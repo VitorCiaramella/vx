@@ -1,0 +1,15 @@
+[submodule "extern/glfw"]
+	path = extern/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "extern/Vulkan-Loader"]
+	path = extern/Vulkan-Loader
+	url = https://github.com/KhronosGroup/Vulkan-Loader.git
+[submodule "extern/Vulkan-Headers"]
+	path = extern/Vulkan-Headers
+	url = https://github.com/KhronosGroup/Vulkan-Headers.git
+[submodule "extern/Vulkan-ValidationLayers"]
+	path = extern/Vulkan-ValidationLayers
+	url = https://github.com/KhronosGroup/Vulkan-ValidationLayers.git
+[submodule "extern/Vulkan-Tools"]
+	path = extern/Vulkan-Tools
+	url = https://github.com/KhronosGroup/Vulkan-Tools.git
