@@ -2,8 +2,55 @@
 
 Build steps:
 
-1) Have CLang available
-https://clang.llvm.org/get_started.html
+PRE-REQS
+    BREW
+        /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+        brew install cmake python python3 git
+        brew install doxygen
+
+GLFW
+    https://www.glfw.org/docs/latest/compile_guide.html#compile_generate
+    
+    1) 
+    cmake -S extern/glfw/. -B build/bin/glfw/ -DBUILD_SHARED_LIBS=OFF 
+        -DGLFW_VULKAN_STATIC=ON
+    cd build/bin/glfw/
+    make 
+
+VULKAN
+    Vulkan-Headers
+        cmake -S extern/Vulkan-Headers/. -B build/bin/Vulkan-Headers/ -DCMAKE_INSTALL_PREFIX=build/bin/Vulkan-Headers/install
+        cmake --build build/bin/Vulkan-Headers/ --target install
+
+    Vulkan-Loader
+        cmake -S extern/Vulkan-Loader/. -B build/bin/Vulkan-Loader/ -DVULKAN_HEADERS_INSTALL_DIR=../../build/bin/Vulkan-Headers/install/ -DCMAKE_BUILD_TYPE=Debug 
+        cmake --build build/bin/Vulkan-Loader/ 
+
+    -> Failed to build
+
+    Vulkan-ValidationLayers
+
+    Vulkan-Tools
+
+install_name_tool -change libvulkan.1.dylib @loader_path/libvulkan.1.dylib vxGraphics
+install_name_tool -add_rpath "@loader_path" vxGraphics
+
+install_name_tool -change '@rpath/libvulkan.1.dylib' '@executable_path/libvulkan.1.dylib' ${workspaceFolder}/build/bin/vxGraphics/vxGraphics
+
+
+Vulkan SDK
+https://vulkan.lunarg.com/sdk/home
+
+    /etc/profile
+    export VULKAN_SDK=/Users/vitorciaramella/Documents/GitHub/vx/extern/vulkansdk-macos-1.1.106.0/macOS
+    export PATH=$VULKAN_SDK/bin:$PATH
+    export DYLD_LIBRARY_PATH=$VULKAN_SDK/lib:$DYLD_LIBRARY_PATH
+    export VK_ICD_FILENAMES=$VULKAN_SDK/etc/vulkan/icd.d/MoltenVK_icd.json
+
+
+CLANG
+    1) Have CLang available
+    https://clang.llvm.org/get_started.html
 
 2) 
 cd /Library/Developer/CommandLineTools/Packages

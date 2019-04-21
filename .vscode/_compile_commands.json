@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/Users/vitorciaramella/Documents/GitHub/vx/build",
+  "command": "/usr/bin/clang++    -g   -o CMakeFiles/vx.dir/main.cpp.o -c /Users/vitorciaramella/Documents/GitHub/vx/main.cpp",
+  "file": "/Users/vitorciaramella/Documents/GitHub/vx/main.cpp"
+}
+]

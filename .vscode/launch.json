@@ -1,0 +1,32 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [        
+        {
+            "name": "clang++ build and debug active file",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bin/vxGraphics/vxGraphics",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build/bin/vxGraphics",
+            "environment": [
+                {"name": "PATH", "value": "$PATH:${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/bin"},
+                {"name": "DYLD_LIBRARY_PATH", "value": "$DYLD_LIBRARY_PATH:${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/lib"},
+                {"name": "VK_LAYER_PATH", "value": "$DYLD_LIBRARY_PATH:${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/etc/vulkan/explicit_layer.d"},
+                {"name": "VK_ICD_FILENAMES", "value": "$DYLD_LIBRARY_PATH:${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/etc/vulkan/icd.d/MoltenVK_icd.json"},
+            ],
+            "externalConsole": true,
+            "MIMode": "lldb",
+            "preLaunchTask": "Build",
+            "postDebugTask": "postdebugKill",
+            "logging": {
+                "trace": true,
+                "traceResponse": true,
+                "engineLogging": true
+            }
+        }
+    ]
+}

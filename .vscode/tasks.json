@@ -1,0 +1,81 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [        
+        {
+            "type": "shell",
+            "label": "BuildWithClang",
+            "command": "/Library/Developer/CommandLineTools/usr/bin/clang++",
+            "args": [
+                "-std=c++17",
+                "-isystem/Library/Developer/CommandLineTools/usr/include",
+                "-stdlib=libc++",
+                
+                "-v",//verbose
+                "-g",//debug
+
+                "-framework",
+                "Cocoa",
+                "-framework",
+                "OpenGL",
+                "-framework",
+                "IOKit",
+                "-framework",
+                "CoreVideo",
+
+                "-I${workspaceFolder}/extern/glfw/include",
+                "-L${workspaceFolder}/build/bin/glfw/src",
+                "-lglfw3",
+
+
+                //"-F${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/Frameworks",
+                //"-framework",
+                //"vulkan",
+                "-I${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/include",
+                "${workspaceFolder}/build/bin/vxGraphics/libvulkan.1.dylib",
+                //"-L${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/lib",
+                //"-llibvulkan",
+
+                //"${file}",
+
+
+                "${workspaceFolder}/src/vxGraphics/main.cpp",
+                "-o",
+                //"${fileDirname}/${fileBasenameNoExtension}",
+                "${workspaceFolder}/build/bin/vxGraphics/vxGraphics",
+            ],
+            "options": {
+              "cwd": "/Library/Developer/CommandLineTools/usr/bin"
+            },
+        },
+        {
+            "label": "a",
+            "type": "shell",
+            "command": "install_name_tool",
+            "args": [
+                "-change",
+                "'@rpath/libvulkan.1.dylib'",
+                "'@executable_path/libvulkan.1.dylib'",
+                "${workspaceFolder}/build/bin/vxGraphics/vxGraphics",
+            ],
+            "dependsOn": ["BuildWithClang"],
+        },
+        {
+            "label": "Build",
+            "dependsOn": ["a"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },            
+        },
+        {
+            "label": "postdebugKill",
+            "type": "process",
+            "command":[
+               "${command:workbench.action.tasks.terminate}",
+               "${command:workbench.action.acceptSelectedQuickOpenItem}",
+            ],
+         },
+    ]
+}
