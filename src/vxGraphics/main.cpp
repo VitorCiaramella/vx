@@ -2,18 +2,16 @@
 #include <vector>
 #include <string>
 
-#include <vulkan/vulkan.h>
+#define VK_USE_PLATFORM_MACOS_MVK
+#define VK_USE_PLATFORM_METAL_EXT
 
-//#define GLFW_INCLUDE_VULKAN 
+#include <vxGraphics/vxGraphics.hpp>
 
+//# GLFW_INCLUDE_VULKAN 
 #include <GLFW/glfw3.h>
 
 using namespace std;
 
-typedef enum class VxResult {
-    VX_SUCCESS = 0,
-    VX_ERROR_INITIALIZATION_FAILED = -3,
-} VxResult;
 
 void vx_glfwErrorCallback(int error, const char* description)
 {
@@ -26,7 +24,7 @@ VxResult vx_glfxGetWindow(GLFWwindow* &window)
 
     if (!glfwInit())
     {
-        return VxResult::VX_ERROR_INITIALIZATION_FAILED;
+        return VxResult::VX_ERROR;
     }
 
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
@@ -38,7 +36,7 @@ VxResult vx_glfxGetWindow(GLFWwindow* &window)
 
     if (!window)
     {
-        return VxResult::VX_ERROR_INITIALIZATION_FAILED;
+        return VxResult::VX_ERROR;
     }
 
     glfwMakeContextCurrent(window);
@@ -69,32 +67,73 @@ VxResult vx_glfxAwaitWindowClose(GLFWwindow* window)
 
 int main()
 {
-    VkInstance instance;
-    VkResult result;
-    VkInstanceCreateInfo info = {};
-    uint32_t instance_layer_count;
+    VxResult vxresult;
 
-    result = vkEnumerateInstanceLayerProperties(&instance_layer_count, nullptr);
-    std::cout << instance_layer_count << " layers found!\n";
-    if (instance_layer_count > 0) {
-        std::unique_ptr<VkLayerProperties[]> instance_layers(new VkLayerProperties[instance_layer_count]);
-        result = vkEnumerateInstanceLayerProperties(&instance_layer_count, instance_layers.get());
-        for (int i = 0; i < instance_layer_count; ++i) {
-            std::cout << instance_layers[i].layerName << "\n";
-        }
+    VxGraphicsInstanceCreateInfo graphicsInstanceCreateInfo = {};
+    graphicsInstanceCreateInfo.applicationName = "vxGraphics";
+    graphicsInstanceCreateInfo.applicationVersion = VX_MAKE_VERSION(0,1,0);
+    graphicsInstanceCreateInfo.engineName = "vxGraphics";
+    graphicsInstanceCreateInfo.engineVersion = VX_MAKE_VERSION(0,1,0);
+    graphicsInstanceCreateInfo.apiVersion = VK_API_VERSION_1_1;
+    #ifdef _DEBUG
+    graphicsInstanceCreateInfo.desiredLayersToEnable.push_back("VK_LAYER_KHRONOS_validation");
+    graphicsInstanceCreateInfo.desiredLayersToEnable.push_back("VK_LAYER_LUNARG_standard_validation");
+    #endif
+
+    graphicsInstanceCreateInfo.desiredExtensionsToEnable.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    graphicsInstanceCreateInfo.desiredExtensionsToEnable.push_back(VK_KHR_8BIT_STORAGE_EXTENSION_NAME);
+    graphicsInstanceCreateInfo.desiredExtensionsToEnable.push_back(VK_KHR_16BIT_STORAGE_EXTENSION_NAME);
+    graphicsInstanceCreateInfo.desiredExtensionsToEnable.push_back(VK_KHR_DRAW_INDIRECT_COUNT_EXTENSION_NAME);
+    graphicsInstanceCreateInfo.desiredExtensionsToEnable.push_back(VK_EXT_SAMPLER_FILTER_MINMAX_EXTENSION_NAME);
+    graphicsInstanceCreateInfo.desiredExtensionsToEnable.push_back(VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME);
+    graphicsInstanceCreateInfo.desiredExtensionsToEnable.push_back(VK_NV_DEVICE_DIAGNOSTIC_CHECKPOINTS_EXTENSION_NAME);
+    graphicsInstanceCreateInfo.desiredExtensionsToEnable.push_back(VK_NV_MESH_SHADER_EXTENSION_NAME);
+
+    graphicsInstanceCreateInfo.desiredExtensionsToEnable.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+    #ifdef VK_USE_PLATFORM_MACOS_MVK
+    graphicsInstanceCreateInfo.desiredExtensionsToEnable.push_back("VK_MVK_macos_surface");  
+    #endif
+    #ifdef VK_USE_PLATFORM_WIN32_KHR
+    graphicsInstanceCreateInfo.desiredExtensionsToEnable.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+    #endif
+    #ifdef _DEBUG
+    graphicsInstanceCreateInfo.desiredExtensionsToEnable.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+    #endif
+
+    graphicsInstanceCreateInfo.desiredDeviceCount = 2;
+    graphicsInstanceCreateInfo.desiredQueueCountPerDevice = 20;
+
+    upt(VxGraphicsInstance) upGraphicsInstance;
+    vxresult = vxCreateGraphicsInstance(&graphicsInstanceCreateInfo, upGraphicsInstance);
+    if (vxresult != VxResult::VX_SUCCESS)
+    {
+        return -1;
     }
 
-    const char * names[] = {
-        "VK_LAYER_KHRONOS_validation"
-    };
-    info.enabledLayerCount = 1;
-    info.ppEnabledLayerNames = names;
+    VkCommandBuffer commandBuffer;
+    vxresult = vxAllocateCommandBuffer(upGraphicsInstance, commandBuffer);
+    if (vxresult != VxResult::VX_SUCCESS)
+    {
+        return -1;
+    }
+    //vkResetCommandPool(device,commandPool,0);
+    //vkDestroyCommandPool(device,commandPool,nullptr);
+    //vkResetCommandBuffer(commandBuffer,0);
+    //vkFreeCommandBuffers(device,commandPool,commandBufferCount,pCommandBuffers);
+    VkCommandBufferBeginInfo commandBufferBeginInfo = {};
+    commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
 
-    result = vkCreateInstance(&info, NULL, &instance);
-    std::cout << "vkCreateInstance result: " << result  << "\n";
+    auto queue = upGraphicsInstance->devices[0].queues[0].queue;
+    VkSubmitInfo submits = {};
+    uint32_t submitCount = 1;
+    VkFence fence = VK_NULL_HANDLE;
+    vkQueueSubmit(queue,submitCount,&submits,fence);
 
-    vkDestroyInstance(instance, nullptr);
-    
+    vkEndCommandBuffer(commandBuffer);
+
+    vkDestroyInstance(upGraphicsInstance->vkInstance, nullptr);
+
     GLFWwindow* window;
     if (vx_glfxGetWindow(window) == VxResult::VX_SUCCESS)
     {

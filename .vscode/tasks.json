@@ -24,6 +24,8 @@
                 "-framework",
                 "CoreVideo",
 
+                "-I${workspaceFolder}/include",
+
                 "-I${workspaceFolder}/extern/glfw/include",
                 "-L${workspaceFolder}/build/bin/glfw/src",
                 "-lglfw3",
@@ -32,14 +34,20 @@
                 //"-F${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/Frameworks",
                 //"-framework",
                 //"vulkan",
+                
                 "-I${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/include",
                 "${workspaceFolder}/build/bin/vxGraphics/libvulkan.1.dylib",
+
+                //"-I${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/MoltenVK/include",
+                //"${workspaceFolder}/build/bin/vxGraphics/libMoltenVK.dylib",
+
                 //"-L${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/lib",
                 //"-llibvulkan",
 
                 //"${file}",
 
 
+                "${workspaceFolder}/src/vxGraphics/functions.cpp",
                 "${workspaceFolder}/src/vxGraphics/main.cpp",
                 "-o",
                 //"${fileDirname}/${fileBasenameNoExtension}",
