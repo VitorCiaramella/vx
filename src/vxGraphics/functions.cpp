@@ -3,6 +3,79 @@
 #include <string>
 #include <algorithm>
 
+#include "platform.hpp"
+
+
+//TODO: make it a function pointer
+void vxErrorCallback(int error, const char* description)
+{
+    fprintf(stderr, "Error: %s\n", description);
+}
+
+
+VxResult vxCreateWindow(const upt(VxGraphicsInstance) & puGraphicsInstance)
+{
+    glfwSetErrorCallback(vxErrorCallback);
+
+    if (!glfwInit())
+    {
+        return VxResult::VX_ERROR;
+    }
+
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
+    glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
+    glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
+    glfwWindowHint(GLFW_FOCUS_ON_SHOW, GLFW_TRUE);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    auto window = glfwCreateWindow(puGraphicsInstance->rpCreateInfo->mainWindowWidth, puGraphicsInstance->rpCreateInfo->mainWindowHeight, "My Title", NULL, NULL);
+
+    if (!window)
+    {
+        return VxResult::VX_ERROR;
+    }
+
+    //glfwMakeContextCurrent(window);
+    //glfwSwapInterval(1);
+
+    int width, height;
+    //glfwGetFramebufferSize(window, &width, &height);
+    //glViewport(0, 0, width, height);
+
+    puGraphicsInstance->mainWindow = window;
+
+    return VxResult::VX_SUCCESS;
+}
+
+VkExtent2D vxGetWindowSize(const upt(VxGraphicsInstance) & puGraphicsInstance)
+{
+    VkExtent2D result;
+    int width = 0;
+    int height = 0;
+    glfwGetFramebufferSize(puGraphicsInstance->mainWindow, &width, &height);
+    result.width = width;
+    result.height = height;
+    return result;
+}
+
+VxResult vxAwaitWindowClose(const upt(VxGraphicsInstance) & puGraphicsInstance)
+{
+    while (!glfwWindowShouldClose(puGraphicsInstance->mainWindow))
+    {
+        int width, height;
+        //glfwGetFramebufferSize(puGraphicsInstance->mainWindow, &width, &height);
+        //glViewport(0, 0, width, height);
+        //glClear(GL_COLOR_BUFFER_BIT);
+
+        //glfwSwapBuffers(puGraphicsInstance->mainWindow);
+        glfwPollEvents();
+    }
+    glfwDestroyWindow(puGraphicsInstance->mainWindow);
+
+    return VxResult::VX_SUCCESS;
+}
+
+
 VkResult vxFillAvailableExtensions(const upt(VxGraphicsInstance) & puGraphicsInstance)
 {
     uint32_t extensionCount;
@@ -294,6 +367,103 @@ VkResult vxCreateDevices(const upt(VxGraphicsInstance) & puGraphicsInstance)
     return VK_SUCCESS;
 }
 
+VkResult vxCreateSwapchain(const upt(VxGraphicsInstance) & puGraphicsInstance)
+{
+	VkSwapchainCreateInfoKHR createInfo = { };
+	createInfo.surface = puGraphicsInstance->mainSurface.surface;
+
+    uint32_t desiredImageCount = 2;
+	createInfo.minImageCount = std::clamp(desiredImageCount, puGraphicsInstance->mainSurface.capabilities.minImageCount, puGraphicsInstance->mainSurface.capabilities.maxImageCount==0 ? desiredImageCount : puGraphicsInstance->mainSurface.capabilities.maxImageCount);;
+
+    //TODO: how to choose best format?
+	createInfo.imageFormat = puGraphicsInstance->mainSurface.formats[0].format;
+	createInfo.imageColorSpace = puGraphicsInstance->mainSurface.formats[0].colorSpace;
+
+    auto windowSize = vxGetWindowSize(puGraphicsInstance);
+    if (puGraphicsInstance->mainSurface.capabilities.currentExtent.width == 0xFFFFFFFF)
+    {
+        createInfo.imageExtent.width = std::clamp(windowSize.width, puGraphicsInstance->mainSurface.capabilities.minImageExtent.width, puGraphicsInstance->mainSurface.capabilities.maxImageExtent.width);
+        createInfo.imageExtent.height = std::clamp(windowSize.height, puGraphicsInstance->mainSurface.capabilities.minImageExtent.height, puGraphicsInstance->mainSurface.capabilities.maxImageExtent.height);
+    }
+    else
+    {
+        createInfo.imageExtent = puGraphicsInstance->mainSurface.capabilities.currentExtent;
+    }
+
+	createInfo.imageArrayLayers = 1;
+	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+    createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	createInfo.queueFamilyIndexCount = 0; //is the number of queue families having access to the image(s) of the swapchain when imageSharingMode is VK_SHARING_MODE_CONCURRENT.
+	createInfo.pQueueFamilyIndices = nullptr; //s an array of queue family indices having access to the images(s) of the swapchain when imageSharingMode is VK_SHARING_MODE_CONCURRENT
+
+	createInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
+
+    auto oldSwapchain = puGraphicsInstance->mainSwapchain;
+    createInfo.oldSwapchain = oldSwapchain;
+
+	createInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+    //if not supported, use current transformation
+    if (!(puGraphicsInstance->mainSurface.capabilities.supportedTransforms & createInfo.preTransform))
+    {
+        createInfo.preTransform = puGraphicsInstance->mainSurface.capabilities.currentTransform;
+    }
+
+    // Find the first supported composite alpha mode - one of these is guaranteed to be set
+    VkCompositeAlphaFlagBitsKHR compositeAlphaFlags[4] = {
+        VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+        VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR,
+        VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
+        VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
+    };
+    for (uint32_t i = 0; i < 4; i++) {
+        if (puGraphicsInstance->mainSurface.capabilities.supportedCompositeAlpha & compositeAlphaFlags[i]) {
+            createInfo.compositeAlpha = compositeAlphaFlags[i];
+            break;
+        }
+    }    
+
+	createInfo.clipped = VK_TRUE;
+    //TODO: parametrize the device
+    StoreAndAssertVkResultP(puGraphicsInstance, vkCreateSwapchainKHR, puGraphicsInstance->devices[0].device, &createInfo, nullptr, &puGraphicsInstance->mainSwapchain);
+
+    if (oldSwapchain != VK_NULL_HANDLE)
+    {
+        //TODO: parametrize the device
+        vkDestroySwapchainKHR(puGraphicsInstance->devices[0].device, oldSwapchain, nullptr);
+    }
+
+    return VK_SUCCESS;
+}
+
+VkResult vxFillSurfaceProperties(const upt(VxGraphicsInstance) & puGraphicsInstance)
+{
+    //TODO: Iterate through wanted surfaces
+    auto surface = &puGraphicsInstance->mainSurface;
+    //TODO: Iterate through wanted devices
+    auto physicalDevice = puGraphicsInstance->selectedAvailableDevices[0]->device;
+
+    uint32_t formatCount;
+	StoreAndAssertVkResultP(surface, vkGetPhysicalDeviceSurfaceFormatsKHR, physicalDevice, surface->surface, &formatCount, nullptr);
+    if (formatCount > 0) 
+    {
+        surface->formats = std::vector<VkSurfaceFormatKHR>(formatCount);
+    	StoreAndAssertVkResultP(surface, vkGetPhysicalDeviceSurfaceFormatsKHR, physicalDevice, surface->surface, &formatCount, surface->formats.data());
+    }
+
+    StoreAndAssertVkResultP(surface, vkGetPhysicalDeviceSurfaceCapabilitiesKHR, physicalDevice, surface->surface, &surface->capabilities);
+
+    uint32_t presentModeCount;
+	StoreAndAssertVkResultP(surface, vkGetPhysicalDeviceSurfacePresentModesKHR, physicalDevice, surface->surface, &presentModeCount, nullptr);
+    if (presentModeCount > 0) 
+    {
+        surface->presentModes = std::vector<VkPresentModeKHR>(presentModeCount);
+    	StoreAndAssertVkResultP(surface, vkGetPhysicalDeviceSurfacePresentModesKHR, physicalDevice, surface->surface, &presentModeCount, surface->presentModes.data());
+    }
+
+    return VK_SUCCESS;
+}
+
 VxResult vxCreateGraphicsInstance(rpt(VxGraphicsInstanceCreateInfo) rpCreateInfo, upt(VxGraphicsInstance) & puGraphicsInstance)
 {
     puGraphicsInstance = nup(VxGraphicsInstance);
@@ -307,6 +477,26 @@ VxResult vxCreateGraphicsInstance(rpt(VxGraphicsInstanceCreateInfo) rpCreateInfo
 
     AssertVkVxResult(vxSelectPhysicalDevices, puGraphicsInstance);
     AssertVkVxResult(vxCreateDevices, puGraphicsInstance);
+
+    AssertVxResult(vxCreateWindow, puGraphicsInstance);
+
+    AssertVkVxResult(vxCreateSurface, puGraphicsInstance);
+    AssertVkVxResult(vxFillSurfaceProperties, puGraphicsInstance);
+    AssertVkVxResult(vxCreateSwapchain, puGraphicsInstance);
+
+    return VxResult::VX_SUCCESS;
+}
+
+VxResult vxGraphicsRun(upt(VxGraphicsInstance) & puGraphicsInstance)
+{
+    AssertVxResult(vxAwaitWindowClose, puGraphicsInstance);
+
+    return VxResult::VX_SUCCESS;
+}
+
+VxResult vxGraphicsTerminate(upt(VxGraphicsInstance) & puGraphicsInstance)
+{
+    glfwTerminate();    
 
     return VxResult::VX_SUCCESS;
 }

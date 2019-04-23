@@ -12,6 +12,9 @@
                 "-isystem/Library/Developer/CommandLineTools/usr/include",
                 "-stdlib=libc++",
                 
+                "-DVK_USE_PLATFORM_MACOS_MVK",
+                "-DVK_USE_PLATFORM_METAL_EXT",
+
                 "-v",//verbose
                 "-g",//debug
 
@@ -49,6 +52,8 @@
 
                 "${workspaceFolder}/src/vxGraphics/functions.cpp",
                 "${workspaceFolder}/src/vxGraphics/main.cpp",
+                "${workspaceFolder}/src/vxGraphics/platform_macos.cpp",
+                "${workspaceFolder}/src/vxGraphics/platform_win32.cpp",
                 "-o",
                 //"${fileDirname}/${fileBasenameNoExtension}",
                 "${workspaceFolder}/build/bin/vxGraphics/vxGraphics",

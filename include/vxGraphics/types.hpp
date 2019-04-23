@@ -2,6 +2,9 @@
 #define VX_GRAPHICS_TYPES
 
 #include <vulkan/vulkan.hpp>
+//# GLFW_INCLUDE_VULKAN 
+#include <GLFW/glfw3.h>
+
 #include <string>
 
 typedef struct VxGraphicsInstanceCreateInfo
@@ -15,6 +18,9 @@ typedef struct VxGraphicsInstanceCreateInfo
     std::vector<std::string>                desiredExtensionsToEnable;
     uint32_t                                desiredDeviceCount;
     uint32_t                                desiredQueueCountPerDevice;
+
+    uint32_t                                mainWindowWidth;
+    uint32_t                                mainWindowHeight;
 } VxGraphicsInstanceCreateInfo;
 
 typedef struct VxGraphicsExtension
@@ -85,6 +91,25 @@ typedef struct VxGraphicsDevice
 } VxGraphicsDevice;
 #define initVxGraphicsDevice(object) 
 
+typedef struct VxGraphicsSurface
+{
+    VkSurfaceKHR                            surface;
+
+    VkResult                                vkGetPhysicalDeviceSurfaceFormatsKHRResult;
+    std::vector<VkSurfaceFormatKHR>         formats;
+
+    VkResult                                vkGetPhysicalDeviceSurfaceCapabilitiesKHRResult;
+    VkSurfaceCapabilitiesKHR                capabilities;
+
+    VkResult                                vkGetPhysicalDeviceSurfacePresentModesKHRResult;
+    std::vector<VkPresentModeKHR>           presentModes;
+} VxGraphicsSurface;
+#define initVxGraphicsSurface(object) \
+    object->vkGetPhysicalDeviceSurfaceFormatsKHRResult = VK_RESULT_MAX_ENUM; \
+    object->vkGetPhysicalDeviceSurfaceCapabilitiesKHRResult = VK_RESULT_MAX_ENUM; \
+    object->vkGetPhysicalDeviceSurfacePresentModesKHRResult = VK_RESULT_MAX_ENUM; \
+
+
 typedef struct VxGraphicsInstance 
 {
     rpt(VxGraphicsInstanceCreateInfo)       rpCreateInfo;
@@ -106,6 +131,13 @@ typedef struct VxGraphicsInstance
     VkResult                                vkCreateDeviceResult;
     std::vector<VxGraphicsDevice>           devices;
 
+    rpt(GLFWwindow)                         mainWindow;
+
+    VkResult                                vkCreateSurfaceResult;    
+    VxGraphicsSurface                       mainSurface;
+
+    VkResult                                vkCreateSwapchainKHRResult;
+    VkSwapchainKHR                          mainSwapchain;
 } VxGraphicsInstance;
 
 #define initVxGraphicsInstance(object) \
@@ -114,6 +146,9 @@ typedef struct VxGraphicsInstance
     object->vkCreateInstanceResult = VK_RESULT_MAX_ENUM; \
     object->vkEnumeratePhysicalDevicesResult = VK_RESULT_MAX_ENUM; \
     object->vkCreateDeviceResult = VK_RESULT_MAX_ENUM; \
+    object->vkCreateSurfaceResult = VK_RESULT_MAX_ENUM; \
+    object->vkCreateSwapchainKHRResult = VK_RESULT_MAX_ENUM; \
+    object->mainSwapchain =  VK_NULL_HANDLE; \
 
 
 

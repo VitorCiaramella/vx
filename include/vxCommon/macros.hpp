@@ -24,4 +24,13 @@
 #define vectorS(object) std::vector<spt(object)>
 #define nvectorS(object,...) std::vector<spt(object)>(__VA_ARGS__)
 
+#define AssertVxResult(vxFunction, ...) \
+    {\
+        auto vxresult = vxFunction(__VA_ARGS__); \
+        if (vxresult != VxResult::VX_SUCCESS) \
+        { \
+            return vxresult; \
+        } \
+    }
+
 #endif
