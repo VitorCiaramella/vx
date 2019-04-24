@@ -3,9 +3,11 @@
 
 #include <vulkan/vulkan.hpp>
 
-VxResult vxCreateGraphicsInstance(rpt(VxGraphicsInstanceCreateInfo) rpCreateInfo, upt(VxGraphicsInstance) & puGraphicsInstance);
-VxResult vxAllocateCommandBuffer(const upt(VxGraphicsInstance) & puGraphicsInstance, VkCommandBuffer & commandBuffer);
-VxResult vxGraphicsRun(upt(VxGraphicsInstance) & puGraphicsInstance);
-VxResult vxGraphicsTerminate(upt(VxGraphicsInstance) & puGraphicsInstance);
+VxResult vxCreateGraphicsInstance(rpt(VxGraphicsInstanceCreateInfo) rpCreateInfo, upt(VxGraphicsInstance) & upGraphicsInstance);
+VxResult vxGraphicsRun(upt(VxGraphicsInstance) & upGraphicsInstance);
+VxResult vxGraphicsDestroyInstance(upt(VxGraphicsInstance) & upGraphicsInstance);
+VxResult vxGraphicsTerminate(upt(VxGraphicsInstance) & upGraphicsInstance);
+
+VkResult vxAllocateCommandBuffer(const upt(VxGraphicsInstance) & upGraphicsInstance, VkCommandBuffer & commandBuffer);
 
 #endif

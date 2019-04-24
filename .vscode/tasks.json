@@ -63,7 +63,7 @@
             },
         },
         {
-            "label": "a",
+            "label": "FixVulkanLibPath",
             "type": "shell",
             "command": "install_name_tool",
             "args": [
@@ -75,8 +75,34 @@
             "dependsOn": ["BuildWithClang"],
         },
         {
+            "label": "cs1",
+            "type": "shell",
+            "command": "${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/bin/glslc",
+            "args": [
+                "-fshader-stage=vert",                
+                "-o",
+                "${workspaceFolder}/build/bin/vxGraphics/triangle.vert.spv",
+                "${workspaceFolder}/src/vxGraphics/shaders/triangle.vert.glsl",
+            ],
+        },
+        {
+            "label": "cs2",
+            "type": "shell",
+            "command": "${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/bin/glslc",
+            "args": [
+                "-fshader-stage=frag",                
+                "-o",
+                "${workspaceFolder}/build/bin/vxGraphics/triangle.frag.spv",
+                "${workspaceFolder}/src/vxGraphics/shaders/triangle.frag.glsl",
+            ],
+        },
+        {
+            "label": "BuildShaders",
+            "dependsOn": ["cs1", "cs2"],
+        },
+        {
             "label": "Build",
-            "dependsOn": ["a"],
+            "dependsOn": ["BuildShaders", "FixVulkanLibPath"],
             "group": {
                 "kind": "build",
                 "isDefault": true

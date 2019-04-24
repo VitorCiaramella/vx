@@ -37,3 +37,5 @@ build/bin
 # Intellisense
 .vscode/ipch
 
+# MacOS Folder Attribute File
+.DS_Store

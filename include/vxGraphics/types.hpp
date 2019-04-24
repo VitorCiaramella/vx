@@ -19,57 +19,52 @@ typedef struct VxGraphicsInstanceCreateInfo
     uint32_t                                desiredDeviceCount;
     uint32_t                                desiredQueueCountPerDevice;
 
+    std::vector<std::string>                shadersFilePaths;
+
     uint32_t                                mainWindowWidth;
     uint32_t                                mainWindowHeight;
 } VxGraphicsInstanceCreateInfo;
 
-typedef struct VxGraphicsExtension
-{
-    VkExtensionProperties                   extension;
-
-} VxGraphicsExtension;
-#define initVxGraphicsExtension(object)
-
-
 typedef struct VxGraphicsLayer
 {
-    VkLayerProperties                       layer;
-    std::vector<VxGraphicsExtension>        availableExtensions;
+    VkLayerProperties                       vkLayer;
 
     VkResult                                vkEnumerateInstanceExtensionPropertiesResult;
+    std::vector<VkExtensionProperties>      vkAvailableExtensions;
 } VxGraphicsLayer;
 #define initVxGraphicsLayer(object) \
     object.vkEnumerateInstanceExtensionPropertiesResult = VK_RESULT_MAX_ENUM; 
 
 typedef struct VxGraphicsQueueFamily
 {
-    VkQueueFamilyProperties                 queueFamily;
+    VkQueueFamilyProperties                 vkQueueFamily;
     uint32_t                                queueFamilyIndex;
     bool                                    supportsPresentation;
     bool                                    supportsCompute;
     bool                                    supportsGraphics;
 
     VkResult                                vkCreateCommandPoolResult;
-    VkCommandPool                           commandPool;
+    VkCommandPool                           vkCommandPool;
 } VxGraphicsQueueFamily;
 #define initVxGraphicsQueueFamily(object) \
     object.vkCreateCommandPoolResult = VK_RESULT_MAX_ENUM;
 
 typedef struct VxGraphicsPhysicalDevice
 {
-    VkPhysicalDevice                        device;
-    VkPhysicalDeviceProperties              deviceProperties;    
-    std::vector<VxGraphicsQueueFamily>      queueFamilies;
-    VkPhysicalDeviceFeatures                deviceFeatures;
+    VkPhysicalDevice                        vkPhysicalDevice;
+    VkPhysicalDeviceProperties              vkPhysicalDeviceProperties;    
+    std::vector<VxGraphicsQueueFamily>      vxQueueFamilies;
+    VkPhysicalDeviceFeatures                vkPhysicalDeviceFeatures;
     bool                                    supportsPresentation;
     bool                                    supportsCompute;
     bool                                    supportsGraphics;
 
     VkResult                                vkEnumerateDeviceExtensionPropertiesResult;
-    std::vector<VxGraphicsExtension>        availableExtensions;
+    std::vector<VkExtensionProperties>      vkAvailableExtensions;
 
     VkResult                                vkEnumerateDeviceLayerPropertiesResult;
-    std::vector<VxGraphicsLayer>            availableLayers;
+    std::vector<VxGraphicsLayer>            vxAvailableLayers;
+
 } VxGraphicsPhysicalDevice;
 #define initVxGraphicsPhysicalDevice(object) \
     object.vkEnumerateDeviceExtensionPropertiesResult = VK_RESULT_MAX_ENUM; \
@@ -77,7 +72,7 @@ typedef struct VxGraphicsPhysicalDevice
 
 typedef struct VxGraphicsQueue
 {
-    VkQueue                                 queue;
+    VkQueue                                 vkQueue;
     uint32_t                                queueIndex;
     uint32_t                                queueFamilyIndex;
 } VxGraphicsQueue;
@@ -85,59 +80,124 @@ typedef struct VxGraphicsQueue
 
 typedef struct VxGraphicsDevice
 {
-    VkDevice                                device;
-    std::vector<VxGraphicsQueue>            queues;
-    std::vector<VxGraphicsQueueFamily>      queueFamilies;
+    VkDevice                                vkDevice;
+    std::vector<VxGraphicsQueue>            vxQueues;
+    std::vector<VxGraphicsQueueFamily>      vxQueueFamilies;
 } VxGraphicsDevice;
 #define initVxGraphicsDevice(object) 
 
 typedef struct VxGraphicsSurface
 {
-    VkSurfaceKHR                            surface;
+    VkResult                                glfwCreateWindowSurfaceResult;
+    VkSurfaceKHR                            vkSurface;
 
     VkResult                                vkGetPhysicalDeviceSurfaceFormatsKHRResult;
-    std::vector<VkSurfaceFormatKHR>         formats;
+    std::vector<VkSurfaceFormatKHR>         vkSurfaceFormats;
 
     VkResult                                vkGetPhysicalDeviceSurfaceCapabilitiesKHRResult;
-    VkSurfaceCapabilitiesKHR                capabilities;
+    VkSurfaceCapabilitiesKHR                vkSurfaceCapabilities;
 
     VkResult                                vkGetPhysicalDeviceSurfacePresentModesKHRResult;
-    std::vector<VkPresentModeKHR>           presentModes;
+    std::vector<VkPresentModeKHR>           vkPresentModes;
 } VxGraphicsSurface;
 #define initVxGraphicsSurface(object) \
     object->vkGetPhysicalDeviceSurfaceFormatsKHRResult = VK_RESULT_MAX_ENUM; \
     object->vkGetPhysicalDeviceSurfaceCapabilitiesKHRResult = VK_RESULT_MAX_ENUM; \
     object->vkGetPhysicalDeviceSurfacePresentModesKHRResult = VK_RESULT_MAX_ENUM; \
 
+typedef struct VxGraphicsSwapchain
+{
+    VkResult                                vkCreateSwapchainKHRResult;
+    VkSwapchainKHR                          vkSwapchain;
+
+    rpt(VxGraphicsDevice)                   vxDevice;
+    VkSurfaceFormatKHR                      vkFormat;
+
+    VkResult                                vkGetSwapchainImagesKHRResult;
+    std::vector<VkImage>                    vkImages;
+
+    VkResult                                vkCreateImageViewResult;
+    std::vector<VkImageView>                vkImageViews;
+
+    VkResult                                vkCreateFramebufferResult;
+    std::vector<VkFramebuffer>              vkFramebuffers;
+
+} VxGraphicsSwapchain;
+#define initVxGraphicsSwapchain(object) \
+    object->vkCreateSwapchainKHRResult = VK_RESULT_MAX_ENUM; \
+
+
+typedef struct VxGraphicsShader
+{
+    std::string                             filePath;        
+    rpt(VxGraphicsDevice)                   vxDevice;
+
+    VkResult                                vxLoadShaderResult;
+    VkShaderModule                          vkShaderModule;
+
+} VxGraphicsShader;
+#define initVxGraphicsShader(object) \
+    object->vkCreateShaderModuleResult = VK_RESULT_MAX_ENUM; \
+
+typedef struct VxGraphicsPipelineLayout
+{
+    rpt(VxGraphicsDevice)                   vxDevice;
+
+    VkResult                                vkCreatePipelineLayoutResult;
+    VkPipelineLayout                        vkPipelineLayout;
+
+} VxGraphicsPipelineLayout;
+#define initVxGraphicsPipelineLayout(object) \
+    object->vkCreatePipelineLayoutResult = VK_RESULT_MAX_ENUM; \
+
+typedef struct VxGraphicsPipeline
+{
+    rpt(VxGraphicsDevice)                   vxDevice;
+    rpt(VxGraphicsPipelineLayout)           vxPipelineLayout;
+    VkRenderPass                            vkRenderPass;
+    VkPipelineCache                         vkPipelineCache;
+
+    VkResult                                vkCreateGraphicsPipelinesResult;
+    VkPipeline                              vkPipeline;
+
+} VxGraphicsPipeline;
+#define initVxGraphicsPipeline(object) \
+    object->vkCreateGraphicsPipelinesResult = VK_RESULT_MAX_ENUM; \
 
 typedef struct VxGraphicsInstance 
 {
     rpt(VxGraphicsInstanceCreateInfo)       rpCreateInfo;
 
     VkResult                                vkEnumerateInstanceLayerPropertiesResult;
-    std::vector<VxGraphicsLayer>            availableLayers;
+    std::vector<VxGraphicsLayer>            vxAvailableLayers;
 
     VkResult                                vkEnumerateInstanceExtensionPropertiesResult;
-    std::vector<VxGraphicsExtension>        availableExtensions;
+    std::vector<VkExtensionProperties>      vkAvailableExtensions;
 
     VkResult                                vkEnumeratePhysicalDevicesResult;
-    std::vector<VxGraphicsPhysicalDevice>   availableDevices;
+    std::vector<VxGraphicsPhysicalDevice>   vxAvailablePhysicalDevices;
 
     VkResult                                vkCreateInstanceResult;
     VkInstance                              vkInstance;
 
-    vectorR(VxGraphicsPhysicalDevice)       selectedAvailableDevices;
+    vectorR(VxGraphicsPhysicalDevice)       vxSelectedPhysicalDevices;
 
     VkResult                                vkCreateDeviceResult;
-    std::vector<VxGraphicsDevice>           devices;
+    std::vector<VxGraphicsDevice>           vxDevices;
 
     rpt(GLFWwindow)                         mainWindow;
 
-    VkResult                                vkCreateSurfaceResult;    
-    VxGraphicsSurface                       mainSurface;
+    VxGraphicsSurface                       vxMainSurface;
 
-    VkResult                                vkCreateSwapchainKHRResult;
-    VkSwapchainKHR                          mainSwapchain;
+    VxGraphicsSwapchain                     vxMainSwapchain;
+
+    VkResult                                vkCreateRenderPassResult;
+    VkRenderPass                            vkRenderPass;
+
+    std::vector<VxGraphicsShader>           vxShaders;
+
+    VxGraphicsPipelineLayout                vxPipelineLayout;
+    VxGraphicsPipeline                      vxPipeline;
 } VxGraphicsInstance;
 
 #define initVxGraphicsInstance(object) \
@@ -145,10 +205,6 @@ typedef struct VxGraphicsInstance
     object->vkEnumerateInstanceExtensionPropertiesResult = VK_RESULT_MAX_ENUM; \
     object->vkCreateInstanceResult = VK_RESULT_MAX_ENUM; \
     object->vkEnumeratePhysicalDevicesResult = VK_RESULT_MAX_ENUM; \
-    object->vkCreateDeviceResult = VK_RESULT_MAX_ENUM; \
-    object->vkCreateSurfaceResult = VK_RESULT_MAX_ENUM; \
-    object->vkCreateSwapchainKHRResult = VK_RESULT_MAX_ENUM; \
-    object->mainSwapchain =  VK_NULL_HANDLE; \
 
 
 
