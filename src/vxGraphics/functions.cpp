@@ -5,6 +5,18 @@
 
 #include "platform.hpp"
 
+char* strToNewCharArray(std::string str)
+{
+    auto strSize = str.size();
+    char* result = new char[strSize+1];
+    for (uint32_t i=0; i<str.size(); i++)
+    {
+        result[i] = str[i];
+    }
+    result[strSize] = 0;
+    return result;
+}
+
 
 //TODO: make it a function pointer
 void vxErrorCallback(int error, const char* description)
@@ -66,6 +78,24 @@ VkSemaphore createSemaphore(VkDevice device)
 	return semaphore;
 }
 
+VkImageMemoryBarrier imageBarrier(VkImage image, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkImageLayout oldLayout, VkImageLayout newLayout)
+{
+	VkImageMemoryBarrier result = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+
+	result.srcAccessMask = srcAccessMask;
+	result.dstAccessMask = dstAccessMask;
+	result.oldLayout = oldLayout;
+	result.newLayout = newLayout;
+	result.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	result.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	result.image = image;
+	result.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	result.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+	result.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+
+	return result;
+}
+
 VkResult vxAwaitWindowClose(const upt(VxGraphicsInstance) & upGraphicsInstance)
 {
     VkCommandBuffer commandBuffer;
@@ -97,6 +127,9 @@ VkResult vxAwaitWindowClose(const upt(VxGraphicsInstance) & upGraphicsInstance)
 
 		AssertVkResult(vkBeginCommandBuffer, commandBuffer, &beginInfo);
 
+        VkImageMemoryBarrier renderBeginBarrier = imageBarrier(swapchainImages[imageIndex], 0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_DEPENDENCY_BY_REGION_BIT, 0, 0, 0, 0, 1, &renderBeginBarrier);
+
 		VkClearColorValue color = { 90.f / 255.f, 10.f / 255.f, 36.f / 255.f, 1 };
 		VkClearValue clearColor = { color };
 
@@ -109,7 +142,7 @@ VkResult vxAwaitWindowClose(const upt(VxGraphicsInstance) & upGraphicsInstance)
 
 		vkCmdBeginRenderPass(commandBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-		VkViewport viewport = { 0, float(windowSize.height), float(windowSize.width), -float(windowSize.height), 0, 1 };
+		VkViewport viewport = { 0, 0, float(windowSize.width), float(windowSize.height), 0, 1 };
 		VkRect2D scissor = { {0, 0}, {windowSize.width, windowSize.height} };
 
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
@@ -123,6 +156,9 @@ VkResult vxAwaitWindowClose(const upt(VxGraphicsInstance) & upGraphicsInstance)
 		vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
 		vkCmdEndRenderPass(commandBuffer);
+
+        VkImageMemoryBarrier renderEndBarrier = imageBarrier(swapchainImages[imageIndex], VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_DEPENDENCY_BY_REGION_BIT, 0, 0, 0, 0, 1, &renderEndBarrier);
 
 		AssertVkResult(vkEndCommandBuffer, commandBuffer);
 
@@ -264,12 +300,13 @@ VkResult vxFillAvailableDevices(const upt(VxGraphicsInstance) & upGraphicsInstan
 
 VkResult vxCreateVkInstance(const upt(VxGraphicsInstance) & upGraphicsInstance)
 {
+    printf("\nCreating vkInstance\n");
     VkInstanceCreateInfo instanceCreateInfo = { VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO };
 
     VkApplicationInfo applicationInfo;
-    applicationInfo.pApplicationName = strdup(upGraphicsInstance->rpCreateInfo->applicationName.c_str());
+    applicationInfo.pApplicationName = strToNewCharArray(upGraphicsInstance->rpCreateInfo->applicationName);
     applicationInfo.applicationVersion = upGraphicsInstance->rpCreateInfo->applicationVersion;
-    applicationInfo.pEngineName = strdup(upGraphicsInstance->rpCreateInfo->engineName.c_str());
+    applicationInfo.pEngineName = strToNewCharArray(upGraphicsInstance->rpCreateInfo->engineName);
     applicationInfo.engineVersion = upGraphicsInstance->rpCreateInfo->engineVersion;
     applicationInfo.apiVersion = upGraphicsInstance->rpCreateInfo->apiVersion;
     instanceCreateInfo.pApplicationInfo = &applicationInfo;
@@ -277,12 +314,24 @@ VkResult vxCreateVkInstance(const upt(VxGraphicsInstance) & upGraphicsInstance)
     auto layersToEnable = nrp(std::vector<char*>);
     for (auto && desiredLayerToEnable : upGraphicsInstance->rpCreateInfo->desiredLayersToEnable) 
     {
+        auto layerSupported = false;
         for (auto && vxLayer : upGraphicsInstance->vxAvailableLayers) 
         {
             if (strcmp(desiredLayerToEnable.c_str(), vxLayer.vkLayer.layerName) == 0) 
             {
-                layersToEnable->push_back(strdup(desiredLayerToEnable.c_str()));
+                layerSupported = true;
+                break;
             }           
+        }
+        if (layerSupported)
+        {
+            layersToEnable->push_back(strToNewCharArray(desiredLayerToEnable));
+            printf("Desired Layer supported: %s\n", desiredLayerToEnable.c_str());
+        }
+        else
+        {
+            //TODO: Handle this
+            printf("Desired Layer not supported: %s\n", desiredLayerToEnable.c_str());
         }
     }
     instanceCreateInfo.enabledLayerCount = layersToEnable->size();
@@ -291,13 +340,26 @@ VkResult vxCreateVkInstance(const upt(VxGraphicsInstance) & upGraphicsInstance)
     auto extensionsToEnable = nrp(std::vector<char*>);
     for (auto && desiredExtensionToEnable : upGraphicsInstance->rpCreateInfo->desiredExtensionsToEnable) 
     {
+        auto extensionSupported = false;
         for (auto && vkExtension : upGraphicsInstance->vkAvailableExtensions) 
         {
             if (strcmp(desiredExtensionToEnable.c_str(), vkExtension.extensionName) == 0) 
             {
-                extensionsToEnable->push_back(strdup(desiredExtensionToEnable.c_str()));
+                extensionSupported = true;
+                break;
             }           
         }
+        if (extensionSupported)
+        {
+            extensionsToEnable->push_back(strToNewCharArray(desiredExtensionToEnable));
+            printf("Desired Extension supported: %s\n", desiredExtensionToEnable.c_str());
+        }
+        else
+        {
+            //TODO: Handle this
+            printf("Desired Extension not supported: %s\n", desiredExtensionToEnable.c_str());
+        }
+        
     }
     instanceCreateInfo.enabledExtensionCount = extensionsToEnable->size();
     instanceCreateInfo.ppEnabledExtensionNames = extensionsToEnable->data();
@@ -356,11 +418,14 @@ VkResult vxSelectPhysicalDevices(const upt(VxGraphicsInstance) & upGraphicsInsta
 
 VkResult vxCreateDevices(const upt(VxGraphicsInstance) & upGraphicsInstance)
 {
+    printf("\nCreating Device\n");
+ 
     uint32_t desiredDeviceCount = std::clamp(upGraphicsInstance->rpCreateInfo->desiredDeviceCount,(uint32_t)1,(uint32_t)upGraphicsInstance->vxSelectedPhysicalDevices.size());
     for (auto && vxPhysicalDevice : upGraphicsInstance->vxSelectedPhysicalDevices) 
     {
         VxGraphicsDevice vxDevice = {};
         initVxGraphicsDevice(vxDevice);
+        vxDevice.vxPhysicalDevice = vxPhysicalDevice;
 
         //TODO: instead of global queue count, do per desired device type
         uint32_t desiredQueueCount = std::clamp(upGraphicsInstance->rpCreateInfo->desiredQueueCountPerDevice,(uint32_t)1,(uint32_t)100);
@@ -406,20 +471,30 @@ VkResult vxCreateDevices(const upt(VxGraphicsInstance) & upGraphicsInstance)
         auto extensionsToEnable = nrp(std::vector<char*>);
         for (auto && desiredExtensionToEnable : upGraphicsInstance->rpCreateInfo->desiredExtensionsToEnable) 
         {
+            auto extensionSupported = false;
             for (auto && vkExtension : vxPhysicalDevice->vkAvailableExtensions) 
             {
                 if (strcmp(desiredExtensionToEnable.c_str(), vkExtension.extensionName) == 0) 
                 {
-                    extensionsToEnable->push_back(strdup(desiredExtensionToEnable.c_str()));
+                    extensionSupported = true;
+                    break;
                 }           
+            }
+            if (extensionSupported)
+            {
+                extensionsToEnable->push_back(strToNewCharArray(desiredExtensionToEnable));
+                printf("Desired Extension supported: %s\n", desiredExtensionToEnable.c_str());
+            }
+            else
+            {
+                //TODO: Handle this
+                printf("Desired Extension not supported: %s\n", desiredExtensionToEnable.c_str());
             }
         }
         deviceCreateInfo.enabledExtensionCount = extensionsToEnable->size();
         deviceCreateInfo.ppEnabledExtensionNames = extensionsToEnable->data();
-
-        VkDevice vkDevice;
-        StoreAndAssertVkResultP(upGraphicsInstance, vkCreateDevice, vxPhysicalDevice->vkPhysicalDevice, &deviceCreateInfo, nullptr, &vkDevice);
-        vxDevice.vkDevice = vkDevice;
+        
+        StoreAndAssertVkResultP(upGraphicsInstance, vkCreateDevice, vxDevice.vxPhysicalDevice->vkPhysicalDevice, &deviceCreateInfo, nullptr, &vxDevice.vkDevice);
         for (auto && vxQueue : vxDevice.vxQueues) 
         {
             vkGetDeviceQueue(vxDevice.vkDevice, vxQueue.queueFamilyIndex, vxQueue.queueIndex, &vxQueue.vkQueue);
@@ -445,13 +520,30 @@ VkResult vxCreateDevices(const upt(VxGraphicsInstance) & upGraphicsInstance)
 VkResult vxCreateSwapchain(const upt(VxGraphicsInstance) & upGraphicsInstance)
 {
     auto vxSwapchain = &upGraphicsInstance->vxMainSwapchain;
-
+    
     //TODO: how to choose best format?
     vxSwapchain->vkFormat = upGraphicsInstance->vxMainSurface.vkSurfaceFormats[0];
     vxSwapchain->vxDevice = &(upGraphicsInstance->vxDevices[0]);
+    vxSwapchain->vxSurface = &(upGraphicsInstance->vxMainSurface);
+
+    auto anyQueueFamilySupportsSurface = false;
+    for (auto && vxQueueFamily : vxSwapchain->vxDevice->vxQueueFamilies)
+    {
+        VkBool32 surfaceSupported = VK_FALSE;
+        AssertVkResult(vkGetPhysicalDeviceSurfaceSupportKHR, vxSwapchain->vxDevice->vxPhysicalDevice->vkPhysicalDevice, vxQueueFamily.queueFamilyIndex, vxSwapchain->vxSurface->vkSurface, &surfaceSupported);
+        if (surfaceSupported)
+        {
+            anyQueueFamilySupportsSurface = true;
+            break;
+        }
+    }
+    if (!anyQueueFamilySupportsSurface)
+    {
+        return VK_ERROR_INCOMPATIBLE_DISPLAY_KHR;
+    }
 
 	VkSwapchainCreateInfoKHR createInfo = { VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR };
-	createInfo.surface = upGraphicsInstance->vxMainSurface.vkSurface;
+	createInfo.surface = vxSwapchain->vxSurface->vkSurface;
 
     uint32_t desiredImageCount = 2;
 	createInfo.minImageCount = std::clamp(desiredImageCount, upGraphicsInstance->vxMainSurface.vkSurfaceCapabilities.minImageCount, upGraphicsInstance->vxMainSurface.vkSurfaceCapabilities.maxImageCount==0 ? desiredImageCount : upGraphicsInstance->vxMainSurface.vkSurfaceCapabilities.maxImageCount);;
@@ -513,8 +605,29 @@ VkResult vxCreateSwapchain(const upt(VxGraphicsInstance) & upGraphicsInstance)
         vkDestroySwapchainKHR(vxSwapchain->vxDevice->vkDevice, oldSwapchain, nullptr);
     }
 
+	VkAttachmentDescription attachments[1] = {};
+	attachments[0].format = upGraphicsInstance->vxMainSwapchain.vkFormat.format;
+	attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
+	attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachments[0].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	attachments[0].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	VkAttachmentReference colorAttachments = { 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
+	VkSubpassDescription subpass = {};
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = 1;
+	subpass.pColorAttachments = &colorAttachments;
+	VkRenderPassCreateInfo renderPassCreateInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
+	renderPassCreateInfo.attachmentCount = sizeof(attachments) / sizeof(attachments[0]);
+	renderPassCreateInfo.pAttachments = attachments;
+	renderPassCreateInfo.subpassCount = 1;
+	renderPassCreateInfo.pSubpasses = &subpass;
+	StoreAndAssertVkResultP(upGraphicsInstance, vkCreateRenderPass, upGraphicsInstance->vxMainSwapchain.vxDevice->vkDevice, &renderPassCreateInfo, 0, &upGraphicsInstance->vkRenderPass);
+
     uint32_t imageCount;
-    StoreAndAssertVkResultP(upGraphicsInstance, vkEnumerateInstanceExtensionProperties, nullptr, &imageCount, nullptr);
+    StoreAndAssertVkResultP(vxSwapchain, vkGetSwapchainImagesKHR, vxSwapchain->vxDevice->vkDevice, vxSwapchain->vkSwapchain, &imageCount, nullptr);
     if (imageCount > 0) 
     {
         vxSwapchain->vkImages = std::vector<VkImage>(imageCount);
@@ -577,36 +690,6 @@ VkResult vxFillSurfaceProperties(const upt(VxGraphicsInstance) & upGraphicsInsta
     return VK_SUCCESS;
 }
 
-VkResult vxCreateRenderPass(const upt(VxGraphicsInstance) & upGraphicsInstance)
-{
-	VkAttachmentDescription attachments[1] = {};
-	attachments[0].format = upGraphicsInstance->vxMainSwapchain.vkFormat.format;
-	attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
-	attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	attachments[0].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	attachments[0].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	VkAttachmentReference colorAttachments = { 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
-
-	VkSubpassDescription subpass = {};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.colorAttachmentCount = 1;
-	subpass.pColorAttachments = &colorAttachments;
-
-	VkRenderPassCreateInfo createInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
-	createInfo.attachmentCount = sizeof(attachments) / sizeof(attachments[0]);
-	createInfo.pAttachments = attachments;
-	createInfo.subpassCount = 1;
-	createInfo.pSubpasses = &subpass;
-
-	StoreAndAssertVkResultP(upGraphicsInstance, vkCreateRenderPass, upGraphicsInstance->vxMainSwapchain.vxDevice->vkDevice, &createInfo, 0, &upGraphicsInstance->vkRenderPass);
-
-	return VK_SUCCESS;
-}
-
 VkResult vxLoadShader(VkDevice device, std::string filePath, VkShaderModule * shaderModule)
 {
 	FILE* file = fopen(filePath.c_str(), "rb");
@@ -661,7 +744,7 @@ VkResult vxCreatePipelineLayout(const upt(VxGraphicsInstance) & upGraphicsInstan
     pipelineLayoutCreateInfo.pSetLayouts = nullptr;
     pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
     pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
-	StoreAndAssertVkResultP(vxPipelineLayout, vkCreatePipelineLayout, vxPipelineLayout->vxDevice->vkDevice, &pipelineLayoutCreateInfo, 0, &vxPipelineLayout->vkPipelineLayout);
+	StoreAndAssertVkResultP(vxPipelineLayout, vkCreatePipelineLayout, vxPipelineLayout->vxDevice->vkDevice, &pipelineLayoutCreateInfo, nullptr, &vxPipelineLayout->vkPipelineLayout);
     return VK_SUCCESS;
 }
 
@@ -734,6 +817,60 @@ VkResult vxCreatePipeline(const upt(VxGraphicsInstance) & upGraphicsInstance)
     return VK_SUCCESS;
 }
 
+std::string VkDebugReportFlagsToString(VkDebugReportFlagsEXT flags)
+{
+    std::string result = "";
+    auto buildDebugReportTypeString = [](VkDebugReportFlagsEXT flags, VkDebugReportFlagBitsEXT flag, std::string flagText, std::string & flagsText)
+    {
+        if (flags & flag)
+        {
+            if (flagText.size()>0) flagsText += ",";
+            flagsText += flagText;
+        }
+    };
+    buildDebugReportTypeString(flags, VK_DEBUG_REPORT_ERROR_BIT_EXT, "Error", result);
+    buildDebugReportTypeString(flags, VK_DEBUG_REPORT_WARNING_BIT_EXT, "Warning", result);
+    buildDebugReportTypeString(flags, VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT, "PerfWarning", result);
+    buildDebugReportTypeString(flags, VK_DEBUG_REPORT_INFORMATION_BIT_EXT, "Information", result);
+    return result;
+}
+
+VkBool32 debugReportCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, const char* pLayerPrefix, const char* pMessage, void* pUserData)
+{
+    auto debugReportType = VkDebugReportFlagsToString(flags);
+    char message[4096];
+    snprintf(message, ARRAYSIZE(message), "(%s): %s\n", debugReportType.c_str(), pMessage);
+    if (!(strstr(message, "Device Extension VK_KHR_surface is not supported by this layer."))
+        &!(strstr(message, "Device Extension VK_MVK_macos_surface is not supported by this layer."))
+        )
+    {
+        printf("%s\n", message);
+
+        #ifdef _WIN32
+            OutputDebugStringA(message);
+        #endif
+
+        if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
+        {
+            auto a = 0;
+        }
+    }
+	return VK_FALSE;
+}
+
+VkResult vxCreateDebugReportCallback(const upt(VxGraphicsInstance) & upGraphicsInstance)
+{
+    #ifdef _DEBUG
+    PFN_vkCreateDebugReportCallbackEXT vkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(upGraphicsInstance->vkInstance, "vkCreateDebugReportCallbackEXT");
+
+    VkDebugReportCallbackCreateInfoEXT createInfo = { VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT };
+    createInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
+    createInfo.pfnCallback = &debugReportCallback;
+	StoreAndAssertVkResultP(upGraphicsInstance, vkCreateDebugReportCallbackEXT, upGraphicsInstance->vkInstance, &createInfo, nullptr, &upGraphicsInstance->vkDebugReportCallback);
+    #endif
+    return VK_SUCCESS;
+}
+
 VxResult vxCreateGraphicsInstance(rpt(VxGraphicsInstanceCreateInfo) rpCreateInfo, upt(VxGraphicsInstance) & upGraphicsInstance)
 {
     upGraphicsInstance = nup(VxGraphicsInstance);
@@ -743,6 +880,7 @@ VxResult vxCreateGraphicsInstance(rpt(VxGraphicsInstanceCreateInfo) rpCreateInfo
     AssertVkVxResult(vxFillAvailableLayers, upGraphicsInstance);
     AssertVkVxResult(vxFillAvailableExtensions, upGraphicsInstance);
     AssertVkVxResult(vxCreateVkInstance, upGraphicsInstance);
+    AssertVkVxResult(vxCreateDebugReportCallback, upGraphicsInstance);
     AssertVkVxResult(vxFillAvailableDevices, upGraphicsInstance);
 
     AssertVkVxResult(vxSelectPhysicalDevices, upGraphicsInstance);
@@ -756,7 +894,6 @@ VxResult vxCreateGraphicsInstance(rpt(VxGraphicsInstanceCreateInfo) rpCreateInfo
 
     AssertVkVxResult(vxLoadShaders, upGraphicsInstance);
     AssertVkVxResult(vxCreatePipelineLayout, upGraphicsInstance);
-    AssertVkVxResult(vxCreateRenderPass, upGraphicsInstance);
     AssertVkVxResult(vxCreatePipeline, upGraphicsInstance);
 
     return VxResult::VX_SUCCESS;

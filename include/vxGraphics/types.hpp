@@ -80,6 +80,7 @@ typedef struct VxGraphicsQueue
 
 typedef struct VxGraphicsDevice
 {
+    rpt(VxGraphicsPhysicalDevice)           vxPhysicalDevice;
     VkDevice                                vkDevice;
     std::vector<VxGraphicsQueue>            vxQueues;
     std::vector<VxGraphicsQueueFamily>      vxQueueFamilies;
@@ -110,6 +111,7 @@ typedef struct VxGraphicsSwapchain
     VkResult                                vkCreateSwapchainKHRResult;
     VkSwapchainKHR                          vkSwapchain;
 
+    rpt(VxGraphicsSurface)                  vxSurface;
     rpt(VxGraphicsDevice)                   vxDevice;
     VkSurfaceFormatKHR                      vkFormat;
 
@@ -189,6 +191,7 @@ typedef struct VxGraphicsInstance
 
     VxGraphicsSurface                       vxMainSurface;
 
+    VkResult                                vkGetSwapchainImagesKHRResult;
     VxGraphicsSwapchain                     vxMainSwapchain;
 
     VkResult                                vkCreateRenderPassResult;
@@ -198,6 +201,9 @@ typedef struct VxGraphicsInstance
 
     VxGraphicsPipelineLayout                vxPipelineLayout;
     VxGraphicsPipeline                      vxPipeline;
+
+    VkResult                                vkCreateDebugReportCallbackEXTResult;
+    VkDebugReportCallbackEXT                vkDebugReportCallback;
 } VxGraphicsInstance;
 
 #define initVxGraphicsInstance(object) \
@@ -205,6 +211,7 @@ typedef struct VxGraphicsInstance
     object->vkEnumerateInstanceExtensionPropertiesResult = VK_RESULT_MAX_ENUM; \
     object->vkCreateInstanceResult = VK_RESULT_MAX_ENUM; \
     object->vkEnumeratePhysicalDevicesResult = VK_RESULT_MAX_ENUM; \
+    object->vkCreateDebugReportCallbackEXTResult = VK_RESULT_MAX_ENUM; \
 
 
 

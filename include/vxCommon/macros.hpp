@@ -33,4 +33,6 @@
         } \
     }
 
+#define ARRAYSIZE(array) (sizeof(array) / sizeof((array)[0]))
+
 #endif
