@@ -1,194 +1,21 @@
 #include <vxGraphics/vxGraphics.hpp>
 
-#include <string>
 #include <algorithm>
 
-#include "platform.hpp"
+#include "internals.hpp"
 
 char* strToNewCharArray(std::string str)
 {
-    auto strSize = str.size();
-    char* result = new char[strSize+1];
-    for (uint32_t i=0; i<str.size(); i++)
-    {
-        result[i] = str[i];
-    }
-    result[strSize] = 0;
-    return result;
-}
-
-
-//TODO: make it a function pointer
-void vxErrorCallback(int error, const char* description)
-{
-    fprintf(stderr, "Error: %s\n", description);
-}
-
-
-VxResult vxCreateWindow(const upt(VxGraphicsInstance) & upGraphicsInstance)
-{
-    glfwSetErrorCallback(vxErrorCallback);
-
-    if (!glfwInit())
-    {
-        return VxResult::VX_ERROR;
-    }
-
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-    glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
-    glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
-    glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
-    glfwWindowHint(GLFW_FOCUS_ON_SHOW, GLFW_TRUE);
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    auto window = glfwCreateWindow(upGraphicsInstance->rpCreateInfo->mainWindowWidth, upGraphicsInstance->rpCreateInfo->mainWindowHeight, "My Title", NULL, NULL);
-
-    if (!window)
-    {
-        return VxResult::VX_ERROR;
-    }
-
-    //glfwMakeContextCurrent(window);
-    //glfwSwapInterval(1);
-
-    int width, height;
-    //glfwGetFramebufferSize(window, &width, &height);
-    //glViewport(0, 0, width, height);
-
-    upGraphicsInstance->mainWindow = window;
-
-    return VxResult::VX_SUCCESS;
-}
-
-VkExtent2D vxGetWindowSize(const upt(VxGraphicsInstance) & upGraphicsInstance)
-{
-    VkExtent2D result;
-    int width = 0;
-    int height = 0;
-    glfwGetFramebufferSize(upGraphicsInstance->mainWindow, &width, &height);
-    result.width = width;
-    result.height = height;
-    return result;
+    return strdup(str.c_str());
 }
 
 VkSemaphore createSemaphore(VkDevice device)
 {
 	VkSemaphoreCreateInfo createInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
 	VkSemaphore semaphore = 0;
-	vkCreateSemaphore(device, &createInfo, 0, &semaphore);
+	vkCreateSemaphore(device, &createInfo, nullptr, &semaphore);
 	return semaphore;
 }
-
-VkImageMemoryBarrier imageBarrier(VkImage image, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkImageLayout oldLayout, VkImageLayout newLayout)
-{
-	VkImageMemoryBarrier result = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-
-	result.srcAccessMask = srcAccessMask;
-	result.dstAccessMask = dstAccessMask;
-	result.oldLayout = oldLayout;
-	result.newLayout = newLayout;
-	result.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	result.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	result.image = image;
-	result.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	result.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
-	result.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
-
-	return result;
-}
-
-VkResult vxAwaitWindowClose(const upt(VxGraphicsInstance) & upGraphicsInstance)
-{
-    VkCommandBuffer commandBuffer;
-    AssertVkResult(vxAllocateCommandBuffer, upGraphicsInstance, commandBuffer);
-
-    auto device = upGraphicsInstance->vxDevices[0].vkDevice;
-    auto swapchain = upGraphicsInstance->vxMainSwapchain.vkSwapchain;
-    auto swapchainFramebuffers = upGraphicsInstance->vxMainSwapchain.vkFramebuffers;
-    auto swapchainImages = upGraphicsInstance->vxMainSwapchain.vkImages;    
-    auto commandPool = upGraphicsInstance->vxDevices[0].vxQueueFamilies[0].vkCommandPool; 
-    auto queue = upGraphicsInstance->vxDevices[0].vxQueues[0].vkQueue;
-    auto renderPass = upGraphicsInstance->vkRenderPass;
-    auto windowSize = vxGetWindowSize(upGraphicsInstance);
-    auto acquireSemaphore = createSemaphore(upGraphicsInstance->vxDevices[0].vkDevice);
-    auto releaseSemaphore = createSemaphore(upGraphicsInstance->vxDevices[0].vkDevice);
-    auto trianglePipeline = upGraphicsInstance->vxPipeline.vkPipeline;
-
-    while (!glfwWindowShouldClose(upGraphicsInstance->mainWindow))
-    {
-        glfwPollEvents();
-
-        uint32_t imageIndex = 0;
-		AssertVkResult(vkAcquireNextImageKHR, device, swapchain, ~0ull, acquireSemaphore, VK_NULL_HANDLE, &imageIndex);
-
-		AssertVkResult(vkResetCommandPool, device, commandPool, 0);
-
-		VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-		AssertVkResult(vkBeginCommandBuffer, commandBuffer, &beginInfo);
-
-        VkImageMemoryBarrier renderBeginBarrier = imageBarrier(swapchainImages[imageIndex], 0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-		vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_DEPENDENCY_BY_REGION_BIT, 0, 0, 0, 0, 1, &renderBeginBarrier);
-
-		VkClearColorValue color = { 90.f / 255.f, 10.f / 255.f, 36.f / 255.f, 1 };
-		VkClearValue clearColor = { color };
-
-		VkRenderPassBeginInfo passBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
-		passBeginInfo.renderPass = renderPass;
-		passBeginInfo.framebuffer = swapchainFramebuffers[imageIndex];
-		passBeginInfo.renderArea.extent = windowSize;
-		passBeginInfo.clearValueCount = 1;
-		passBeginInfo.pClearValues = &clearColor;
-
-		vkCmdBeginRenderPass(commandBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		VkViewport viewport = { 0, 0, float(windowSize.width), float(windowSize.height), 0, 1 };
-		VkRect2D scissor = { {0, 0}, {windowSize.width, windowSize.height} };
-
-		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-		VkImageSubresourceRange range = {};
-		range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		range.levelCount = 1;
-		range.layerCount = 1;
-		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, trianglePipeline);
-		vkCmdDraw(commandBuffer, 3, 1, 0, 0);
-
-		vkCmdEndRenderPass(commandBuffer);
-
-        VkImageMemoryBarrier renderEndBarrier = imageBarrier(swapchainImages[imageIndex], VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-		vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_DEPENDENCY_BY_REGION_BIT, 0, 0, 0, 0, 1, &renderEndBarrier);
-
-		AssertVkResult(vkEndCommandBuffer, commandBuffer);
-
-		VkPipelineStageFlags submitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = &acquireSemaphore;
-		submitInfo.pWaitDstStageMask = &submitStageMask;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandBuffer;
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = &releaseSemaphore;
-		AssertVkResult(vkQueueSubmit, queue, 1, &submitInfo, VK_NULL_HANDLE);
-
-		VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
-		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = &releaseSemaphore;
-		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = &swapchain;
-		presentInfo.pImageIndices = &imageIndex;
-		AssertVkResult(vkQueuePresentKHR, queue, &presentInfo);
-
-        AssertVkResult(vkDeviceWaitIdle, device);
-
-    }
-    glfwDestroyWindow(upGraphicsInstance->mainWindow);
-
-    return VkResult::VK_SUCCESS;
-}
-
 
 VkResult vxFillAvailableExtensions(const upt(VxGraphicsInstance) & upGraphicsInstance)
 {
@@ -896,6 +723,11 @@ VxResult vxCreateGraphicsInstance(rpt(VxGraphicsInstanceCreateInfo) rpCreateInfo
     AssertVkVxResult(vxCreatePipelineLayout, upGraphicsInstance);
     AssertVkVxResult(vxCreatePipeline, upGraphicsInstance);
 
+    //TODO: parametrize
+    AssertVkVxResult(vxAllocateCommandBuffer, upGraphicsInstance, upGraphicsInstance->vkCommandBuffer);
+    upGraphicsInstance->acquireSemaphore = createSemaphore(upGraphicsInstance->vxDevices[0].vkDevice);
+    upGraphicsInstance->releaseSemaphore = createSemaphore(upGraphicsInstance->vxDevices[0].vkDevice);
+
     return VxResult::VX_SUCCESS;
 }
 
@@ -915,6 +747,34 @@ VxResult vxGraphicsTerminate(upt(VxGraphicsInstance) & upGraphicsInstance)
 
 VxResult vxGraphicsDestroyInstance(upt(VxGraphicsInstance) & upGraphicsInstance)
 {
+    vkDestroySemaphore(upGraphicsInstance->vxDevices[0].vkDevice, upGraphicsInstance->acquireSemaphore, nullptr);
+	vkDestroySemaphore(upGraphicsInstance->vxDevices[0].vkDevice, upGraphicsInstance->releaseSemaphore, nullptr);
+
+    vkDestroyPipeline(upGraphicsInstance->vxDevices[0].vkDevice, upGraphicsInstance->vxPipeline.vkPipeline, nullptr);
+
+	vkDestroyPipelineLayout(upGraphicsInstance->vxDevices[0].vkDevice, upGraphicsInstance->vxPipeline.vxPipelineLayout->vkPipelineLayout, nullptr);
+
+	for (auto && vxShader : upGraphicsInstance->vxShaders)
+		vkDestroyShaderModule(upGraphicsInstance->vxDevices[0].vkDevice, vxShader.vkShaderModule, nullptr);
+    
+	for (auto && vkImageView : upGraphicsInstance->vxMainSwapchain.vkImageViews)
+		vkDestroyImageView(upGraphicsInstance->vxDevices[0].vkDevice, vkImageView, nullptr);
+
+	for (auto && vkFramebuffer : upGraphicsInstance->vxMainSwapchain.vkFramebuffers)
+		vkDestroyFramebuffer(upGraphicsInstance->vxDevices[0].vkDevice, vkFramebuffer, nullptr);
+
+    vkDestroyRenderPass(upGraphicsInstance->vxDevices[0].vkDevice, upGraphicsInstance->vkRenderPass, nullptr);
+
+	vkDestroySwapchainKHR(upGraphicsInstance->vxDevices[0].vkDevice, upGraphicsInstance->vxMainSwapchain.vkSwapchain, nullptr);
+
+    vkDestroySurfaceKHR(upGraphicsInstance->vkInstance, upGraphicsInstance->vxMainSurface.vkSurface, nullptr);
+    glfwDestroyWindow(upGraphicsInstance->mainWindow);
+    //device
+    vkDestroyCommandPool(upGraphicsInstance->vxDevices[0].vkDevice, upGraphicsInstance->vxDevices[0].vxQueueFamilies[0].vkCommandPool, nullptr);
+    vkDestroyDevice(upGraphicsInstance->vxDevices[0].vkDevice, nullptr);
+
+    PFN_vkDestroyDebugReportCallbackEXT vkDestroyDebugReportCallbackEXT = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(upGraphicsInstance->vkInstance, "vkDestroyDebugReportCallbackEXT");
+    vkDestroyDebugReportCallbackEXT(upGraphicsInstance->vkInstance, upGraphicsInstance->vkDebugReportCallback, nullptr);
     vkDestroyInstance(upGraphicsInstance->vkInstance, nullptr);
     upGraphicsInstance.release();
     return VxResult::VX_SUCCESS;

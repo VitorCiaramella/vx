@@ -7,6 +7,15 @@
 
 #include <string>
 
+typedef enum class VxWindowLoopResult
+{
+    VX_WL_CONTINUE,
+    VX_WL_STOP,
+} VxWindowLoopResult;
+
+struct VxGraphicsInstance;
+typedef VxWindowLoopResult (*PFN_vxWindowLoop)(const upt(VxGraphicsInstance) & upGraphicsInstance);
+
 typedef struct VxGraphicsInstanceCreateInfo
 {
     std::string                             applicationName;
@@ -204,6 +213,16 @@ typedef struct VxGraphicsInstance
 
     VkResult                                vkCreateDebugReportCallbackEXTResult;
     VkDebugReportCallbackEXT                vkDebugReportCallback;
+
+    PFN_vxWindowLoop                        vxWindowLoopFunction;
+
+    VkExtent2D                              windowSize;
+    VkResult                                vkAllocateCommandBuffersResult;
+    VkCommandBuffer                         vkCommandBuffer;
+
+    VkSemaphore                             acquireSemaphore;
+    VkSemaphore                             releaseSemaphore;
+
 } VxGraphicsInstance;
 
 #define initVxGraphicsInstance(object) \

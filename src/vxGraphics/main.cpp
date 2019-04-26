@@ -7,6 +7,108 @@
 
 using namespace std;
 
+VkImageMemoryBarrier imageBarrier(VkImage image, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkImageLayout oldLayout, VkImageLayout newLayout)
+{
+	VkImageMemoryBarrier result = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+
+	result.srcAccessMask = srcAccessMask;
+	result.dstAccessMask = dstAccessMask;
+	result.oldLayout = oldLayout;
+	result.newLayout = newLayout;
+	result.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	result.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	result.image = image;
+	result.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	result.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+	result.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+
+	return result;
+}
+
+VxWindowLoopResult windowLoop(const upt(VxGraphicsInstance) & upGraphicsInstance)
+{
+    auto commandBuffer = upGraphicsInstance->vkCommandBuffer;
+    auto device = upGraphicsInstance->vxDevices[0].vkDevice;
+    auto swapchain = upGraphicsInstance->vxMainSwapchain.vkSwapchain;
+    auto swapchainFramebuffers = upGraphicsInstance->vxMainSwapchain.vkFramebuffers;
+    auto swapchainImages = upGraphicsInstance->vxMainSwapchain.vkImages;    
+    auto commandPool = upGraphicsInstance->vxDevices[0].vxQueueFamilies[0].vkCommandPool; 
+    auto queue = upGraphicsInstance->vxDevices[0].vxQueues[0].vkQueue;
+    auto renderPass = upGraphicsInstance->vkRenderPass;
+    auto windowSize = upGraphicsInstance->windowSize;
+    auto acquireSemaphore = upGraphicsInstance->acquireSemaphore;
+    auto releaseSemaphore = upGraphicsInstance->releaseSemaphore;
+    auto trianglePipeline = upGraphicsInstance->vxPipeline.vkPipeline;
+
+    uint32_t imageIndex = 0;
+    AssertVkResultVxWindowLoop(vkAcquireNextImageKHR, device, swapchain, ~0ull, acquireSemaphore, VK_NULL_HANDLE, &imageIndex);
+
+    AssertVkResultVxWindowLoop(vkResetCommandPool, device, commandPool, 0);
+
+    VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    AssertVkResultVxWindowLoop(vkBeginCommandBuffer, commandBuffer, &beginInfo);
+
+    VkImageMemoryBarrier renderBeginBarrier = imageBarrier(swapchainImages[imageIndex], 0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_DEPENDENCY_BY_REGION_BIT, 0, 0, 0, 0, 1, &renderBeginBarrier);
+
+    VkClearColorValue color = { 90.f / 255.f, 10.f / 255.f, 36.f / 255.f, 1 };
+    VkClearValue clearColor = { color };
+
+    VkRenderPassBeginInfo passBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
+    passBeginInfo.renderPass = renderPass;
+    passBeginInfo.framebuffer = swapchainFramebuffers[imageIndex];
+    passBeginInfo.renderArea.extent = windowSize;
+    passBeginInfo.clearValueCount = 1;
+    passBeginInfo.pClearValues = &clearColor;
+
+    vkCmdBeginRenderPass(commandBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    VkViewport viewport = { 0, 0, float(windowSize.width), float(windowSize.height), 0, 1 };
+    VkRect2D scissor = { {0, 0}, {windowSize.width, windowSize.height} };
+
+    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+    VkImageSubresourceRange range = {};
+    range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    range.levelCount = 1;
+    range.layerCount = 1;
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, trianglePipeline);
+    vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+
+    vkCmdEndRenderPass(commandBuffer);
+
+    VkImageMemoryBarrier renderEndBarrier = imageBarrier(swapchainImages[imageIndex], VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_DEPENDENCY_BY_REGION_BIT, 0, 0, 0, 0, 1, &renderEndBarrier);
+
+    AssertVkResultVxWindowLoop(vkEndCommandBuffer, commandBuffer);
+
+    VkPipelineStageFlags submitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = &acquireSemaphore;
+    submitInfo.pWaitDstStageMask = &submitStageMask;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = &releaseSemaphore;
+    AssertVkResultVxWindowLoop(vkQueueSubmit, queue, 1, &submitInfo, VK_NULL_HANDLE);
+
+    VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = &releaseSemaphore;
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = &swapchain;
+    presentInfo.pImageIndices = &imageIndex;
+    AssertVkResultVxWindowLoop(vkQueuePresentKHR, queue, &presentInfo);
+
+    AssertVkResultVxWindowLoop(vkDeviceWaitIdle, device);
+
+    return VxWindowLoopResult::VX_WL_CONTINUE;
+}
+
 int main()
 {
     VxResult vxresult;
@@ -61,6 +163,7 @@ int main()
         return -1;
     }
 
+    upGraphicsInstance->vxWindowLoopFunction = &windowLoop;
     vxGraphicsRun(upGraphicsInstance);
     
     vxGraphicsDestroyInstance(upGraphicsInstance);

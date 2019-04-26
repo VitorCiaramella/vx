@@ -30,6 +30,15 @@
         } \
     }
 
+#define AssertVkResultVxWindowLoop(vkFunction, ...) \
+    {\
+        auto vkresult = vkFunction(__VA_ARGS__); \
+        if (vkresult != VK_SUCCESS) \
+        { \
+            return VxWindowLoopResult::VX_WL_STOP;\
+        } \
+    }
+
 #define AssertVkVxResult(vkFunction, ...) \
     {\
         auto vkresult = vkFunction(__VA_ARGS__); \
