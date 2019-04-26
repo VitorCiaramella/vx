@@ -4,7 +4,6 @@
 #include <vector>
 
 #include <vxCommon/vxCommon.hpp>
-#include "macros.hpp"
 #include "types.hpp"
 #include "functions.hpp"
 

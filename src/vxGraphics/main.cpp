@@ -3,7 +3,7 @@
 #include <string>
 
 #include <vxGraphics/vxGraphics.hpp>
-
+#include "internals.hpp"
 
 using namespace std;
 
@@ -27,6 +27,10 @@ VkImageMemoryBarrier imageBarrier(VkImage image, VkAccessFlags srcAccessMask, Vk
 
 VxWindowLoopResult windowLoop(const upt(VxGraphicsInstance) & upGraphicsInstance)
 {
+    if (upGraphicsInstance->acquireSemaphore == nullptr)
+    {
+        return VxWindowLoopResult::VX_WL_STOP;
+    }
     auto commandBuffer = upGraphicsInstance->vkCommandBuffer;
     auto device = upGraphicsInstance->vxDevices[0].vkDevice;
     auto swapchain = upGraphicsInstance->vxMainSwapchain.vkSwapchain;

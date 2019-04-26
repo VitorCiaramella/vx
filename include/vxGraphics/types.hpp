@@ -14,6 +14,8 @@ typedef enum class VxWindowLoopResult
 } VxWindowLoopResult;
 
 struct VxGraphicsInstance;
+struct VxGraphicsSurface;
+
 typedef VxWindowLoopResult (*PFN_vxWindowLoop)(const upt(VxGraphicsInstance) & upGraphicsInstance);
 
 typedef struct VxGraphicsInstanceCreateInfo
@@ -79,6 +81,26 @@ typedef struct VxGraphicsPhysicalDevice
     object.vkEnumerateDeviceExtensionPropertiesResult = VK_RESULT_MAX_ENUM; \
     object.vkEnumerateDeviceLayerPropertiesResult = VK_RESULT_MAX_ENUM;
 
+typedef struct VxGraphicsSurfacePhysicalDevice
+{
+    rpt(VxGraphicsSurface)                  vxSurface;
+    rpt(VxGraphicsPhysicalDevice)           vxPhysicalDevice;
+    std::vector<VxGraphicsQueueFamily>      vxSupportedQueueFamilies;
+
+    VkResult                                vkGetPhysicalDeviceSurfaceFormatsKHRResult;
+    std::vector<VkSurfaceFormatKHR>         vkSurfaceFormats;
+
+    VkResult                                vkGetPhysicalDeviceSurfaceCapabilitiesKHRResult;
+    VkSurfaceCapabilitiesKHR                vkSurfaceCapabilities;
+
+    VkResult                                vkGetPhysicalDeviceSurfacePresentModesKHRResult;
+    std::vector<VkPresentModeKHR>           vkPresentModes;
+
+} VxGraphicsSurfacePhysicalDevice;
+#define initVxGraphicsSurfacePhysicalDevice(object) \
+    object.vkEnumerateDeviceExtensionPropertiesResult = VK_RESULT_MAX_ENUM; \
+    object.vkEnumerateDeviceLayerPropertiesResult = VK_RESULT_MAX_ENUM;
+
 typedef struct VxGraphicsQueue
 {
     VkQueue                                 vkQueue;
@@ -98,17 +120,11 @@ typedef struct VxGraphicsDevice
 
 typedef struct VxGraphicsSurface
 {
-    VkResult                                glfwCreateWindowSurfaceResult;
-    VkSurfaceKHR                            vkSurface;
+    VkResult                                        glfwCreateWindowSurfaceResult;
+    VkSurfaceKHR                                    vkSurface;
 
-    VkResult                                vkGetPhysicalDeviceSurfaceFormatsKHRResult;
-    std::vector<VkSurfaceFormatKHR>         vkSurfaceFormats;
-
-    VkResult                                vkGetPhysicalDeviceSurfaceCapabilitiesKHRResult;
-    VkSurfaceCapabilitiesKHR                vkSurfaceCapabilities;
-
-    VkResult                                vkGetPhysicalDeviceSurfacePresentModesKHRResult;
-    std::vector<VkPresentModeKHR>           vkPresentModes;
+    std::vector<VxGraphicsSurfacePhysicalDevice>    vxSupportedSurfaceDevices;
+    rpt(VxGraphicsSurfacePhysicalDevice)            vxSurfaceDevice;
 } VxGraphicsSurface;
 #define initVxGraphicsSurface(object) \
     object->vkGetPhysicalDeviceSurfaceFormatsKHRResult = VK_RESULT_MAX_ENUM; \

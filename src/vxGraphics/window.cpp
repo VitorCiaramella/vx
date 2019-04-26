@@ -50,8 +50,6 @@ VkResult vxAwaitWindowClose(const upt(VxGraphicsInstance) & upGraphicsInstance)
     {
         return VkResult::VK_ERROR_INVALID_EXTERNAL_HANDLE;
     }
-    //TODO: parametrize
-    auto device = upGraphicsInstance->vxDevices[0].vkDevice;
     while (!glfwWindowShouldClose(upGraphicsInstance->mainWindow))
     {
         glfwPollEvents();
@@ -62,6 +60,5 @@ VkResult vxAwaitWindowClose(const upt(VxGraphicsInstance) & upGraphicsInstance)
             break;
         }
     }
-    AssertVkResult(vkDeviceWaitIdle, device);
     return VkResult::VK_SUCCESS;
 }

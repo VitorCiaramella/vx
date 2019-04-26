@@ -1,5 +1,5 @@
-#ifndef VX_GRAPHICS_WINDOW
-#define VX_GRAPHICS_WINDOW
+#ifndef VX_GRAPHICS_WINDOW_HEADER
+#define VX_GRAPHICS_WINDOW_HEADER
 
 #include <vxGraphics/vxGraphics.hpp>
 

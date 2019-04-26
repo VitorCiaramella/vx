@@ -1,2 +1,6 @@
 #include "window.hpp"
-#include "platform.hpp"
+#include "surface.hpp"
+#include "instance.hpp"
+#include "debug.hpp"
+#include "synchronization.hpp"
+#include "macros.hpp"

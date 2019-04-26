@@ -2,7 +2,7 @@
 
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
 
-VkResult vxCreateSurface(const upt(VxGraphicsInstance) & puGraphicsInstance)
+VkResult vxCreateSurface_PlatformSpecific(const upt(VxGraphicsInstance) & upGraphicsInstance)
 {
     VkWin32SurfaceCreateInfoKHR createInfo;
     createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;

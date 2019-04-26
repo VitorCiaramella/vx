@@ -33,6 +33,10 @@
         } \
     }
 
-#define ARRAYSIZE(array) (sizeof(array) / sizeof((array)[0]))
+#define arraySize(array) (sizeof(array) / sizeof((array)[0]))
+
+#define strToNewCharArray(str) strdup(str.c_str())
+
+#define CASE_ID_RETURN_NAME(x) case x: return #x
 
 #endif
