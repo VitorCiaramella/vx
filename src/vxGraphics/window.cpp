@@ -1,5 +1,6 @@
-#include <vxGraphics/vxGraphics.hpp>
+#include "commonHeaders.hpp"
 
+/*
 //TODO: make it a function pointer
 void vxErrorCallback(int error, const char* description)
 {
@@ -62,3 +63,4 @@ VkResult vxAwaitWindowClose(const upt(VxGraphicsInstance) & upGraphicsInstance)
     }
     return VkResult::VK_SUCCESS;
 }
+*/

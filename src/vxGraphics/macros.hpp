@@ -1,34 +1,40 @@
 #ifndef VX_GRAPHICS_MACROS
 #define VX_GRAPHICS_MACROS
 
-#define StoreAndAssertVkResult(resultStorage, vkFunction, ...) \
+#define AssertVkResult(vkFunction, ...) \
     {\
-        auto vkresult = vkFunction(__VA_ARGS__); \
-        resultStorage.vkFunction##Result = vkresult;\
-        if (vkresult != VK_SUCCESS) \
+        auto vkResult = vkFunction(__VA_ARGS__); \
+        if (vkResult != VK_SUCCESS) \
         { \
-            return vkresult; \
+            vxLogVkResult2(vkResult, #vkFunction); \
+            return vkResult; \
+        } \
+    }
+
+#define AssertTrueVkResult(check) \
+    {\
+        if (!(check)) \
+        { \
+            vxLogWarning2("Assert failed.","Assert"); \
+            return VK_ERROR_VALIDATION_FAILED_EXT; \
         } \
     }
 
 #define StoreAndAssertVkResultP(resultStorage, vkFunction, ...) \
-    {\
-        auto vkresult = vkFunction(__VA_ARGS__); \
-        resultStorage->vkFunction##Result = vkresult;\
-        if (vkresult != VK_SUCCESS) \
-        { \
-            return vkresult; \
-        } \
-    }
+    resultStorage = vkFunction(__VA_ARGS__); \
+    if (resultStorage != VK_SUCCESS) \
+    { \
+        vxLogVkResult2(resultStorage, #vkFunction); \
+        return resultStorage; \
+    } 
 
-#define AssertVkResult(vkFunction, ...) \
-    {\
-        auto vkresult = vkFunction(__VA_ARGS__); \
-        if (vkresult != VK_SUCCESS) \
-        { \
-            return vkresult; \
-        } \
-    }
+#define GetAndAssertSharedPointerVk(variable, wpObject) \
+    if (wpObject.expired()) \
+    { \
+        vxLogWarning3("Trying to access expired pointer %s", "Memory", #wpObject); \
+        return VK_ERROR_INVALID_EXTERNAL_HANDLE; \
+    } \
+    auto variable = wpObject.lock(); 
 
 #define AssertVkResultVxWindowLoop(vkFunction, ...) \
     {\
@@ -48,24 +54,24 @@
         } \
     }
 
-#define CopyResultItems(storage, storageProperty, itemType, items, itemCount) \
+#define CopyResultItemsSP(storage, storageProperty, itemType, items, itemCount) \
     {\
-        storage = std::vector<itemType>(itemCount); \
+        storage.resize(itemCount); \
         for (uint32_t i=0; i<itemCount; i++) \
         { \
-            init##itemType(storage[i]); \
-            storage[i].storageProperty = items[i]; \
+            storage[i] = nsp<itemType>(); \
+            storage[i]->storageProperty = items[i]; \
         } \
     }
 
-#define AppendResultItems(storage, storageProperty, itemType, items, itemCount) \
+#define AppendResultItemsSP(storage, storageProperty, itemType, items, itemCount) \
     {\
+        auto baseIndex = storage.size(); \\
+        storage.resize(itemCount+storage.size()); \
         for (uint32_t i=0; i<itemCount; i++) \
         { \
-            itemType storageItem; \
-            init##itemType(storageItem); \
-            storageItem.storageProperty = items[i]; \
-            storage.push_back(storageItem); \
+            storage[baseIndex+i] = nsp<itemType>(); \
+            storage[baseIndex+i]->storageProperty = items[i]; \
         } \
     }
 

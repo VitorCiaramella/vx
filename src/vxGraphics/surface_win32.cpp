@@ -1,4 +1,4 @@
-#include <vxGraphics/vxGraphics.hpp>
+#include "commonHeaders.hpp"
 
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
 

@@ -4,7 +4,7 @@
             "name": "Mac",
             "includePath": [
                 "/Library/Developer/CommandLineTools/usr/include",
-                "${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/include/**",
+                "${workspaceFolder}/extern/vulkansdk/macos/macOS/include/**",
                 "${workspaceFolder}/extern/glfw/include/**",
                 "${workspaceFolder}/include/**",
                 "${workspaceFolder}/src/**"

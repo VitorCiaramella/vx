@@ -1,6 +1,4 @@
-#include <vxGraphics/vxGraphics.hpp>
-
-#include "internals.hpp"
+#include "commonHeaders.hpp"
 
 VkResult vxCreateSemaphore(VkDevice device, VkSemaphore * semaphore)
 {

@@ -34,22 +34,10 @@
                 "-L${workspaceFolder}/build/bin/glfw/src",
                 "-lglfw3",
 
-
-                //"-F${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/Frameworks",
-                //"-framework",
-                //"vulkan",
-                
-                "-I${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/include",
+                "-I${workspaceFolder}/extern/vulkansdk/macos/macOS/include",
                 "${workspaceFolder}/build/bin/vxGraphics/libvulkan.1.dylib",
 
-                //"-I${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/MoltenVK/include",
-                //"${workspaceFolder}/build/bin/vxGraphics/libMoltenVK.dylib",
-
-                //"-L${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/lib",
-                //"-llibvulkan",
-
-                //"${file}",
-
+                "${workspaceFolder}/src/vxCommon/debug.cpp",
 
                 "${workspaceFolder}/src/vxGraphics/functions.cpp",
                 "${workspaceFolder}/src/vxGraphics/main.cpp",
@@ -57,11 +45,12 @@
                 "${workspaceFolder}/src/vxGraphics/window.cpp",
                 "${workspaceFolder}/src/vxGraphics/debug.cpp",
                 "${workspaceFolder}/src/vxGraphics/synchronization.cpp",
+                "${workspaceFolder}/src/vxGraphics/device.cpp",
                 "${workspaceFolder}/src/vxGraphics/surface.cpp",
                 "${workspaceFolder}/src/vxGraphics/surface_macos.cpp",
                 "${workspaceFolder}/src/vxGraphics/surface_win32.cpp",
+                
                 "-o",
-                //"${fileDirname}/${fileBasenameNoExtension}",
                 "${workspaceFolder}/build/bin/vxGraphics/vxGraphics",
             ],
             "options": {
@@ -83,7 +72,7 @@
         {
             "label": "cs1",
             "type": "shell",
-            "command": "${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/bin/glslc",
+            "command": "${workspaceFolder}/extern/vulkansdk/macos/macOS/bin/glslc",
             "args": [
                 "-fshader-stage=vert",                
                 "-o",
@@ -94,7 +83,7 @@
         {
             "label": "cs2",
             "type": "shell",
-            "command": "${workspaceFolder}/extern/vulkansdk-macos-1.1.106.0/macOS/bin/glslc",
+            "command": "${workspaceFolder}/extern/vulkansdk/macos/macOS/bin/glslc",
             "args": [
                 "-fshader-stage=frag",                
                 "-o",

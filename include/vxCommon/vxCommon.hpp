@@ -3,5 +3,6 @@
 
 #include "macros.hpp"
 #include "types.hpp"
+#include "debug.hpp"
 
 #endif

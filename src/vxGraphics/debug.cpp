@@ -1,6 +1,19 @@
-#include <vxGraphics/vxGraphics.hpp>
+#include "commonHeaders.hpp"
 
-#include "internals.hpp"
+VxGraphicsDebug::~VxGraphicsDebug()
+{
+    vxLogInfo2("Destructor call", "Memory");
+    if (vkDebugReportCallback != nullptr)
+    {
+        GetAndAssertSharedPointer(spVxGraphicsInstance, wpVxGraphicsInstance);
+        AssertTrue(spVxGraphicsInstance->vkInstance!=nullptr);
+        vxLogInfo2("Destroying vkDebugReportCallback...", "Memory");
+        PFN_vkDestroyDebugReportCallbackEXT vkDestroyDebugReportCallbackEXT = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(spVxGraphicsInstance->vkInstance, "vkDestroyDebugReportCallbackEXT");
+        vkDestroyDebugReportCallbackEXT(spVxGraphicsInstance->vkInstance, vkDebugReportCallback, nullptr);
+        vkDebugReportCallback = nullptr;
+        vxLogInfo2("vkDebugReportCallback destroyed.", "Memory");
+    }
+}
 
 const char * VkResultToString(VkResult vkResult)
 {
@@ -65,48 +78,55 @@ std::string VkDebugReportFlagsToString(VkDebugReportFlagsEXT flags)
 VkBool32 debugReportCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, const char* pLayerPrefix, const char* pMessage, void* pUserData)
 {
     auto debugReportType = VkDebugReportFlagsToString(flags);
-    char message[4096];
-    snprintf(message, arraySize(message), "(%s): %s\n", debugReportType.c_str(), pMessage);
-    if (!(strstr(message, "Device Extension VK_KHR_surface is not supported by this layer."))
-        &!(strstr(message, "Device Extension VK_MVK_macos_surface is not supported by this layer."))
-        )
+    if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
     {
-        printf("%s\n", message);
+        vxLogError3("%s: %s", "Vulkan", debugReportType.c_str(), pMessage);
 
-        #ifdef _WIN32
-            OutputDebugStringA(message);
-        #endif
-
-        if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
+        if (!(strstr(pMessage, "Device Extension VK_KHR_surface is not supported by this layer."))
+            &!(strstr(pMessage, "Device Extension VK_MVK_macos_surface is not supported by this layer."))
+            )
         {
-            auto a = 0;
+            auto a = 0;//breakpoint
         }
+    }
+    else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT || flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT)
+    {
+        vxLogWarning3("%s: %s", "Vulkan", debugReportType.c_str(), pMessage);
+    }
+    else if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT)
+    {
+        vxLogInfo3("%s: %s", "Vulkan", debugReportType.c_str(), pMessage);
     }
 	return VK_FALSE;
 }
 
-VkResult vxCreateDebugReportCallback(const upt(VxGraphicsInstance) & upGraphicsInstance)
+VkResult _vxCreateDebugReportCallback(const spt(VxGraphicsDebug) & spVxGraphicsDebug)
 {
-    #ifdef _DEBUG
-    PFN_vkCreateDebugReportCallbackEXT vkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(upGraphicsInstance->vkInstance, "vkCreateDebugReportCallbackEXT");
-
+    vxLogInfo2("Creating debug report callback", "Vulkan");
+    GetAndAssertSharedPointerVk(spVxGraphicsInstance, spVxGraphicsDebug->wpVxGraphicsInstance);
+    AssertTrueVkResult(spVxGraphicsInstance->vkInstance!=nullptr);
+    PFN_vkCreateDebugReportCallbackEXT vkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(spVxGraphicsInstance->vkInstance, "vkCreateDebugReportCallbackEXT");
+    AssertTrueVkResult(vkCreateDebugReportCallbackEXT!=nullptr);
     VkDebugReportCallbackCreateInfoEXT createInfo = { VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT };
     createInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
     createInfo.pfnCallback = &debugReportCallback;
-	StoreAndAssertVkResultP(upGraphicsInstance, vkCreateDebugReportCallbackEXT, upGraphicsInstance->vkInstance, &createInfo, nullptr, &upGraphicsInstance->vkDebugReportCallback);
-    #endif
+	StoreAndAssertVkResultP(spVxGraphicsDebug->vkCreateDebugReportCallbackResult, vkCreateDebugReportCallbackEXT, spVxGraphicsInstance->vkInstance, &createInfo, nullptr, &spVxGraphicsDebug->vkDebugReportCallback);
+    vxLogInfo2("Debug report callback created.", "Vulkan");
     return VK_SUCCESS;
 }
 
-void vxDebugLogVkResult(char* vkFunctionName, VkResult vkResult)
+void vxGraphicsDebugLogVkResult(const VkResult vkResult, const char* vulkanFunctionName, const char* functionName, const char* fileName, const int line)
 {
     auto vkResultAsText = VkResultToString(vkResult);
-    char message[4096];
-    snprintf(message, arraySize(message), "(%s): %s\n", vkResultAsText, vkFunctionName);
-
-    printf("%s\n", message);
-
-    #ifdef _WIN32
-        OutputDebugStringA(message);
-    #endif
+    if (vulkanFunctionName == nullptr)
+    {
+        vxLogError2(vkResultAsText, "Vulkan");
+    }
+    else
+    {
+        char message[1024];
+        snprintf(message, arraySize(message), "%s:%s", vkResultAsText, vulkanFunctionName);
+        vxLogError2(message, "Vulkan");
+    }    
 }
+

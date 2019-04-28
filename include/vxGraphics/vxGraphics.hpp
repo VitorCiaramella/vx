@@ -4,7 +4,11 @@
 #include <vector>
 
 #include <vxCommon/vxCommon.hpp>
-#include "types.hpp"
-#include "functions.hpp"
+#include "window.hpp"
+#include "surface.hpp"
+#include "instance.hpp"
+#include "debug.hpp"
+#include "synchronization.hpp"
+#include "device.hpp"
 
 #endif

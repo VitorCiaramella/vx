@@ -1,135 +1,110 @@
-#include <vxGraphics/vxGraphics.hpp>
+#include "commonHeaders.hpp"
 
-#include "internals.hpp"
+VxGraphicsInstanceCreateInfo::~VxGraphicsInstanceCreateInfo()
+{    
+    vxLogInfo2("Destructor call", "Memory");
+}
 
-VkResult vxFillAvailableLayers(const upt(VxGraphicsInstance) & upGraphicsInstance)
+VxGraphicsLayer::~VxGraphicsLayer()
 {
+    vxLogInfo2("Destructor call", "Memory");
+    vkAvailableExtensions.clear();
+}
+
+VxGraphicsQueueFamily::~VxGraphicsQueueFamily()
+{
+    vxLogInfo2("Destructor call", "Memory");
+}
+
+VxGraphicsPhysicalDevice::~VxGraphicsPhysicalDevice()
+{
+    vxLogInfo2("Destructor call", "Memory");
+    spVxQueueFamilies.clear();
+    vkAvailableExtensions.clear();
+}
+
+void vxGraphicsDestroyInstance(VxGraphicsInstance * spVxGraphicsInstance)
+{
+    spVxGraphicsInstance->spVxGraphicsDebug = nullptr;
+    spVxGraphicsInstance->spVxAvailablePhysicalDevices.clear();
+    if (spVxGraphicsInstance->vkInstance != nullptr)
+    {
+        vxLogInfo2("Destroying vkInstance...", "Memory");
+        vkDestroyInstance(spVxGraphicsInstance->vkInstance, nullptr);
+        spVxGraphicsInstance->vkInstance = nullptr;
+        vxLogInfo2("vkInstance destroyed.", "Memory");
+    }
+    spVxGraphicsInstance->vkAvailableExtensions.clear();
+    spVxGraphicsInstance->spVxAvailableLayers.clear();
+    spVxGraphicsInstance->spCreateInfo = nullptr;
+}
+
+VxGraphicsInstance::~VxGraphicsInstance()
+{    
+    vxLogInfo2("Destructor call", "Memory");
+    vxGraphicsDestroyInstance(this);
+}
+
+VkResult vxGetAvailableExtensions(char* pLayerName, vector(VkExtensionProperties) & vkAvailableExtensions)
+{
+    vxLogInfo3("Getting available extensions for layer '%s'...", "Vulkan", pLayerName);
+    uint32_t extensionCount;
+    AssertVkResult(vkEnumerateInstanceExtensionProperties, pLayerName, &extensionCount, nullptr);
+    if (extensionCount > 0) 
+    {
+        vkAvailableExtensions.resize(extensionCount);
+        AssertVkResult(vkEnumerateInstanceExtensionProperties, pLayerName, &extensionCount, vkAvailableExtensions.data());
+    }
+    vxLogInfo3("Extensions found: %i for layer '%s'.", "Vulkan", extensionCount, pLayerName);
+    return VK_SUCCESS;
+}
+
+VkResult vxGetAvailableExtensions(vector(VkExtensionProperties) & vkAvailableExtensions)
+{
+    return vxGetAvailableExtensions(nullptr, vkAvailableExtensions);
+}
+
+VkResult vxGetAvailableLayers(vectorS(VxGraphicsLayer) & spVxAvailableLayers)
+{
+    vxLogInfo2("Getting available layers...", "Vulkan");
     uint32_t layerCount;
-    StoreAndAssertVkResultP(upGraphicsInstance, vkEnumerateInstanceLayerProperties, &layerCount, nullptr);
+    AssertVkResult(vkEnumerateInstanceLayerProperties, &layerCount, nullptr);
     if (layerCount > 0) 
     {
         auto availableLayers = nup(VkLayerProperties[],layerCount);
-        StoreAndAssertVkResultP(upGraphicsInstance, vkEnumerateInstanceLayerProperties, &layerCount, availableLayers.get());
-        CopyResultItems(upGraphicsInstance->vxAvailableLayers, vkLayer, VxGraphicsLayer, availableLayers, layerCount);
+        AssertVkResult(vkEnumerateInstanceLayerProperties, &layerCount, availableLayers.get());
+        CopyResultItemsSP(spVxAvailableLayers, vkLayer, VxGraphicsLayer, availableLayers, layerCount);
 
-        for (auto && vxLayer : upGraphicsInstance->vxAvailableLayers) 
+        for (auto && vxLayer : spVxAvailableLayers) 
         {
-            uint32_t extensionCount;
-            StoreAndAssertVkResult(vxLayer, vkEnumerateInstanceExtensionProperties, vxLayer.vkLayer.layerName, &extensionCount, nullptr);
-            if (extensionCount > 0) 
-            {
-                vxLayer.vkAvailableExtensions = std::vector<VkExtensionProperties>(extensionCount);
-                StoreAndAssertVkResult(vxLayer, vkEnumerateInstanceExtensionProperties, vxLayer.vkLayer.layerName, &extensionCount, vxLayer.vkAvailableExtensions.data());
-            }
+            StoreAndAssertVkResultP(vxLayer->getAvailableExtensionsResult, vxGetAvailableExtensions, vxLayer->vkLayer.layerName, vxLayer->vkAvailableExtensions);
         }
     }
+    vxLogInfo3("Layers found: %i.", "Vulkan", layerCount);
     return VK_SUCCESS;
 }
 
-VkResult vxFillAvailableExtensions(const upt(VxGraphicsInstance) & upGraphicsInstance)
+VkResult vxCreateVkInstance(const spt(VxGraphicsInstance) & spVxGraphicsInstance, VkInstance * vkInstance)
 {
-    uint32_t extensionCount;
-    StoreAndAssertVkResultP(upGraphicsInstance, vkEnumerateInstanceExtensionProperties, nullptr, &extensionCount, nullptr);
-    if (extensionCount > 0) 
-    {
-        upGraphicsInstance->vkAvailableExtensions = std::vector<VkExtensionProperties>(extensionCount);
-        StoreAndAssertVkResultP(upGraphicsInstance, vkEnumerateInstanceExtensionProperties, nullptr, &extensionCount, upGraphicsInstance->vkAvailableExtensions.data());
-    }
-    return VK_SUCCESS;
-}
-
-static bool vxQueueFamilySupportsPresentation(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex)
-{
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
-	return !!vkGetPhysicalDeviceWin32PresentationSupportKHR(physicalDevice, queueFamilyIndex);
-#else
-	return true;
-#endif
-}
-
-VkResult vxFillAvailableDevices(const upt(VxGraphicsInstance) & upGraphicsInstance)
-{
-    uint32_t deviceCount;
-    StoreAndAssertVkResultP(upGraphicsInstance, vkEnumeratePhysicalDevices, upGraphicsInstance->vkInstance, &deviceCount, nullptr);
-    if (deviceCount > 0) 
-    {
-        auto availableDevices = nup(VkPhysicalDevice[],deviceCount);
-        StoreAndAssertVkResultP(upGraphicsInstance, vkEnumeratePhysicalDevices, upGraphicsInstance->vkInstance, &deviceCount, availableDevices.get());
-        CopyResultItems(upGraphicsInstance->vxAvailablePhysicalDevices, vkPhysicalDevice, VxGraphicsPhysicalDevice, availableDevices, deviceCount);
-
-        for (auto && vxPhysicalDevice : upGraphicsInstance->vxAvailablePhysicalDevices) 
-        {
-            vxPhysicalDevice.supportsCompute = false;
-            vxPhysicalDevice.supportsGraphics = false;
-            vxPhysicalDevice.supportsPresentation = false;
-            
-            vkGetPhysicalDeviceProperties(vxPhysicalDevice.vkPhysicalDevice, &vxPhysicalDevice.vkPhysicalDeviceProperties);
-            vkGetPhysicalDeviceFeatures(vxPhysicalDevice.vkPhysicalDevice, &vxPhysicalDevice.vkPhysicalDeviceFeatures);
-
-            uint32_t queueFamilyPropertyCount;
-            vkGetPhysicalDeviceQueueFamilyProperties(vxPhysicalDevice.vkPhysicalDevice, &queueFamilyPropertyCount, nullptr);
-            if (queueFamilyPropertyCount > 0)
-            {
-                auto queueFamilyProperties = nup(VkQueueFamilyProperties[],queueFamilyPropertyCount);
-                vkGetPhysicalDeviceQueueFamilyProperties(vxPhysicalDevice.vkPhysicalDevice, &queueFamilyPropertyCount, queueFamilyProperties.get());
-                CopyResultItems(vxPhysicalDevice.vxQueueFamilies, vkQueueFamily, VxGraphicsQueueFamily, queueFamilyProperties, queueFamilyPropertyCount);
-
-                uint32_t queueFamilyIndex = 0; 
-                for (auto && vxQueueFamily : vxPhysicalDevice.vxQueueFamilies) 
-                {
-                    vxQueueFamily.queueFamilyIndex = queueFamilyIndex++;
-                    vxQueueFamily.supportsPresentation = vxQueueFamilySupportsPresentation(vxPhysicalDevice.vkPhysicalDevice, vxQueueFamily.queueFamilyIndex);
-                    vxQueueFamily.supportsCompute = vxQueueFamily.vkQueueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT;
-                    vxQueueFamily.supportsGraphics = vxQueueFamily.vkQueueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT;
-
-                    vxPhysicalDevice.supportsCompute = vxPhysicalDevice.supportsCompute | vxQueueFamily.supportsPresentation;
-                    vxPhysicalDevice.supportsGraphics = vxPhysicalDevice.supportsGraphics | vxQueueFamily.supportsCompute;
-                    vxPhysicalDevice.supportsPresentation = vxPhysicalDevice.supportsPresentation | vxQueueFamily.supportsGraphics;
-                }
-            }
-
-            uint32_t extensionCount;
-            StoreAndAssertVkResult(vxPhysicalDevice, vkEnumerateDeviceExtensionProperties, vxPhysicalDevice.vkPhysicalDevice, nullptr, &extensionCount, nullptr);
-            if (extensionCount > 0) 
-            {
-                vxPhysicalDevice.vkAvailableExtensions = std::vector<VkExtensionProperties>(extensionCount);
-                StoreAndAssertVkResult(vxPhysicalDevice, vkEnumerateDeviceExtensionProperties, vxPhysicalDevice.vkPhysicalDevice, nullptr, &extensionCount, vxPhysicalDevice.vkAvailableExtensions.data());
-            }            
-            for (auto && vxLayer : upGraphicsInstance->vxAvailableLayers) 
-            {
-                StoreAndAssertVkResult(vxPhysicalDevice, vkEnumerateDeviceExtensionProperties, vxPhysicalDevice.vkPhysicalDevice, vxLayer.vkLayer.layerName, &extensionCount, nullptr);
-                if (extensionCount > 0) 
-                {
-                    auto baseIndex = vxPhysicalDevice.vkAvailableExtensions.size();
-                    vxPhysicalDevice.vkAvailableExtensions.reserve(vxPhysicalDevice.vkAvailableExtensions.size()+extensionCount);
-                    StoreAndAssertVkResult(vxPhysicalDevice, vkEnumerateDeviceExtensionProperties, vxPhysicalDevice.vkPhysicalDevice, vxLayer.vkLayer.layerName, &extensionCount, &vxPhysicalDevice.vkAvailableExtensions[baseIndex]);
-                }            
-            }
-        }
-    }
-    return VK_SUCCESS;
-}
-
-VkResult vxCreateVkInstance(const upt(VxGraphicsInstance) & upGraphicsInstance)
-{
-    printf("\nCreating vkInstance\n");
+    vxLogInfo2("Creating Vulkan instance...", "Vulkan");
     VkInstanceCreateInfo instanceCreateInfo = { VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO };
 
     VkApplicationInfo applicationInfo;
-    applicationInfo.pApplicationName = strToNewCharArray(upGraphicsInstance->rpCreateInfo->applicationName);
-    applicationInfo.applicationVersion = upGraphicsInstance->rpCreateInfo->applicationVersion;
-    applicationInfo.pEngineName = strToNewCharArray(upGraphicsInstance->rpCreateInfo->engineName);
-    applicationInfo.engineVersion = upGraphicsInstance->rpCreateInfo->engineVersion;
-    applicationInfo.apiVersion = upGraphicsInstance->rpCreateInfo->apiVersion;
+    applicationInfo.pApplicationName = strToNewCharArray(spVxGraphicsInstance->spCreateInfo->applicationName);
+    applicationInfo.applicationVersion = spVxGraphicsInstance->spCreateInfo->applicationVersion;
+    applicationInfo.pEngineName = strToNewCharArray(spVxGraphicsInstance->spCreateInfo->engineName);
+    applicationInfo.engineVersion = spVxGraphicsInstance->spCreateInfo->engineVersion;
+    applicationInfo.apiVersion = spVxGraphicsInstance->spCreateInfo->apiVersion;
     instanceCreateInfo.pApplicationInfo = &applicationInfo;
 
+    vxLogInfo2("Checking desired layers to enable...", "Vulkan");
     auto layersToEnable = nrp(std::vector<char*>);
-    for (auto && desiredLayerToEnable : upGraphicsInstance->rpCreateInfo->desiredLayersToEnable) 
+    for (auto && desiredLayerToEnable : spVxGraphicsInstance->spCreateInfo->desiredLayersToEnable) 
     {
         auto layerSupported = false;
-        for (auto && vxLayer : upGraphicsInstance->vxAvailableLayers) 
+        for (auto && vxLayer : spVxGraphicsInstance->spVxAvailableLayers) 
         {
-            if (strcmp(desiredLayerToEnable.c_str(), vxLayer.vkLayer.layerName) == 0) 
+            if (strcmp(desiredLayerToEnable.c_str(), vxLayer->vkLayer.layerName) == 0) 
             {
                 layerSupported = true;
                 break;
@@ -138,22 +113,23 @@ VkResult vxCreateVkInstance(const upt(VxGraphicsInstance) & upGraphicsInstance)
         if (layerSupported)
         {
             layersToEnable->push_back(strToNewCharArray(desiredLayerToEnable));
-            printf("Desired Layer supported: %s\n", desiredLayerToEnable.c_str());
+            vxLogInfo3("Desired layer supported: %s.", "Vulkan", desiredLayerToEnable.c_str());
         }
         else
         {
             //TODO: Handle this
-            printf("Desired Layer not supported: %s\n", desiredLayerToEnable.c_str());
+            vxLogInfo3("Desired layer NOT supported: %s.", "Vulkan", desiredLayerToEnable.c_str());
         }
     }
     instanceCreateInfo.enabledLayerCount = layersToEnable->size();
     instanceCreateInfo.ppEnabledLayerNames = layersToEnable->data();
 
+    vxLogInfo2("Checking desired extensions to enable...", "Vulkan");
     auto extensionsToEnable = nrp(std::vector<char*>);
-    for (auto && desiredExtensionToEnable : upGraphicsInstance->rpCreateInfo->desiredExtensionsToEnable) 
+    for (auto && desiredExtensionToEnable : spVxGraphicsInstance->spCreateInfo->desiredExtensionsToEnable) 
     {
         auto extensionSupported = false;
-        for (auto && vkExtension : upGraphicsInstance->vkAvailableExtensions) 
+        for (auto && vkExtension : spVxGraphicsInstance->vkAvailableExtensions) 
         {
             if (strcmp(desiredExtensionToEnable.c_str(), vkExtension.extensionName) == 0) 
             {
@@ -164,39 +140,110 @@ VkResult vxCreateVkInstance(const upt(VxGraphicsInstance) & upGraphicsInstance)
         if (extensionSupported)
         {
             extensionsToEnable->push_back(strToNewCharArray(desiredExtensionToEnable));
-            printf("Desired Extension supported: %s\n", desiredExtensionToEnable.c_str());
+            vxLogInfo3("Desired extension supported: %s.", "Vulkan", desiredExtensionToEnable.c_str());
         }
         else
         {
             //TODO: Handle this
-            printf("Desired Extension not supported: %s\n", desiredExtensionToEnable.c_str());
+            vxLogInfo3("Desired extension NOT supported: %s.", "Vulkan", desiredExtensionToEnable.c_str());
         }
         
     }
     instanceCreateInfo.enabledExtensionCount = extensionsToEnable->size();
     instanceCreateInfo.ppEnabledExtensionNames = extensionsToEnable->data();
 
-    StoreAndAssertVkResultP(upGraphicsInstance, vkCreateInstance, &instanceCreateInfo, NULL, &upGraphicsInstance->vkInstance);
-
+    AssertVkResult(vkCreateInstance, &instanceCreateInfo, NULL, vkInstance);
+    vxLogInfo2("Vulkan Instance created.", "Vulkan");
     return VK_SUCCESS;
 }
 
-VxResult vxCreateGraphicsInstance(rpt(VxGraphicsInstanceCreateInfo) rpCreateInfo, upt(VxGraphicsInstance) & upGraphicsInstance)
+VkResult vxGetAvailablePhysicalDevices(const spt(VxGraphicsInstance) & spVxGraphicsInstance, vectorS(VxGraphicsPhysicalDevice) & spVxAvailablePhysicalDevices)
 {
-    upGraphicsInstance = nup(VxGraphicsInstance);
-    initVxGraphicsInstance(upGraphicsInstance);
-    upGraphicsInstance->rpCreateInfo = rpCreateInfo;
+    GetAndAssertSharedPointerVk(spVxGraphicsInstance, spVxGraphicsDebug->wpVxGraphicsInstance);
+    vxLogInfo2("Getting available physical devices...", "Vulkan");
+    uint32_t deviceCount;
+    AssertVkResult(vkEnumeratePhysicalDevices, spVxGraphicsInstance->vkInstance, &deviceCount, nullptr);
+    if (deviceCount > 0) 
+    {
+        auto availableDevices = nup(VkPhysicalDevice[],deviceCount);
+        AssertVkResult(vkEnumeratePhysicalDevices, spVxGraphicsInstance->vkInstance, &deviceCount, availableDevices.get());
+        CopyResultItemsSP(spVxAvailablePhysicalDevices, vkPhysicalDevice, VxGraphicsPhysicalDevice, availableDevices, deviceCount);
+        vxLogInfo3("Physical devices found: %i.", "Vulkan", deviceCount);
 
-    AssertVkVxResult(vxFillAvailableLayers, upGraphicsInstance);
-    AssertVkVxResult(vxFillAvailableExtensions, upGraphicsInstance);
-    AssertVkVxResult(vxCreateVkInstance, upGraphicsInstance);
-    AssertVkVxResult(vxCreateDebugReportCallback, upGraphicsInstance);
-    AssertVkVxResult(vxFillAvailableDevices, upGraphicsInstance);
+        vxLogInfo2("Getting physical devices properties...", "Vulkan");
+        for (auto && vxPhysicalDevice : spVxAvailablePhysicalDevices) 
+        {
+            vxPhysicalDevice->supportsCompute = false;
+            vxPhysicalDevice->supportsGraphics = false;
+            
+            vkGetPhysicalDeviceProperties(vxPhysicalDevice->vkPhysicalDevice, &vxPhysicalDevice->vkPhysicalDeviceProperties);
+            vkGetPhysicalDeviceFeatures(vxPhysicalDevice->vkPhysicalDevice, &vxPhysicalDevice->vkPhysicalDeviceFeatures);
 
-    AssertVxResult(vxCreateWindow, upGraphicsInstance);
-    AssertVkVxResult(vxCreateSurface, upGraphicsInstance);
+            vxLogInfo2("Getting physical device queue families...", "Vulkan");
+            uint32_t queueFamilyPropertyCount;
+            vkGetPhysicalDeviceQueueFamilyProperties(vxPhysicalDevice->vkPhysicalDevice, &queueFamilyPropertyCount, nullptr);
+            if (queueFamilyPropertyCount > 0)
+            {
+                auto queueFamilyProperties = nup(VkQueueFamilyProperties[],queueFamilyPropertyCount);
+                vkGetPhysicalDeviceQueueFamilyProperties(vxPhysicalDevice->vkPhysicalDevice, &queueFamilyPropertyCount, queueFamilyProperties.get());
+                CopyResultItemsSP(vxPhysicalDevice->spVxQueueFamilies, vkQueueFamily, VxGraphicsQueueFamily, queueFamilyProperties, queueFamilyPropertyCount);
 
-    //AssertVkVxResult(vxCreateDevices, upGraphicsInstance);
+                uint32_t queueFamilyIndex = 0; 
+                for (auto && vxQueueFamily : vxPhysicalDevice->spVxQueueFamilies) 
+                {
+                    vxQueueFamily->queueFamilyIndex = queueFamilyIndex++;
+                    vxQueueFamily->supportsCompute = vxQueueFamily->vkQueueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT;
+                    vxQueueFamily->supportsGraphics = vxQueueFamily->vkQueueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT;
+
+                    vxPhysicalDevice->supportsCompute = vxPhysicalDevice->supportsCompute | vxQueueFamily->supportsPresentation;
+                    vxPhysicalDevice->supportsGraphics = vxPhysicalDevice->supportsGraphics | vxQueueFamily->supportsCompute;
+                }
+            }
+            vxLogInfo3("Physical device queue families: %i", "Vulkan", queueFamilyPropertyCount);
+
+            vxLogInfo2("Getting physical device extensions...", "Vulkan");
+            uint32_t extensionCount;
+            StoreAndAssertVkResultP(vxPhysicalDevice->getAvailableExtensionResult, vkEnumerateDeviceExtensionProperties, vxPhysicalDevice->vkPhysicalDevice, nullptr, &extensionCount, nullptr);
+            if (extensionCount > 0) 
+            {
+                vxPhysicalDevice->vkAvailableExtensions = std::vector<VkExtensionProperties>(extensionCount);
+                StoreAndAssertVkResultP(vxPhysicalDevice->getAvailableExtensionResult, vkEnumerateDeviceExtensionProperties, vxPhysicalDevice->vkPhysicalDevice, nullptr, &extensionCount, vxPhysicalDevice->vkAvailableExtensions.data());
+            }            
+            for (auto && vxLayer : spVxGraphicsInstance->spVxAvailableLayers) 
+            {
+                vxPhysicalDevice->getAvailableExtensionResult = vkEnumerateDeviceExtensionProperties(vxPhysicalDevice->vkPhysicalDevice, vxLayer->vkLayer.layerName, &extensionCount, nullptr);
+                if (extensionCount > 0) 
+                {
+                    auto baseIndex = vxPhysicalDevice->vkAvailableExtensions.size();
+                    vxPhysicalDevice->vkAvailableExtensions.reserve(vxPhysicalDevice->vkAvailableExtensions.size()+extensionCount);
+                    StoreAndAssertVkResultP(vxPhysicalDevice->getAvailableExtensionResult, vkEnumerateDeviceExtensionProperties, vxPhysicalDevice->vkPhysicalDevice, vxLayer->vkLayer.layerName, &extensionCount, &vxPhysicalDevice->vkAvailableExtensions[baseIndex]);
+                }            
+            }
+            vxLogInfo3("Physical device extensions: %i.", "Vulkan", vxPhysicalDevice->vkAvailableExtensions.size());
+        }
+    }
+    return VK_SUCCESS;
+}
+
+VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo, spt(VxGraphicsInstance) & spVxGraphicsInstance)
+{
+    spVxGraphicsInstance = nsp<VxGraphicsInstance>();
+    spVxGraphicsInstance->spCreateInfo = spCreateInfo;
+    spVxGraphicsInstance->spVxGraphicsDebug = nsp<VxGraphicsDebug>();
+    spVxGraphicsInstance->spVxGraphicsDebug->wpVxGraphicsInstance = spVxGraphicsInstance;
+
+    StoreAndAssertVkResultP(spVxGraphicsInstance->getAvailableLayersResult, vxGetAvailableLayers, spVxGraphicsInstance->spVxAvailableLayers);
+    StoreAndAssertVkResultP(spVxGraphicsInstance->getAvailableExtensionsResult, vxGetAvailableExtensions, spVxGraphicsInstance->vkAvailableExtensions);
+    StoreAndAssertVkResultP(spVxGraphicsInstance->createInstanceResult, vxCreateVkInstance, spVxGraphicsInstance, &spVxGraphicsInstance->vkInstance);
+
+    AssertVkResult(vxCreateDebugReportCallback, spVxGraphicsInstance->spVxGraphicsDebug);
+
+    StoreAndAssertVkResultP(spVxGraphicsInstance->getAvailablePhysicalDevicesResult, vxGetAvailablePhysicalDevices, spVxGraphicsInstance, spVxGraphicsInstance->spVxAvailablePhysicalDevices);
+
+    //AssertVxResult(vxCreateWindow, spVxGraphicsInstance);
+    //AssertVkVxResult(vxCreateSurface, spVxGraphicsInstance, &spVxGraphicsInstance->spVxMainSurface);
+
+    //AssertVkVxResult(vxCreateDevices, spVxGraphicsInstance);
 
     //AssertVkVxResult(vxCreateSwapchain, upGraphicsInstance);
 
@@ -209,5 +256,27 @@ VxResult vxCreateGraphicsInstance(rpt(VxGraphicsInstanceCreateInfo) rpCreateInfo
     //upGraphicsInstance->acquireSemaphore = createSemaphore(upGraphicsInstance->vxDevices[0].vkDevice);
     //upGraphicsInstance->releaseSemaphore = createSemaphore(upGraphicsInstance->vxDevices[0].vkDevice);
 
-    return VxResult::VX_SUCCESS;
+    return VK_SUCCESS;
+}
+
+VkResult vxGraphicsDestroyInstance(spt(VxGraphicsInstance) & spVxGraphicsInstance)
+{
+    if (spVxGraphicsInstance != nullptr)
+    {
+        vxGraphicsDestroyInstance(spVxGraphicsInstance.get());
+        spVxGraphicsInstance = nullptr;
+    }
+    return VK_SUCCESS;
+}
+
+VkResult vxGraphicsTerminate(spt(VxGraphicsInstance) & spVxGraphicsInstance)
+{
+    vxGraphicsDestroyInstance(spVxGraphicsInstance);
+    glfwTerminate();    
+    return VK_SUCCESS;
+}
+
+VkResult vxGetVkSuccess()
+{
+    return VK_SUCCESS;
 }
