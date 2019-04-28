@@ -5,7 +5,6 @@
 
 #include <vxCommon/vxCommon.hpp>
 #include "window.hpp"
-#include "surface.hpp"
 #include "instance.hpp"
 #include "debug.hpp"
 #include "synchronization.hpp"

@@ -1,6 +1,6 @@
-#include "commonHeaders.hpp"
-
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
+
+#include "commonHeaders.hpp"
 
 VkResult vxCreateSurface_PlatformSpecific(const upt(VxGraphicsInstance) & upGraphicsInstance)
 {
@@ -12,6 +12,12 @@ VkResult vxCreateSurface_PlatformSpecific(const upt(VxGraphicsInstance) & upGrap
     createInfo.hwnd = demo->window;
     err = vkCreateWin32SurfaceKHR(demo->inst, &createInfo, NULL, &demo->surface);
 }
+
+bool vxQueueFamilySupportsPresentation(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex)
+{
+	return !!vkGetPhysicalDeviceWin32PresentationSupportKHR(physicalDevice, queueFamilyIndex);
+}
+
 
 #endif
 

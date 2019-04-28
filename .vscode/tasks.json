@@ -46,9 +46,8 @@
                 "${workspaceFolder}/src/vxGraphics/debug.cpp",
                 "${workspaceFolder}/src/vxGraphics/synchronization.cpp",
                 "${workspaceFolder}/src/vxGraphics/device.cpp",
-                "${workspaceFolder}/src/vxGraphics/surface.cpp",
-                "${workspaceFolder}/src/vxGraphics/surface_macos.cpp",
-                "${workspaceFolder}/src/vxGraphics/surface_win32.cpp",
+                "${workspaceFolder}/src/vxGraphics/macos/window.cpp",
+                "${workspaceFolder}/src/vxGraphics/win32/window.cpp",
                 
                 "-o",
                 "${workspaceFolder}/build/bin/vxGraphics/vxGraphics",

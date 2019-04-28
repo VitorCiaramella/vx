@@ -123,9 +123,6 @@ spt(VxGraphicsInstanceCreateInfo) getCreateInfo()
     spGraphicsInstanceCreateInfo->engineVersion = VX_MAKE_VERSION(0,1,0);
     spGraphicsInstanceCreateInfo->apiVersion = VK_API_VERSION_1_1;
 
-    spGraphicsInstanceCreateInfo->mainWindowWidth = 1024;
-    spGraphicsInstanceCreateInfo->mainWindowHeight = 768;
-
     #ifdef _DEBUG
     //spGraphicsInstanceCreateInfo->desiredLayersToEnable.push_back("VK_LAYER_KHRONOS_validation");
     spGraphicsInstanceCreateInfo->desiredLayersToEnable.push_back("VK_LAYER_LUNARG_standard_validation");

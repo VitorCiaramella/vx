@@ -7,6 +7,10 @@
 #include <string>
 
 #include "debug.hpp"
+#include "window.hpp"
+
+struct VxGraphicsWindowCreateInfo;
+struct VxGraphicsWindow;
 
 typedef struct VxGraphicsInstanceCreateInfo
 {
@@ -20,10 +24,9 @@ typedef struct VxGraphicsInstanceCreateInfo
     uint32_t                                desiredDeviceCount;
     uint32_t                                desiredQueueCountPerDevice;
 
-    std::vector<std::string>                shadersFilePaths;
+    spt(VxGraphicsWindowCreateInfo)         spMainWindowCreateInfo;
 
-    uint32_t                                mainWindowWidth;
-    uint32_t                                mainWindowHeight;
+    std::vector<std::string>                shadersFilePaths;
 
     ~VxGraphicsInstanceCreateInfo();
     void init()
@@ -38,8 +41,7 @@ typedef struct VxGraphicsInstanceCreateInfo
         desiredDeviceCount = 1;
         desiredQueueCountPerDevice = 1;
         shadersFilePaths.reserve(32);
-        mainWindowWidth = 1024;
-        mainWindowHeight = 768;        
+        spMainWindowCreateInfo = nsp<VxGraphicsWindowCreateInfo>();
     }
 } VxGraphicsInstanceCreateInfo;
 
@@ -121,11 +123,10 @@ typedef struct VxGraphicsInstance
     VkResult                                getAvailablePhysicalDevicesResult;
     vectorS(VxGraphicsPhysicalDevice)       spVxAvailablePhysicalDevices;
 
-
-    //spt(VxGraphicsWindow)                   spMainVxGraphicsWindow;
+    VkResult                                createMainGraphicsWindowResult;
+    spt(VxGraphicsWindow)                   spMainVxGraphicsWindow;
 
     /*
-    spt(VxGraphicsSurface)                  spVxMainSurface;
 
     VkResult                                vkCreateDeviceResult;
     std::vector<VxGraphicsDevice>           vxDevices;

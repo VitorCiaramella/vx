@@ -23,20 +23,21 @@ VxGraphicsPhysicalDevice::~VxGraphicsPhysicalDevice()
     vkAvailableExtensions.clear();
 }
 
-void vxGraphicsDestroyInstance(VxGraphicsInstance * spVxGraphicsInstance)
+void vxGraphicsDestroyInstance(VxGraphicsInstance * rpVxGraphicsInstance)
 {
-    spVxGraphicsInstance->spVxGraphicsDebug = nullptr;
-    spVxGraphicsInstance->spVxAvailablePhysicalDevices.clear();
-    if (spVxGraphicsInstance->vkInstance != nullptr)
+    rpVxGraphicsInstance->spMainVxGraphicsWindow = nullptr;
+    rpVxGraphicsInstance->spVxGraphicsDebug = nullptr;
+    rpVxGraphicsInstance->spVxAvailablePhysicalDevices.clear();
+    if (rpVxGraphicsInstance->vkInstance != nullptr)
     {
         vxLogInfo2("Destroying vkInstance...", "Memory");
-        vkDestroyInstance(spVxGraphicsInstance->vkInstance, nullptr);
-        spVxGraphicsInstance->vkInstance = nullptr;
+        vkDestroyInstance(rpVxGraphicsInstance->vkInstance, nullptr);
+        rpVxGraphicsInstance->vkInstance = nullptr;
         vxLogInfo2("vkInstance destroyed.", "Memory");
     }
-    spVxGraphicsInstance->vkAvailableExtensions.clear();
-    spVxGraphicsInstance->spVxAvailableLayers.clear();
-    spVxGraphicsInstance->spCreateInfo = nullptr;
+    rpVxGraphicsInstance->vkAvailableExtensions.clear();
+    rpVxGraphicsInstance->spVxAvailableLayers.clear();
+    rpVxGraphicsInstance->spCreateInfo = nullptr;
 }
 
 VxGraphicsInstance::~VxGraphicsInstance()
@@ -159,7 +160,7 @@ VkResult vxCreateVkInstance(const spt(VxGraphicsInstance) & spVxGraphicsInstance
 
 VkResult vxGetAvailablePhysicalDevices(const spt(VxGraphicsInstance) & spVxGraphicsInstance, vectorS(VxGraphicsPhysicalDevice) & spVxAvailablePhysicalDevices)
 {
-    GetAndAssertSharedPointerVk(spVxGraphicsInstance, spVxGraphicsDebug->wpVxGraphicsInstance);
+    AssertTrueVkResult(spVxGraphicsInstance!=nullptr);
     vxLogInfo2("Getting available physical devices...", "Vulkan");
     uint32_t deviceCount;
     AssertVkResult(vkEnumeratePhysicalDevices, spVxGraphicsInstance->vkInstance, &deviceCount, nullptr);
@@ -240,8 +241,12 @@ VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo
 
     StoreAndAssertVkResultP(spVxGraphicsInstance->getAvailablePhysicalDevicesResult, vxGetAvailablePhysicalDevices, spVxGraphicsInstance, spVxGraphicsInstance->spVxAvailablePhysicalDevices);
 
-    //AssertVxResult(vxCreateWindow, spVxGraphicsInstance);
-    //AssertVkVxResult(vxCreateSurface, spVxGraphicsInstance, &spVxGraphicsInstance->spVxMainSurface);
+    if (spVxGraphicsInstance->spCreateInfo->spMainWindowCreateInfo != nullptr)
+    {
+        StoreAndAssertVkResultP(spVxGraphicsInstance->createMainGraphicsWindowResult, vxCreateGraphicsWindow, spVxGraphicsInstance->spCreateInfo->spMainWindowCreateInfo, spVxGraphicsInstance->spMainVxGraphicsWindow);
+
+        StoreAndAssertVkResultP(spVxGraphicsInstance->spMainVxGraphicsWindow->createGraphicsSurfaceResult, vxCreateGraphicsSurface, spVxGraphicsInstance, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface);
+    }
 
     //AssertVkVxResult(vxCreateDevices, spVxGraphicsInstance);
 
