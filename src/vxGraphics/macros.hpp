@@ -20,6 +20,15 @@
         } \
     }
 
+#define AssertNotNullVkResult(object) \
+    {\
+        if (object == nullptr) \
+        { \
+            vxLogWarning3("Assert failed. #s is null.", "Memory", #object); \
+            return VK_ERROR_VALIDATION_FAILED_EXT; \
+        } \
+    }
+
 #define StoreAndAssertVkResultP(resultStorage, vkFunction, ...) \
     resultStorage = vkFunction(__VA_ARGS__); \
     if (resultStorage != VK_SUCCESS) \

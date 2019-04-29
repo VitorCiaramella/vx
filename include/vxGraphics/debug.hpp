@@ -22,8 +22,10 @@ typedef struct VxGraphicsDebug
     VkDebugReportCallbackEXT                vkDebugReportCallback;
 
     ~VxGraphicsDebug();
-    void init()
+    void destroy();
+    void init(spt(VxGraphicsInstance) spVxGraphicsInstance)
     {
+        wpVxGraphicsInstance = spVxGraphicsInstance;
         vkCreateDebugReportCallbackResult = VK_RESULT_MAX_ENUM;
         vkDebugReportCallback = nullptr;
     }

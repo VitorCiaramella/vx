@@ -8,9 +8,14 @@
 
 #include "debug.hpp"
 #include "window.hpp"
+#include "pipeline.hpp"
+
+using std::string;
 
 struct VxGraphicsWindowCreateInfo;
 struct VxGraphicsWindow;
+struct VxGraphicsPipelineCreateInfo;
+struct VxGraphicsPipeline;
 
 typedef struct VxGraphicsInstanceCreateInfo
 {
@@ -19,16 +24,14 @@ typedef struct VxGraphicsInstanceCreateInfo
     std::string                             engineName;
     uint32_t                                engineVersion;
     uint32_t                                apiVersion;
-    std::vector<std::string>                desiredLayersToEnable;
-    std::vector<std::string>                desiredExtensionsToEnable;
-    uint32_t                                desiredDeviceCount;
-    uint32_t                                desiredQueueCountPerDevice;
+    vector(string)                          desiredLayersToEnable;
+    vector(string)                          desiredExtensionsToEnable;
 
     spt(VxGraphicsWindowCreateInfo)         spMainWindowCreateInfo;
-
-    std::vector<std::string>                shadersFilePaths;
-
+    spt(VxGraphicsPipelineCreateInfo)       spVxGraphicsPipelineCreateInfo;
+    
     ~VxGraphicsInstanceCreateInfo();
+    void destroy();
     void init()
     {
         applicationName = "";
@@ -38,10 +41,8 @@ typedef struct VxGraphicsInstanceCreateInfo
         apiVersion = VK_API_VERSION_1_0;
         desiredLayersToEnable.reserve(32);
         desiredExtensionsToEnable.reserve(32);
-        desiredDeviceCount = 1;
-        desiredQueueCountPerDevice = 1;
-        shadersFilePaths.reserve(32);
         spMainWindowCreateInfo = nsp<VxGraphicsWindowCreateInfo>();
+        spVxGraphicsPipelineCreateInfo = nsp<VxGraphicsPipelineCreateInfo>();
     }
 } VxGraphicsInstanceCreateInfo;
 
@@ -53,6 +54,7 @@ typedef struct VxGraphicsLayer
     vector(VkExtensionProperties)           vkAvailableExtensions;
 
     ~VxGraphicsLayer();
+    void destroy();
     void init()
     {
         vkLayer = {};
@@ -69,6 +71,7 @@ typedef struct VxGraphicsQueueFamily
     bool                                    supportsGraphics;
 
     ~VxGraphicsQueueFamily();
+    void destroy();
     void init()
     {
         vkQueueFamily = {};
@@ -89,9 +92,10 @@ typedef struct VxGraphicsPhysicalDevice
     bool                                    supportsGraphics;
 
     VkResult                                getAvailableExtensionResult;
-    vector(VkExtensionProperties)           vkAvailableExtensions;
+    vector(VkExtensionProperties)          vkAvailableExtensions;
 
     ~VxGraphicsPhysicalDevice();
+    void destroy();
     void init()
     {
         vkPhysicalDevice = {};
@@ -126,27 +130,11 @@ typedef struct VxGraphicsInstance
     VkResult                                createMainGraphicsWindowResult;
     spt(VxGraphicsWindow)                   spMainVxGraphicsWindow;
 
-    /*
-
-    VkResult                                vkCreateDeviceResult;
-    std::vector<VxGraphicsDevice>           vxDevices;
-
-
-    VkResult                                vkGetSwapchainImagesKHRResult;
-    VxGraphicsSwapchain                     vxMainSwapchain;
-
-    VkResult                                vkCreateRenderPassResult;
-    VkRenderPass                            vkRenderPass;
-
-    std::vector<VxGraphicsShader>           vxShaders;
-
-    VxGraphicsPipelineLayout                vxPipelineLayout;
-    VxGraphicsPipeline                      vxPipeline;
-
- 
+    VkResult                                createMainGraphicsPipelineResult;
+    spt(VxGraphicsPipeline)                 spMainVxGraphicsPipeline;
+    /* 
     PFN_vxWindowLoop                        vxWindowLoopFunction;
 
-    VkExtent2D                              windowSize;
     VkResult                                vkAllocateCommandBuffersResult;
     VkCommandBuffer                         vkCommandBuffer;
 
@@ -155,7 +143,8 @@ typedef struct VxGraphicsInstance
     */
 
     ~VxGraphicsInstance();
-   void init()
+    void destroy();
+    void init()
     {
         spCreateInfo = nullptr;
 
@@ -172,6 +161,12 @@ typedef struct VxGraphicsInstance
 
         getAvailablePhysicalDevicesResult = VK_RESULT_MAX_ENUM;
         spVxAvailablePhysicalDevices.reserve(32);
+
+        createMainGraphicsWindowResult = VK_RESULT_MAX_ENUM;
+        spMainVxGraphicsWindow = nullptr;
+
+        createMainGraphicsPipelineResult = VK_RESULT_MAX_ENUM;
+        spMainVxGraphicsPipeline = nullptr;
     }
 } VxGraphicsInstance;
 

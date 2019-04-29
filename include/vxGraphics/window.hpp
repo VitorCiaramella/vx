@@ -15,7 +15,7 @@ struct VxGraphicsSurfacePhysicalDevice;
 struct VxGraphicsSurface;
 struct VxGraphicsSwapchain;
 
-typedef VxWindowLoopResult (*PFN_vxWindowLoop)(const upt(VxGraphicsInstance) & upGraphicsInstance);
+typedef VxWindowLoopResult (*PFN_vxWindowLoop)(const spt(VxGraphicsWindow) & spVxGraphicsWindow);
 
 typedef struct VxGraphicsWindowCreateInfo
 {
@@ -32,8 +32,10 @@ typedef struct VxGraphicsWindowCreateInfo
     bool                                    scaleToMonitor;
     bool                                    fullScreen;
     const char*                             title;
+    PFN_vxWindowLoop                        rpVxWindowLoopFunction;
 
     ~VxGraphicsWindowCreateInfo();
+    void destroy();
     void init()
     {
         initialWidth = 1024;
@@ -49,6 +51,7 @@ typedef struct VxGraphicsWindowCreateInfo
         scaleToMonitor = false;
         fullScreen = false;
         title = "VxGraphicsWindow";
+        rpVxWindowLoopFunction = nullptr;
     }
 } VxGraphicsWindowCreateInfo;
 
@@ -62,14 +65,19 @@ typedef struct VxGraphicsWindow
 {
     rpt(GLFWwindow)                         rpGlfwWindow;
 
+    PFN_vxWindowLoop                        rpVxWindowLoopFunction;
+
     VkResult                                createGraphicsSurfaceResult;
     spt(VxGraphicsSurface)                  spVxGraphicsSurface;
 
     ~VxGraphicsWindow();
-    void init()
+    void destroy();
+    void init(PFN_vxWindowLoop windowLoopFunction)
     {
+        rpVxWindowLoopFunction = windowLoopFunction;
         rpGlfwWindow = nullptr;
         createGraphicsSurfaceResult = VK_RESULT_MAX_ENUM;
+        spVxGraphicsSurface = nullptr;
     }
 } VxGraphicsWindow;
 
@@ -90,6 +98,7 @@ typedef struct VxGraphicsSurfacePhysicalDevice
     vector(VkPresentModeKHR)                vkPresentModes;
 
     ~VxGraphicsSurfacePhysicalDevice();
+    void destroy();
     void init()
     {
         wpVxSupportedQueueFamilies.reserve(32);
@@ -110,51 +119,88 @@ typedef struct VxGraphicsSurface
     VkResult                                        createSurfaceResult;
     VkSurfaceKHR                                    vkSurface;
 
-    vectorS(VxGraphicsSurfacePhysicalDevice)        spVxSupportedSurfaceDevices;
-    wpt(VxGraphicsSurfacePhysicalDevice)            wpVxSurfaceDevice;
+    vectorS(VxGraphicsSurfacePhysicalDevice)        spVxSupportedPhysicalDevices;
+    wpt(VxGraphicsSurfacePhysicalDevice)            wpVxSurfacePhysicalDevice;
+
+    spt(VxGraphicsDevice)                           spVxSurfaceDevice;
+
+    VkResult                                        createSwapchainResult;
+    spt(VxGraphicsSwapchain)                        spVxGraphicsSwapchain;
 
     ~VxGraphicsSurface();
-    void init()
+    void destroy();
+    void init(spt(VxGraphicsInstance) spVxGraphicsInstance, spt(VxGraphicsWindow) spVxGraphicsWindow)
     {
+        wpVxGraphicsInstance = spVxGraphicsInstance;
+        wpVxGraphicsWindow = spVxGraphicsWindow;
         createSurfaceResult = VK_RESULT_MAX_ENUM;
         vkSurface = nullptr;
-        spVxSupportedSurfaceDevices.reserve(32);
+        spVxSupportedPhysicalDevices.reserve(32);
+        spVxSurfaceDevice = nullptr;
+        createSwapchainResult = VK_RESULT_MAX_ENUM;
+        spVxGraphicsSwapchain = nullptr;
     }
 } VxGraphicsSurface;
 
 typedef struct VxGraphicsSwapchain
 {
-    VkResult                                vkCreateSwapchainKHRResult;
-    VkSwapchainKHR                          vkSwapchain;
-
     wpt(VxGraphicsSurface)                  wpVxSurface;
     wpt(VxGraphicsDevice)                   wpVxDevice;
     VkSurfaceFormatKHR                      vkFormat;
 
-    VkResult                                vkGetSwapchainImagesKHRResult;
+    VkResult                                createSwapchainResult;
+    VkSwapchainKHR                          vkSwapchain;
+
+    VkResult                                createRenderPassResult;
+    VkRenderPass                            vkRenderPass;
+
+    VkResult                                getImagesResult;
     vector(VkImage)                         vkImages;
 
-    VkResult                                vkCreateImageViewResult;
+    VkResult                                createImageViewsResult;
     vector(VkImageView)                     vkImageViews;
 
-    VkResult                                vkCreateFramebufferResult;
+    VkResult                                createFramebuffersResult;
     vector(VkFramebuffer)                   vkFramebuffers;
 
+    VkResult                                createAcquireSemaphoreResult;
+    VkSemaphore                             vkAcquireSemaphore;
+    VkResult                                createReleaseSemaphoreResult;
+    VkSemaphore                             vkReleaseSemaphore;
+
     ~VxGraphicsSwapchain();
-    void init()
+    void destroy();
+    void init(spt(VxGraphicsSurface) spVxSurface, spt(VxGraphicsDevice) spVxDevice)
     {
-        vkCreateSwapchainKHRResult = VK_RESULT_MAX_ENUM;
+        wpVxSurface = spVxSurface;
+        wpVxDevice = spVxDevice;
+        vkFormat = {};
+        createSwapchainResult = VK_RESULT_MAX_ENUM;
+        vkSwapchain = nullptr;
+        createRenderPassResult = VK_RESULT_MAX_ENUM;
+        vkRenderPass = nullptr;
+        getImagesResult = VK_RESULT_MAX_ENUM;
+        vkImages.reserve(32);
+        createImageViewsResult = VK_RESULT_MAX_ENUM;
+        vkImageViews.reserve(32);
+        createFramebuffersResult = VK_RESULT_MAX_ENUM;
+        vkFramebuffers.reserve(32);
+        createAcquireSemaphoreResult = VK_RESULT_MAX_ENUM;
+        createReleaseSemaphoreResult = VK_RESULT_MAX_ENUM;
+        vkAcquireSemaphore = nullptr;
+        vkReleaseSemaphore = nullptr;
     }
 } VxGraphicsSwapchain;
 
 VkResult vxCreateGraphicsWindow(spt(VxGraphicsWindowCreateInfo) spVxGraphicsWindowCreateInfo, spt(VxGraphicsWindow) & spVxGraphicsWindow);
+VkExtent2D vxGetWindowSize(const spt(VxGraphicsWindow) & spVxGraphicsWindow);
+VkResult vxAwaitWindowClose(const spt(VxGraphicsWindow) & spVxGraphicsWindow);
+
 VkResult vxCreateGraphicsSurface(const spt(VxGraphicsInstance) & spVxGraphicsInstance, spt(VxGraphicsSurface) & spVxGraphicsSurface);
+VkResult vxCreateSurfaceDevice(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(VxGraphicsDevice) & spVxGraphicsDevice);
+VkResult vxCreateSwapchain(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(VxGraphicsSwapchain) & spVxGraphicsSwapchain);
 
 VkResult vxCreateSurface_PlatformSpecific(const spt(VxGraphicsSurface) & spVxGraphicsSurface);
 bool vxQueueFamilySupportsPresentation_PlatformSpecific(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex);
 
-/*
-VkExtent2D vxGetWindowSize(const upt(VxGraphicsInstance) & upGraphicsInstance);
-VkResult vxAwaitWindowClose(const upt(VxGraphicsInstance) & upGraphicsInstance);
-*/
 #endif

@@ -9,7 +9,7 @@
             "command": "/Library/Developer/CommandLineTools/usr/bin/clang++",
             "args": [
                 "-std=c++17",
-                "-isystem/Library/Developer/CommandLineTools/usr/include",
+                //"-isystem/Library/Developer/CommandLineTools/usr/include",
                 "-stdlib=libc++",
                 
                 "-DVK_USE_PLATFORM_MACOS_MVK",
@@ -35,11 +35,11 @@
                 "-lglfw3",
 
                 "-I${workspaceFolder}/extern/vulkansdk/macos/macOS/include",
-                "${workspaceFolder}/build/bin/vxGraphics/libvulkan.1.dylib",
+                "$VULKAN_SDK/lib/libvulkan.1.dylib",
 
                 "${workspaceFolder}/src/vxCommon/debug.cpp",
 
-                "${workspaceFolder}/src/vxGraphics/functions.cpp",
+                "${workspaceFolder}/src/vxGraphics/pipeline.cpp",
                 "${workspaceFolder}/src/vxGraphics/main.cpp",
                 "${workspaceFolder}/src/vxGraphics/instance.cpp",
                 "${workspaceFolder}/src/vxGraphics/window.cpp",
@@ -63,7 +63,7 @@
             "args": [
                 "-change",
                 "'@rpath/libvulkan.1.dylib'",
-                "'@executable_path/libvulkan.1.dylib'",
+                "'@executable_path/vulkan/lib/libvulkan.1.dylib'",
                 "${workspaceFolder}/build/bin/vxGraphics/vxGraphics",
             ],
             "dependsOn": ["BuildWithClang"],
@@ -75,7 +75,7 @@
             "args": [
                 "-fshader-stage=vert",                
                 "-o",
-                "${workspaceFolder}/build/bin/vxGraphics/triangle.vert.spv",
+                "${workspaceFolder}/build/bin/vxGraphics/shaders/triangle.vert.spv",
                 "${workspaceFolder}/src/vxGraphics/shaders/triangle.vert.glsl",
             ],
         },
@@ -86,7 +86,7 @@
             "args": [
                 "-fshader-stage=frag",                
                 "-o",
-                "${workspaceFolder}/build/bin/vxGraphics/triangle.frag.spv",
+                "${workspaceFolder}/build/bin/vxGraphics/shaders/triangle.frag.spv",
                 "${workspaceFolder}/src/vxGraphics/shaders/triangle.frag.glsl",
             ],
         },
@@ -96,7 +96,8 @@
         },
         {
             "label": "Build",
-            "dependsOn": ["BuildShaders", "FixVulkanLibPath"],
+            //"dependsOn": ["BuildShaders", "FixVulkanLibPath"],
+            "dependsOn": ["BuildShaders", "BuildWithClang"],
             "group": {
                 "kind": "build",
                 "isDefault": true

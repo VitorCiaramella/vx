@@ -1,52 +1,87 @@
 #include "commonHeaders.hpp"
 
+void VxGraphicsInstanceCreateInfo::destroy()
+{    
+    vxLogInfo2("Destroy call", "Memory");
+    AssertNotNull(this);
+}
+
 VxGraphicsInstanceCreateInfo::~VxGraphicsInstanceCreateInfo()
 {    
     vxLogInfo2("Destructor call", "Memory");
+    destroy();
+}
+
+void VxGraphicsLayer::destroy()
+{    
+    vxLogInfo2("Destroy call", "Memory");
+    AssertNotNull(this);
+    vkAvailableExtensions.clear();
 }
 
 VxGraphicsLayer::~VxGraphicsLayer()
 {
     vxLogInfo2("Destructor call", "Memory");
-    vkAvailableExtensions.clear();
+    destroy();
+}
+
+void VxGraphicsQueueFamily::destroy()
+{    
+    vxLogInfo2("Destroy call", "Memory");
+    AssertNotNull(this);
 }
 
 VxGraphicsQueueFamily::~VxGraphicsQueueFamily()
 {
     vxLogInfo2("Destructor call", "Memory");
+    destroy();
+}
+
+void VxGraphicsPhysicalDevice::destroy()
+{    
+    vxLogInfo2("Destroy call", "Memory");
+    AssertNotNull(this);
+    spVxQueueFamilies.clear();
+    vkAvailableExtensions.clear();
 }
 
 VxGraphicsPhysicalDevice::~VxGraphicsPhysicalDevice()
 {
     vxLogInfo2("Destructor call", "Memory");
-    spVxQueueFamilies.clear();
-    vkAvailableExtensions.clear();
+    destroy();
 }
 
-void vxGraphicsDestroyInstance(VxGraphicsInstance * rpVxGraphicsInstance)
+void VxGraphicsInstance::destroy()
 {
-    rpVxGraphicsInstance->spMainVxGraphicsWindow = nullptr;
-    rpVxGraphicsInstance->spVxGraphicsDebug = nullptr;
-    rpVxGraphicsInstance->spVxAvailablePhysicalDevices.clear();
-    if (rpVxGraphicsInstance->vkInstance != nullptr)
+    vxLogInfo2("Destroy call", "Memory");
+    AssertNotNull(this);
+    spMainVxGraphicsPipeline->destroy();
+    spMainVxGraphicsPipeline = nullptr;
+    spMainVxGraphicsWindow->destroy();
+    spMainVxGraphicsWindow = nullptr;
+    spVxGraphicsDebug->destroy();
+    spVxGraphicsDebug = nullptr;
+    spVxAvailablePhysicalDevices.clear();
+    if (vkInstance != nullptr)
     {
         vxLogInfo2("Destroying vkInstance...", "Memory");
-        vkDestroyInstance(rpVxGraphicsInstance->vkInstance, nullptr);
-        rpVxGraphicsInstance->vkInstance = nullptr;
+        vkDestroyInstance(vkInstance, nullptr);
+        vkInstance = nullptr;
         vxLogInfo2("vkInstance destroyed.", "Memory");
     }
-    rpVxGraphicsInstance->vkAvailableExtensions.clear();
-    rpVxGraphicsInstance->spVxAvailableLayers.clear();
-    rpVxGraphicsInstance->spCreateInfo = nullptr;
+    vkAvailableExtensions.clear();
+    spVxAvailableLayers.clear();
+    spCreateInfo->destroy();
+    spCreateInfo = nullptr;
 }
 
 VxGraphicsInstance::~VxGraphicsInstance()
 {    
     vxLogInfo2("Destructor call", "Memory");
-    vxGraphicsDestroyInstance(this);
+    destroy();
 }
 
-VkResult vxGetAvailableExtensions(char* pLayerName, vector(VkExtensionProperties) & vkAvailableExtensions)
+VkResult vxGetAvailableExtensions(char* pLayerName, std::vector<VkExtensionProperties> & vkAvailableExtensions)
 {
     vxLogInfo3("Getting available extensions for layer '%s'...", "Vulkan", pLayerName);
     uint32_t extensionCount;
@@ -160,7 +195,7 @@ VkResult vxCreateVkInstance(const spt(VxGraphicsInstance) & spVxGraphicsInstance
 
 VkResult vxGetAvailablePhysicalDevices(const spt(VxGraphicsInstance) & spVxGraphicsInstance, vectorS(VxGraphicsPhysicalDevice) & spVxAvailablePhysicalDevices)
 {
-    AssertTrueVkResult(spVxGraphicsInstance!=nullptr);
+    AssertNotNullVkResult(spVxGraphicsInstance);
     vxLogInfo2("Getting available physical devices...", "Vulkan");
     uint32_t deviceCount;
     AssertVkResult(vkEnumeratePhysicalDevices, spVxGraphicsInstance->vkInstance, &deviceCount, nullptr);
@@ -230,8 +265,7 @@ VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo
 {
     spVxGraphicsInstance = nsp<VxGraphicsInstance>();
     spVxGraphicsInstance->spCreateInfo = spCreateInfo;
-    spVxGraphicsInstance->spVxGraphicsDebug = nsp<VxGraphicsDebug>();
-    spVxGraphicsInstance->spVxGraphicsDebug->wpVxGraphicsInstance = spVxGraphicsInstance;
+    spVxGraphicsInstance->spVxGraphicsDebug = nsp<VxGraphicsDebug>(spVxGraphicsInstance);
 
     StoreAndAssertVkResultP(spVxGraphicsInstance->getAvailableLayersResult, vxGetAvailableLayers, spVxGraphicsInstance->spVxAvailableLayers);
     StoreAndAssertVkResultP(spVxGraphicsInstance->getAvailableExtensionsResult, vxGetAvailableExtensions, spVxGraphicsInstance->vkAvailableExtensions);
@@ -246,16 +280,17 @@ VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo
         StoreAndAssertVkResultP(spVxGraphicsInstance->createMainGraphicsWindowResult, vxCreateGraphicsWindow, spVxGraphicsInstance->spCreateInfo->spMainWindowCreateInfo, spVxGraphicsInstance->spMainVxGraphicsWindow);
 
         StoreAndAssertVkResultP(spVxGraphicsInstance->spMainVxGraphicsWindow->createGraphicsSurfaceResult, vxCreateGraphicsSurface, spVxGraphicsInstance, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface);
+
+        StoreAndAssertVkResultP(spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->createSurfaceResult, vxCreateSurfaceDevice, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice);
+
+        StoreAndAssertVkResultP(spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->createSwapchainResult, vxCreateSwapchain, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain);
+
+        if (spVxGraphicsInstance->spCreateInfo != nullptr)
+        {
+            StoreAndAssertVkResultP(spVxGraphicsInstance->createMainGraphicsPipelineResult, vxCreatePipeline, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface, spVxGraphicsInstance->spCreateInfo->spVxGraphicsPipelineCreateInfo, spVxGraphicsInstance->spMainVxGraphicsPipeline);
+        }
     }
-
-    //AssertVkVxResult(vxCreateDevices, spVxGraphicsInstance);
-
-    //AssertVkVxResult(vxCreateSwapchain, upGraphicsInstance);
-
-    //AssertVkVxResult(vxLoadShaders, upGraphicsInstance);
-    //AssertVkVxResult(vxCreatePipelineLayout, upGraphicsInstance);
-    //AssertVkVxResult(vxCreatePipeline, upGraphicsInstance);
-
+    
     //TODO: parametrize
     //AssertVkVxResult(vxAllocateCommandBuffer, upGraphicsInstance, upGraphicsInstance->vkCommandBuffer);
     //upGraphicsInstance->acquireSemaphore = createSemaphore(upGraphicsInstance->vxDevices[0].vkDevice);
@@ -268,9 +303,15 @@ VkResult vxGraphicsDestroyInstance(spt(VxGraphicsInstance) & spVxGraphicsInstanc
 {
     if (spVxGraphicsInstance != nullptr)
     {
-        vxGraphicsDestroyInstance(spVxGraphicsInstance.get());
+        spVxGraphicsInstance->destroy();
         spVxGraphicsInstance = nullptr;
     }
+    return VK_SUCCESS;
+}
+
+VkResult vxGraphicsRun(const spt(VxGraphicsInstance) & spVxGraphicsInstance)
+{
+    AssertVkResult(vxAwaitWindowClose, spVxGraphicsInstance->spMainVxGraphicsWindow);
     return VK_SUCCESS;
 }
 

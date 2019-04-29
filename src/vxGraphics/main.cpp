@@ -24,25 +24,25 @@ VkImageMemoryBarrier imageBarrier(VkImage image, VkAccessFlags srcAccessMask, Vk
 	return result;
 }
 
-/*
-VxWindowLoopResult windowLoop(const upt(VxGraphicsInstance) & upGraphicsInstance)
+VxWindowLoopResult windowLoop(const spt(VxGraphicsWindow) & spVxGraphicsWindow)
 {
-    if (upGraphicsInstance->acquireSemaphore == nullptr)
+    if (spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkAcquireSemaphore == nullptr)
     {
         return VxWindowLoopResult::VX_WL_STOP;
     }
-    auto commandBuffer = upGraphicsInstance->vkCommandBuffer;
-    auto device = upGraphicsInstance->vxDevices[0].vkDevice;
-    auto swapchain = upGraphicsInstance->vxMainSwapchain.vkSwapchain;
-    auto swapchainFramebuffers = upGraphicsInstance->vxMainSwapchain.vkFramebuffers;
-    auto swapchainImages = upGraphicsInstance->vxMainSwapchain.vkImages;    
-    auto commandPool = upGraphicsInstance->vxDevices[0].vxQueueFamilies[0].vkCommandPool; 
-    auto queue = upGraphicsInstance->vxDevices[0].vxQueues[0].vkQueue;
-    auto renderPass = upGraphicsInstance->vkRenderPass;
-    auto windowSize = upGraphicsInstance->windowSize;
-    auto acquireSemaphore = upGraphicsInstance->acquireSemaphore;
-    auto releaseSemaphore = upGraphicsInstance->releaseSemaphore;
-    auto trianglePipeline = upGraphicsInstance->vxPipeline.vkPipeline;
+    GetAndAssertSharedPointer2(spVxGraphicsInstance, spVxGraphicsWindow->spVxGraphicsSurface->wpVxGraphicsInstance, VxWindowLoopResult::VX_WL_STOP);
+    auto commandBuffer = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->spVxQueueFamilies[0]->vkCommandBuffer;
+    auto device = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->vkDevice;
+    auto swapchain = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkSwapchain;
+    auto swapchainFramebuffers = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkFramebuffers;
+    auto swapchainImages = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkImages;    
+    auto commandPool = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->spVxQueueFamilies[0]->vkCommandPool; 
+    auto queue = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->spVxQueues[0]->vkQueue;
+    auto renderPass = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkRenderPass;
+    auto windowSize = vxGetWindowSize(spVxGraphicsWindow);
+    auto acquireSemaphore = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkAcquireSemaphore;
+    auto releaseSemaphore = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkReleaseSemaphore;
+    auto trianglePipeline = spVxGraphicsInstance->spMainVxGraphicsPipeline->vkPipeline;
 
     uint32_t imageIndex = 0;
     AssertVkResultVxWindowLoop(vkAcquireNextImageKHR, device, swapchain, ~0ull, acquireSemaphore, VK_NULL_HANDLE, &imageIndex);
@@ -112,7 +112,6 @@ VxWindowLoopResult windowLoop(const upt(VxGraphicsInstance) & upGraphicsInstance
 
     return VxWindowLoopResult::VX_WL_CONTINUE;
 }
-*/
 
 spt(VxGraphicsInstanceCreateInfo) getCreateInfo()
 {
@@ -125,7 +124,9 @@ spt(VxGraphicsInstanceCreateInfo) getCreateInfo()
 
     #ifdef _DEBUG
     //spGraphicsInstanceCreateInfo->desiredLayersToEnable.push_back("VK_LAYER_KHRONOS_validation");
+    //spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     spGraphicsInstanceCreateInfo->desiredLayersToEnable.push_back("VK_LAYER_LUNARG_standard_validation");
+    spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
     #endif
 
     spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
@@ -145,16 +146,11 @@ spt(VxGraphicsInstanceCreateInfo) getCreateInfo()
     #ifdef VK_USE_PLATFORM_WIN32_KHR
     spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
     #endif
-    #ifdef _DEBUG
-    //spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-    spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-    #endif
 
-    spGraphicsInstanceCreateInfo->desiredDeviceCount = 1;
-    spGraphicsInstanceCreateInfo->desiredQueueCountPerDevice = 1;
+	spGraphicsInstanceCreateInfo->spVxGraphicsPipelineCreateInfo->shadersFilePaths.push_back("shaders/triangle.vert.spv");
+	spGraphicsInstanceCreateInfo->spVxGraphicsPipelineCreateInfo->shadersFilePaths.push_back("shaders/triangle.frag.spv");
 
-	spGraphicsInstanceCreateInfo->shadersFilePaths.push_back("triangle.vert.spv");
-	spGraphicsInstanceCreateInfo->shadersFilePaths.push_back("triangle.frag.spv");
+    spGraphicsInstanceCreateInfo->spMainWindowCreateInfo->rpVxWindowLoopFunction = &windowLoop;
 
     return spGraphicsInstanceCreateInfo;
 }
@@ -165,10 +161,8 @@ VkResult createInstanceAndRun()
     spt(VxGraphicsInstance) spVxGraphicsInstance;
     AssertVkResult(vxCreateGraphicsInstance, spGraphicsInstanceCreateInfo, spVxGraphicsInstance);
     
-    /*
-    upGraphicsInstance->vxWindowLoopFunction = &windowLoop;
-    vxGraphicsRun(upGraphicsInstance);    
-    */
+    AssertVkResult(vxGraphicsRun, spVxGraphicsInstance);    
+    
     AssertVkResult(vxGraphicsDestroyInstance, spVxGraphicsInstance);
     AssertVkResult(vxGraphicsTerminate, spVxGraphicsInstance);
 

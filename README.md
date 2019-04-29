@@ -42,7 +42,7 @@ Vulkan SDK
 https://vulkan.lunarg.com/sdk/home
 
     /etc/profile
-    export VULKAN_SDK=/Users/vitorciaramella/Documents/GitHub/vx/extern/vulkansdk-macos-1.1.106.0/macOS
+    export VULKAN_SDK=/Users/vitorciaramella/Documents/GitHub/vx/extern/vulkansdk/macos/macOS
     export PATH=$VULKAN_SDK/bin:$PATH
     export DYLD_LIBRARY_PATH=$VULKAN_SDK/lib:$DYLD_LIBRARY_PATH
     export VK_ICD_FILENAMES=$VULKAN_SDK/etc/vulkan/icd.d/MoltenVK_icd.json

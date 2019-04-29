@@ -38,11 +38,11 @@
 #define nwp(objectType,...) std::weak_ptr<objectType>(__VA_ARGS__)
 //#define nsp(objectType,...) std::make_shared<objectType>(__VA_ARGS__)
 
-template <typename objectType>
-std::shared_ptr<objectType> nsp() 
+template <typename objectType, typename... Args>
+std::shared_ptr<objectType> nsp(Args... args) 
 {
     auto obj = std::make_shared<objectType>();
-    obj->init();
+    obj->init(args...);
     return obj;
 }
 
@@ -51,6 +51,14 @@ std::shared_ptr<objectType> nsp()
     { \
         vxLogWarning3("Trying to access expired pointer %s", "Memory", #wpObject); \
         return; \
+    } \
+    auto variable = wpObject.lock(); 
+
+#define GetAndAssertSharedPointer2(variable, wpObject, returnValue) \
+    if (wpObject.expired()) \
+    { \
+        vxLogWarning3("Trying to access expired pointer %s", "Memory", #wpObject); \
+        return returnValue; \
     } \
     auto variable = wpObject.lock(); 
 
@@ -63,14 +71,23 @@ std::shared_ptr<objectType> nsp()
         } \
     }
 
-//vectors
-#define vector(object) std::vector<object>
-#define vectorR(object) std::vector<rpt(object)>
-#define vectorS(object) std::vector<spt(object)>
-#define vectorU(object) std::vector<upt(object)>
-#define vectorW(object) std::vector<wpt(object)>
-#define nvectorU(object,...) std::vector<upt(object)>(__VA_ARGS__)
-#define nvectorS(object,...) std::vector<spt(object)>(__VA_ARGS__)
+#define AssertNotNull(object) \
+    {\
+        if (object == nullptr) \
+        { \
+            vxLogWarning3("Assert failed. #s is null.", "Memory", #object); \
+            return; \
+        } \
+    }
+
+#define AssertNotNull(object) \
+    {\
+        if (object == nullptr) \
+        { \
+            vxLogWarning3("Assert failed. #s is null.", "Memory", #object); \
+            return; \
+        } \
+    }
 
 #define AssertVxResult(vxFunction, ...) \
     {\
@@ -80,6 +97,74 @@ std::shared_ptr<objectType> nsp()
             return vxresult; \
         } \
     }
+
+//vectors
+#define vector(value_type) std::vector<value_type>
+#define vectorR(value_type) std::vector<rpt(value_type)>
+#define vectorW(value_type) std::vector<std::weak_ptr<value_type>>
+#define vectorS(value_type) vectorOfSharedPointers<value_type>
+
+template <typename value_type>
+struct vectorOfSharedPointers
+{
+    private:
+        std::vector<std::shared_ptr<value_type>> storage;
+    public:
+        typedef typename std::vector<std::shared_ptr<value_type>>::iterator              iterator;
+        typedef typename std::vector<const std::shared_ptr<value_type>>::iterator        const_iterator;
+        typedef typename std::shared_ptr<value_type>                                     &reference;
+        typedef typename std::shared_ptr<value_type>                              const  &const_reference;
+
+        void push_back(const std::shared_ptr<value_type>& val)
+        {
+            storage.push_back(val);
+        }
+        void push_back(std::shared_ptr<value_type>&& val)
+        {
+            storage.push_back(val);
+        }
+        void clear() noexcept
+        {
+            for (auto && item : storage)
+            {
+                item->destroy();
+            }
+            storage.clear();
+        }
+        void reserve(size_t n)
+        {            
+            storage.reserve(n);
+        }
+        void resize(size_t n)
+        {            
+            storage.resize(n);
+        }
+        reference operator[] (size_t n)
+        {
+            return storage[n];
+        }
+        const_reference operator[] (size_t n) const
+        {
+            return storage[n];
+        }
+        iterator begin() noexcept
+        {            
+            return storage.begin();
+        }
+        const_iterator cbegin() const noexcept
+        {
+            return storage.cbegin();
+        }
+        iterator end() noexcept
+        {
+            return storage.end();
+        }
+        const_iterator cend() const noexcept
+        {
+            return storage.cend();
+        }
+
+};
 
 #define arraySize(array) (sizeof(array) / sizeof((array)[0]))
 

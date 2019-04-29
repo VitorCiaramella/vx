@@ -9,5 +9,6 @@
 #include "debug.hpp"
 #include "synchronization.hpp"
 #include "device.hpp"
+#include "pipeline.hpp"
 
 #endif

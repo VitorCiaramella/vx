@@ -6,6 +6,21 @@
 #include <string>
 
 #include "device.hpp"
+#include "window.hpp"
+
+struct VxGraphicsSurface;
+
+typedef struct VxGraphicsPipelineCreateInfo
+{
+    vector(std::string)                     shadersFilePaths;
+
+    ~VxGraphicsPipelineCreateInfo();
+    void destroy();
+    void init()
+    {
+        shadersFilePaths.reserve(32);
+    }
+} VxGraphicsPipelineCreateInfo;
 
 typedef struct VxGraphicsShader
 {
@@ -15,34 +30,48 @@ typedef struct VxGraphicsShader
     VkResult                                vxLoadShaderResult;
     VkShaderModule                          vkShaderModule;
 
+    ~VxGraphicsShader();
+    void destroy();
+    void init(spt(VxGraphicsDevice) spVxGraphicsDevice)
+    {
+        wpVxDevice = spVxGraphicsDevice;
+        filePath = "";        
+        vxLoadShaderResult = VK_RESULT_MAX_ENUM;
+        vkShaderModule = nullptr;
+    }
 } VxGraphicsShader;
-#define initVxGraphicsShader(object) \
-    object->vkCreateShaderModuleResult = VK_RESULT_MAX_ENUM; \
-
-typedef struct VxGraphicsPipelineLayout
-{
-    wpt(VxGraphicsDevice)                   wpVxDevice;
-
-    VkResult                                vkCreatePipelineLayoutResult;
-    VkPipelineLayout                        vkPipelineLayout;
-
-} VxGraphicsPipelineLayout;
-#define initVxGraphicsPipelineLayout(object) \
-    object->vkCreatePipelineLayoutResult = VK_RESULT_MAX_ENUM; \
 
 typedef struct VxGraphicsPipeline
 {
     wpt(VxGraphicsDevice)                   wpVxDevice;
-    wpt(VxGraphicsPipelineLayout)           wpVxPipelineLayout;
     VkRenderPass                            vkRenderPass;
     VkPipelineCache                         vkPipelineCache;
 
-    VkResult                                vkCreateGraphicsPipelinesResult;
+    VkResult                                createPipelineLayoutResult;
+    VkPipelineLayout                        vkPipelineLayout;
+
+    VkResult                                createPipelineResult;
     VkPipeline                              vkPipeline;
 
-} VxGraphicsPipeline;
-#define initVxGraphicsPipeline(object) \
-    object->vkCreateGraphicsPipelinesResult = VK_RESULT_MAX_ENUM; \
+    VkResult                                loadShaderdResult;
+    vectorS(VxGraphicsShader)               spVxGraphicsShaders;
 
+    ~VxGraphicsPipeline();
+    void destroy();
+    void init(spt(VxGraphicsDevice) spVxGraphicsDevice, VkRenderPass renderPass)
+    {
+        wpVxDevice = spVxGraphicsDevice;
+        vkRenderPass = renderPass;
+        vkPipelineCache = nullptr;
+        createPipelineLayoutResult = VK_RESULT_MAX_ENUM;
+        vkPipelineLayout = nullptr;
+        createPipelineResult = VK_RESULT_MAX_ENUM;
+        vkPipeline = nullptr;
+        loadShaderdResult = VK_RESULT_MAX_ENUM;
+        spVxGraphicsShaders.reserve(32);
+    }
+} VxGraphicsPipeline;
+
+VkResult vxCreatePipeline(const spt(VxGraphicsSurface) & spVxGraphicsSurface, const spt(VxGraphicsPipelineCreateInfo) & spCreateInfo, spt(VxGraphicsPipeline) & spVxGraphicsPipeline);
 
 #endif
