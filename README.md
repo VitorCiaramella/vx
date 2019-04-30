@@ -78,6 +78,10 @@ build creation
 cmake -S ./src -B ./build -G Ninja 
 
 
+GIT after initial pull
+git submodule init
+?git submodule pull recursive
+
 BOOST
 ./bootstrap.sh --with-toolset=clang --prefix=../../build/bin/boost --exec-prefix=../../build/bin/boost
 ./b2 clean

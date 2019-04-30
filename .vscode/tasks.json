@@ -72,10 +72,15 @@
 
                 "-v",//verbose
                 "-g",//debug
-                "-L${workspaceFolder}/build/bin/boost/lib",
-                "-lboost_system",
-                "-lboost_filesystem",
-                "-lboost_thread-mt",
+                //"-L${workspaceFolder}/build/bin/boost/lib",
+                //"-lboost_system",
+                //"-lboost_filesystem",
+                //"-lboost_process",
+                //"-lboost_thread-mt",
+                "${workspaceFolder}/build/bin/boost/lib/libboost_filesystem-mt-d-x64.a",
+                "${workspaceFolder}/build/bin/boost/lib/libboost_chrono-mt-d-x64.a",
+                "${workspaceFolder}/build/bin/boost/lib/libboost_system-mt-d-x64.a",
+                "${workspaceFolder}/build/bin/boost/lib/libboost_thread-mt-d-x64.a",
 
                 "-I${workspaceFolder}/build/bin/boost/include",
 
