@@ -13,3 +13,6 @@
 [submodule "extern/Vulkan-Tools"]
 	path = extern/Vulkan-Tools
 	url = https://github.com/KhronosGroup/Vulkan-Tools.git
+[submodule "extern/meshoptimizer"]
+	path = extern/meshoptimizer
+	url = https://github.com/zeux/meshoptimizer.git
