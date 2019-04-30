@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [        
+        /*
         {
             "name": "clang++ build and debug active file",
             "type": "cppdbg",
@@ -21,6 +22,26 @@
             "MIMode": "lldb",
             "preLaunchTask": "Build",
             "postDebugTask": "postdebugKill",
+            "logging": {
+                "trace": true,
+                "traceResponse": true,
+                "engineLogging": true
+            }
+        },
+        */
+        {
+            "name": "clang++ build and debug active file",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bin/vxBuild/vxBuild",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build/bin/vxBuild",
+            "environment": [
+            ],
+            "externalConsole": true,
+            "MIMode": "lldb",
+            "preLaunchTask": "Build",
             "logging": {
                 "trace": true,
                 "traceResponse": true,

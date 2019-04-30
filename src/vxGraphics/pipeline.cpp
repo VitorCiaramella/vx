@@ -1,5 +1,7 @@
 #include "commonHeaders.hpp"
 
+//#include <boost/filesystem.hpp>
+
 void VxGraphicsPipelineCreateInfo::destroy()
 {
     vxLogInfo2("Destroy call", "Memory");
@@ -57,28 +59,32 @@ VxGraphicsPipeline::~VxGraphicsPipeline()
 
 VkResult vxLoadShader(VkDevice device, std::string filePath, VkShaderModule * shaderModule)
 {
+	//printf(boost::filesystem::current_path().c_str());
+
 	FILE* file = fopen(filePath.c_str(), "rb");
-	assert(file);
+	AssertNotNullVkResult(file);
 
 	fseek(file, 0, SEEK_END);
 	long length = ftell(file);
-	assert(length >= 0);
+	AssertTrueVkResult(length >= 0);
 	fseek(file, 0, SEEK_SET);
 
 	char* buffer = new char[length];
-	assert(buffer);
+	AssertNotNullVkResult(buffer);
 
 	size_t rc = fread(buffer, 1, length, file);
-	assert(rc == size_t(length));
+	AssertTrueVkResult(rc == size_t(length));
 	fclose(file);
 
 	VkShaderModuleCreateInfo createInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
 	createInfo.codeSize = length;
 	createInfo.pCode = reinterpret_cast<const uint32_t*>(buffer);
-
+	
 	auto vkResult = vkCreateShaderModule(device, &createInfo, 0, shaderModule);
 
 	delete[] buffer;
+
+	AssertTrueVkResult(vkResult == VK_SUCCESS);
 
 	return vkResult;
 }

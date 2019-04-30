@@ -6,6 +6,7 @@
                 "/Library/Developer/CommandLineTools/usr/include",
                 "${workspaceFolder}/extern/vulkansdk/macos/macOS/include/**",
                 "${workspaceFolder}/extern/glfw/include/**",
+                "${workspaceFolder}/extern/boost/boost/**",
                 "${workspaceFolder}/include/**",
                 "${workspaceFolder}/src/**"
             ],

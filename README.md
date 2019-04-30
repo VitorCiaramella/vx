@@ -61,3 +61,30 @@ rm -rf "$(getconf DARWIN_USER_CACHE_DIR)/org.llvm.clang/ModuleCache"
 3) Update "compilerPath" in .vscode/c_cpp_properties.json
 https://code.visualstudio.com/docs/cpp/config-clang-mac
 
+
+
+
+build
+http://www.bitsnbites.eu/faster-c-builds/
+If you use CMake as your main build tool (you probably should), simply specify a Ninja-based generator (e.g. cmake -G Ninja path/to/source).
+
+brew install ccache
+
+export PATH=/usr/lib/ccache:$PATH
+
+
+
+build creation
+cmake -S ./src -B ./build -G Ninja 
+
+
+BOOST
+./bootstrap.sh --with-toolset=clang --prefix=../../build/bin/boost --exec-prefix=../../build/bin/boost
+./b2 clean
+./b2 install --build-type=complete --build-dir=../../build/bin/boost/build toolset=clang cxxflags="-DBOOST_SYSTEM_NO_DEPRECATED -stdlib=libc++ -std=c++17" linkflags="-stdlib=libc++" --layout=tagged 
+
+
+copy from /Library/Developer/CommandLineTools/usr/bin/clang
+to /usr/bin/
+
+-DBOOST_SYSTEM_NO_DEPRECATED

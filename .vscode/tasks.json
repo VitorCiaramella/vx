@@ -30,7 +30,10 @@
 
                 "-I${workspaceFolder}/include",
 
+                "-I${workspaceFolder}/extern/boost/boost",
+
                 "-I${workspaceFolder}/extern/glfw/include",
+
                 "-L${workspaceFolder}/build/bin/glfw/src",
                 "-lglfw3",
 
@@ -51,6 +54,35 @@
                 
                 "-o",
                 "${workspaceFolder}/build/bin/vxGraphics/vxGraphics",
+            ],
+            "options": {
+              "cwd": "/Library/Developer/CommandLineTools/usr/bin"
+            },
+        },
+        {
+            "type": "shell",
+            "label": "BuildWithClang2",
+            "command": "/Library/Developer/CommandLineTools/usr/bin/clang++",
+            "args": [
+                "-std=c++17",
+                //"-isystem/Library/Developer/CommandLineTools/usr/include",
+                "-stdlib=libc++",
+                
+                "-D_DEBUG",
+
+                "-v",//verbose
+                "-g",//debug
+                "-L${workspaceFolder}/build/bin/boost/lib",
+                "-lboost_system",
+                "-lboost_filesystem",
+                "-lboost_thread-mt",
+
+                "-I${workspaceFolder}/build/bin/boost/include",
+
+                "${workspaceFolder}/src/vxBuild/main.cpp",
+
+                "-o",
+                "${workspaceFolder}/build/bin/vxBuild/vxBuild",
             ],
             "options": {
               "cwd": "/Library/Developer/CommandLineTools/usr/bin"
@@ -97,7 +129,8 @@
         {
             "label": "Build",
             //"dependsOn": ["BuildShaders", "FixVulkanLibPath"],
-            "dependsOn": ["BuildShaders", "BuildWithClang"],
+            //"dependsOn": ["BuildShaders", "BuildWithClang"],
+            "dependsOn": ["BuildWithClang2"],
             "group": {
                 "kind": "build",
                 "isDefault": true

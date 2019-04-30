@@ -75,16 +75,7 @@ std::shared_ptr<objectType> nsp(Args... args)
     {\
         if (object == nullptr) \
         { \
-            vxLogWarning3("Assert failed. #s is null.", "Memory", #object); \
-            return; \
-        } \
-    }
-
-#define AssertNotNull(object) \
-    {\
-        if (object == nullptr) \
-        { \
-            vxLogWarning3("Assert failed. #s is null.", "Memory", #object); \
+            vxLogWarning3("Assert failed. %s is null.", "Memory", #object); \
             return; \
         } \
     }

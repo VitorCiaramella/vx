@@ -24,7 +24,7 @@
     {\
         if (object == nullptr) \
         { \
-            vxLogWarning3("Assert failed. #s is null.", "Memory", #object); \
+            vxLogWarning3("Assert failed. %s is null.", "Memory", #object); \
             return VK_ERROR_VALIDATION_FAILED_EXT; \
         } \
     }
