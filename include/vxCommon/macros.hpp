@@ -1,3 +1,5 @@
+#include <memory>
+
 #ifndef VX_COMMON_MACROS
 #define VX_COMMON_MACROS
 
@@ -23,25 +25,25 @@
          9,8,7,6,5,4,3,2,1,0
 
 #define VX_MAKE_VERSION(major, minor, patch) \
-    (((major) << 22) | ((minor) << 12) | (patch))
+    (((major) < <  22) | ((minor) < <  12) | (patch))
 
 #define VX_CURRENT_VERSION VX_MAKE_VERSION(0,1,0)
 
 //pointer types
 #define rpt(objectType) objectType*
-#define upt(objectType) std::unique_ptr<objectType>
-#define wpt(objectType) std::weak_ptr<objectType>
-#define spt(objectType) std::shared_ptr<objectType>
+#define upt(objectType) std::unique_ptr< objectType >
+#define wpt(objectType) std::weak_ptr< objectType >
+#define spt(objectType) std::shared_ptr< objectType >
 //new pointers
 #define nrp(objectType,...) new objectType(__VA_ARGS__)
-#define nup(objectType,...) std::make_unique<objectType>(__VA_ARGS__)
-#define nwp(objectType,...) std::weak_ptr<objectType>(__VA_ARGS__)
-//#define nsp(objectType,...) std::make_shared<objectType>(__VA_ARGS__)
+#define nup(objectType,...) std::make_unique< objectType >(__VA_ARGS__)
+#define nwp(objectType,...) std::weak_ptr< objectType >(__VA_ARGS__)
+//#define nsp(objectType,...) std::make_shared< objectType >(__VA_ARGS__)
 
-template <typename objectType, typename... Args>
-std::shared_ptr<objectType> nsp(Args... args) 
+template < typename objectType, typename... Args >
+std::shared_ptr< objectType > nsp(Args... args) 
 {
-    auto obj = std::make_shared<objectType>();
+    auto obj = std::make_shared< objectType >();
     obj->init(args...);
     return obj;
 }
@@ -90,27 +92,27 @@ std::shared_ptr<objectType> nsp(Args... args)
     }
 
 //vectors
-#define vector(value_type) std::vector<value_type>
-#define vectorR(value_type) std::vector<rpt(value_type)>
-#define vectorW(value_type) std::vector<std::weak_ptr<value_type>>
-#define vectorS(value_type) vectorOfSharedPointers<value_type>
+#define vector(value_type) std::vector< value_type >
+#define vectorR(value_type) std::vector< rpt(value_type) >
+#define vectorW(value_type) std::vector< std::weak_ptr< value_type > >
+#define vectorS(value_type) vectorOfSharedPointers< value_type >
 
-template <typename value_type>
+template < typename value_type >
 struct vectorOfSharedPointers
 {
     private:
-        std::vector<std::shared_ptr<value_type>> storage;
+        std::vector< std::shared_ptr< value_type > > storage;
     public:
-        typedef typename std::vector<std::shared_ptr<value_type>>::iterator              iterator;
-        typedef typename std::vector<const std::shared_ptr<value_type>>::iterator        const_iterator;
-        typedef typename std::shared_ptr<value_type>                                     &reference;
-        typedef typename std::shared_ptr<value_type>                              const  &const_reference;
+        typedef typename std::vector< std::shared_ptr< value_type > >::iterator              iterator;
+        typedef typename std::vector< const std::shared_ptr< value_type > >::iterator        const_iterator;
+        typedef typename std::shared_ptr< value_type >                                     &reference;
+        typedef typename std::shared_ptr< value_type >                              const  &const_reference;
 
-        void push_back(const std::shared_ptr<value_type>& val)
+        void push_back(const std::shared_ptr< value_type >& val)
         {
             storage.push_back(val);
         }
-        void push_back(std::shared_ptr<value_type>&& val)
+        void push_back(std::shared_ptr< value_type >&& val)
         {
             storage.push_back(val);
         }

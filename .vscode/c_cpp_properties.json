@@ -6,9 +6,10 @@
                 "/Library/Developer/CommandLineTools/usr/include",
                 "${workspaceFolder}/extern/vulkansdk/macos/macOS/include/**",
                 "${workspaceFolder}/extern/glfw/include/**",
-                "${workspaceFolder}/extern/boost/boost/**",
+                "${workspaceFolder}/build/bin/boost/include/**",
                 "${workspaceFolder}/include/**",
-                "${workspaceFolder}/src/**"
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/extern/tiny-process-library/**"
             ],
             "defines": ["_DEBUG", "VK_USE_PLATFORM_MACOS_MVK", "VK_USE_PLATFORM_METAL_EXT"],
             "macFrameworkPath": [

@@ -86,6 +86,11 @@
 
                 "${workspaceFolder}/src/vxBuild/main.cpp",
 
+                "-I${workspaceFolder}/extern/tiny-process-library",
+                "${workspaceFolder}/extern/tiny-process-library/process.cpp",
+                //"${workspaceFolder}/extern/tiny-process-library/process_win.cpp",
+                "${workspaceFolder}/extern/tiny-process-library/process_unix.cpp",
+
                 "-o",
                 "${workspaceFolder}/build/bin/vxBuild/vxBuild",
             ],
