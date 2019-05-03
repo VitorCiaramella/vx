@@ -2,9 +2,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/process.hpp>
-#include <boost/thread.hpp>
-#include <boost/chrono.hpp>
-#include <boost/asio.hpp>
 
 #include "../../extern/tiny-process-library/process.hpp"
 
@@ -14,11 +11,11 @@
 #include <queue>
 #include <iostream>
 #include <fstream>
+#include <thread>
+#include <chrono>
 
 namespace fs = boost::filesystem;
 namespace bp = boost::process;
-namespace ba = boost::asio;
-namespace bs = boost::system;
 
 #define AssertExists(path) \
     if (!fs::exists(path)) \
@@ -26,31 +23,6 @@ namespace bs = boost::system;
         printf("Error: File/Directory does not exist: %s\n", path.c_str()); \
         return -1; \
     }
-
-#define StdPipeFunction std::function<void(const bs::error_code & ec, std::size_t n)>
-
-struct Process;
-
-typedef struct BPProcess 
-{
-    Process* rpProcess;
-
-    bp::child bpChildProcess;
-    ba::io_service ios;
-
-    StdPipeFunction onStdOutFunction;
-    char stdOutBufferVector[128 << 10];
-    ba::mutable_buffers_1 stdOutBuffer;
-    bp::async_pipe stdOutPipe;
-
-    StdPipeFunction onStdErrorFunction;
-    char stdErrorBufferVector[128 << 10];
-    ba::mutable_buffers_1 stdErrorBuffer;
-    bp::async_pipe stdErrorPipe;
-
-    BPProcess(Process * process);
-    ~BPProcess();
-} BPProcess;
 
 typedef struct Process 
 {
@@ -62,27 +34,29 @@ public:
     std::vector<std::string> args;
     int exitCode;
     std::stringstream stdOutStream;
-    std::stringstream stdErrorStream;
     fs::path stdOutPath;
-    fs::path stdErrorPath;
+    std::string cmdWithArgs;
+    std::ofstream * stdOutFile;
     
     void runAsync()
     {
-        std::string cmdWithArgs;
-        cmdWithArgs += exePath.string();
+        cmdWithArgs = exePath.string();
         for (auto && arg : args)
         {
             cmdWithArgs += " " + arg;
         }
-        upProcess = std::make_unique<TinyProcessLib::Process>(cmdWithArgs, "", 
-            [&](const char *bytes, size_t n) 
+        auto logFunction = [&](const char *bytes, size_t n) 
+        {
+            stdOutStream.write(bytes, n);
+            if (stdOutFile != nullptr)
             {
-                stdOutStream.write(bytes, n);
-            }, 
-            [&](const char *bytes, size_t n) 
-            {
-                stdErrorStream.write(bytes, n);
-            });
+                stdOutFile->write(bytes, n);
+            }
+        };
+        logFunction(cmdWithArgs.c_str(), cmdWithArgs.size());
+        auto newLine = std::string("\n");
+        logFunction(newLine.c_str(), newLine.size());
+        upProcess = std::make_unique<TinyProcessLib::Process>(cmdWithArgs, "", logFunction, logFunction);
     }
 
     bool isCompleted()
@@ -99,19 +73,11 @@ public:
                 auto file = std::ofstream(stdOutPath.c_str());
                 if (file.is_open())
                 {
+                    file << cmdWithArgs << "\n";
+                    file << "Exit code: " << exitCode << "\n\n";
                     file << stdOutStream.rdbuf();
                     file.close();
                     stdOutStream.clear();
-                }
-            }
-            if (!stdErrorPath.empty())
-            {
-                auto file = std::ofstream(stdErrorPath.c_str());
-                if (file.is_open())
-                {
-                    file << stdErrorStream.rdbuf();
-                    file.close();
-                    stdErrorStream.clear();
                 }
             }
             return true;
@@ -126,8 +92,6 @@ typedef struct ProcessManager
     std::queue<std::shared_ptr<Process>> processQueue;
     std::list<std::shared_ptr<Process>> currentProcesses;
     std::list<std::shared_ptr<Process>> completedProcesses;
-    std::list<std::shared_ptr<Process>> completedProcessesWithSuccess;
-    std::list<std::shared_ptr<Process>> completedProcessesWithError;
 } ProcessManager;
 
 void listAllFiles(const fs::path & path, std::list<fs::path> & filesFound, const std::list<std::string> & extensionFilters, bool isRecursive)
@@ -172,80 +136,64 @@ void listAllFiles(const fs::path & path, std::list<fs::path> & filesFound, const
     }
 }
 
-void printProcessOutput(const std::list<std::shared_ptr<Process>> & processes)
+void printCompletedProcesses(const std::list<std::shared_ptr<Process>> & processes, bool & containsFailures)
 {
     std::string line;
+    bool headerPrinted = false;
     for (auto && process : processes)
     {        
-        printf("  %s\n", process->description.c_str());
+        if (process->exitCode == 0)
+        {
+            if (!headerPrinted)
+            {
+                printf("\nSuccesses:\n");
+                headerPrinted = true;
+            }
+            printf("  %s\n", process->description.c_str());
+            printf("    Exit code: %i\n", process->exitCode);
+            printf("    %s\n", process->cmdWithArgs.c_str());
+            printf("\n\n");
+        }
+    }
+    headerPrinted = false;
+    for (auto && process : processes)
+    {        
         if (process->exitCode != 0)
         {
-            printf("    Exit code: %i\n", process->exitCode);
-            while (process->stdErrorStream && std::getline(process->stdErrorStream, line) && !line.empty())
+            if (!headerPrinted)
             {
-                printf("    %s\n", line.c_str());
+                printf("\nFailures:\n");
+                headerPrinted = true;
             }
+            printf("  %s\n", process->description.c_str());
+            printf("    Exit code: %i\n", process->exitCode);
+            printf("    %s\n", process->cmdWithArgs.c_str());
             while (process->stdOutStream && std::getline(process->stdOutStream, line) && !line.empty())
             {
                 printf("    %s\n", line.c_str());
             }
+            if (!process->stdOutPath.empty())
+            {
+                auto logFile = std::ifstream(process->stdOutPath.c_str());
+                if (logFile.is_open())
+                {
+                    while ( getline (logFile,line) )
+                    {
+                        printf("    %s\n", line.c_str());
+                    }
+                    logFile.close();
+                }
+            }
+            printf("\n\n");
         }
     }
-}
-
-BPProcess::BPProcess(Process * process)
-    : stdOutBuffer(ba::buffer(stdOutBufferVector))
-    , stdErrorBuffer(ba::buffer(stdErrorBufferVector))
-    , stdOutPipe(bp::async_pipe(ios))
-    , stdErrorPipe(bp::async_pipe(ios))
-{
-    rpProcess = process;
-    onStdOutFunction = [&](const bs::error_code & ec, size_t n)
-    {
-        rpProcess->stdOutStream.write(stdOutBufferVector, n);
-        if (!ec)
-        {
-            ba::async_read(stdOutPipe, stdOutBuffer, onStdOutFunction);
-        }
-    };
-
-    onStdErrorFunction = [&](const bs::error_code & ec, size_t n)
-    {
-        rpProcess->stdErrorStream.write(stdErrorBufferVector, n);
-        if (!ec)
-        {
-            ba::async_read(stdErrorPipe, stdErrorBuffer, onStdErrorFunction);
-        }
-    };
-
-    bpChildProcess = bp::child(bp::exe(rpProcess->exePath),bp::args(rpProcess->args),bp::std_out > stdOutPipe,bp::std_err > stdErrorPipe);
-
-    ba::async_read(stdOutPipe, stdOutBuffer, onStdOutFunction);
-    ba::async_read(stdErrorPipe, stdErrorBuffer, onStdErrorFunction);
-
-    ios.run();
-}
-
-BPProcess::~BPProcess()
-{
-    if (bpChildProcess.valid())
-    {
-        bpChildProcess.wait();            
-        bpChildProcess.terminate();
-    }
-    if (!ios.stopped())
-    {
-        ios.stop();
-    }
-    stdOutPipe.close();
-    stdErrorPipe.close();
 }
 
 void processJobs(const std::shared_ptr<ProcessManager> & processManager)
 {
     auto maxCurrentProcesses = std::clamp(processManager->maxCurrentProcesses, (uint)1, (uint)16);
 
-    while (processManager->processQueue.size()>0)
+    while (processManager->processQueue.size()>0 || processManager->currentProcesses.size()>0)
     {
         while ((processManager->processQueue.size()>0)
                 && (processManager->currentProcesses.size() < maxCurrentProcesses))
@@ -257,6 +205,7 @@ void processJobs(const std::shared_ptr<ProcessManager> & processManager)
             process->runAsync();
         }
         auto anyProcessDone = false;
+        auto awaitingMessagePrinted = false;
         while (!anyProcessDone)
         {
             auto currentProcessesTmp = processManager->currentProcesses;
@@ -268,26 +217,22 @@ void processJobs(const std::shared_ptr<ProcessManager> & processManager)
                     processManager->completedProcesses.push_back(currentProcessTmp);
                     processManager->currentProcesses.remove(currentProcessTmp);
                     anyProcessDone = true;
-                    if (currentProcessTmp->exitCode==0)
-                    {
-                        processManager->completedProcessesWithSuccess.push_back(currentProcessTmp);
-                    }
-                    else
-                    {
-                        processManager->completedProcessesWithError.push_back(currentProcessTmp);
-                    }
                 }
             }        
             if (!anyProcessDone)
-            {
-                printf("Awaiting...\n");
-                boost::this_thread::sleep_for(boost::chrono::milliseconds(250));
+            {   
+                if (!awaitingMessagePrinted)
+                {
+                    printf("Awaiting...\n");
+                }
+                awaitingMessagePrinted = true;
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
         }
     }
 }
 
-void getFiles(const std::list<std::string> & searchPaths, const std::string & rootPath, const std::list<std::string> & extensions, std::list<fs::path> & filesFound)
+void getFiles(const std::list<std::string> & searchPaths, const std::list<std::string> & extensions, const std::string & rootPath, std::list<fs::path> & filesFound)
 {
      for (auto && originalPath : searchPaths)
     {
@@ -309,7 +254,7 @@ void getFiles(const std::list<std::string> & searchPaths, const std::string & ro
         directory = fs::canonical(directory);
         auto extension = filename.extension().string();
         filename.replace_extension("");
-        auto isRecursiveWildcard = boost::iequals(filename.string(), "**");
+        auto isRecursiveWildcard = boost::iequals(filename.string(), "**") || boost::iequals(filename.string(), ".");
         auto isWildcard = boost::iequals(filename.string(), "*");
         if (!isRecursiveWildcard && !isWildcard)
         {
@@ -331,6 +276,11 @@ void getFiles(const std::list<std::string> & searchPaths, const std::string & ro
         filesFound.clear();
         */
     }    
+}
+
+void getFiles(const std::list<std::string> & searchPaths, const std::list<std::string> & extensions, const fs::path & rootPath, std::list<fs::path> & filesFound)
+{
+    getFiles(searchPaths, extensions, rootPath.string(), filesFound);
 }
 
 void dedupFiles(std::list<fs::path> & files)
@@ -358,210 +308,337 @@ void dedupFiles(std::list<fs::path> & files)
 typedef struct CppCompileTask
 {
     std::string cppCompilerPath;
-    std::list<std::string> inputPaths;
-    std::list<std::string> inputExtensions;
+    std::list<std::string> sourcePaths;
     std::string outputPath;
     std::list<std::string> options;
     std::list<std::string> includePaths;
-    bool alwaysRecompile;
+    std::list<std::string> preCompiledIncludePaths;
+    std::list<std::string> frameworks;
+    std::list<std::string> libraryPaths;
+    std::list<std::string> libraries;
+    bool forceCppRecompilation;
+    bool forceHeaderCopy;
+    bool forceHeaderRecompilation;
 } CppCompileTask;
 
-void createHppPreCompileProcessRequest(const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath)
+bool assertDirectoryExists(const fs::path & path)
+{
+    if (!fs::exists(path) || !fs::is_directory(path))
+    {
+        printf("Error: Directory does not exist: %s\n", path.c_str());
+        return false;
+    }   
+    return true;
+}
+
+
+void printPathList(const std::string & header, const std::list<fs::path> & pathList)
+{
+    printf("\n%s\n", header.c_str());
+    for (auto && path : pathList)
+    {
+        printf("  -%s\n", path.c_str());
+    }
+}
+
+fs::path createSubDirectory(const fs::path & path, const std::string & subFolder)
+{
+    auto subDirectoryPath = fs::path(path).append(subFolder);
+    if (!fs::exists(subDirectoryPath))
+    {
+        fs::create_directories(subDirectoryPath);
+    }
+    subDirectoryPath = fs::canonical(subDirectoryPath);
+    return subDirectoryPath;
+}
+
+fs::path createSubDirectory(const std::string & path, const std::string & subFolder)
+{
+    return createSubDirectory(fs::path(path), subFolder);
+}
+
+fs::path createDirectory(const fs::path & path)
+{
+    if (!fs::exists(path))
+    {
+        fs::create_directories(path);
+    }
+    return fs::canonical(path);
+}
+
+fs::path absolutePath(const std::string & path, const fs::path & absRootPath)
+{
+    return fs::absolute(fs::path(path), absRootPath);
+}
+
+fs::path createCorrespondingPath(const fs::path & originalPath, const fs::path & rootPath, const fs::path & newRootPath)
+{
+    auto relativeIncludePath = fs::relative(fs::absolute(originalPath, rootPath),rootPath);
+    auto correspondingPath = fs::absolute(relativeIncludePath, newRootPath);
+    auto correspondingFolderPath = correspondingPath;
+    if (correspondingFolderPath.has_extension())
+    {
+        correspondingFolderPath = correspondingFolderPath.parent_path();
+    }
+    createDirectory(correspondingFolderPath);
+    return correspondingPath;
+}
+
+void copyHeaderFilesForPreCompilation(const std::shared_ptr<ProcessManager> & processManager, CppCompileTask & cppCompileTask, const fs::path & absRootPath, std::ofstream * logFile)
 {
     auto filesFound = std::list<fs::path>();
-    auto hppExtensions = std::list<std::string>();
-    hppExtensions.push_back(".hpp");
+    auto extensions = std::list<std::string>();
+    extensions.push_back(".h");
+    extensions.push_back(".hpp");
+    getFiles(cppCompileTask.includePaths, extensions, absRootPath, filesFound);
+    //dedupFiles(filesFound);
+    printPathList("Headers to copy an pre-compile:", filesFound);
+
+    auto outputRootPath = absolutePath(cppCompileTask.outputPath, absRootPath);
+    auto headersOutputRootPath = createSubDirectory(outputRootPath, "/headers/");
+
     for (auto && includePath : cppCompileTask.includePaths)
     {
-        auto searchPaths = std::list<std::string>();
-        auto absSearchPath = fs::absolute(includePath, absRootPath);
-        if (!fs::exists(absSearchPath) || !fs::is_directory(absSearchPath))
-        {
-            printf("Error: Directory does not exist: %s\n", absSearchPath.c_str());
-            continue;
-        }        
-        auto searchPath = fs::absolute(fs::path("**"),fs::canonical(absSearchPath));        
-        searchPaths.push_back(searchPath.string());
-        getFiles(searchPaths, absRootPath.string(), hppExtensions, filesFound);
+        auto absoluteOutputPath = createCorrespondingPath(includePath, absRootPath, headersOutputRootPath);
+        cppCompileTask.preCompiledIncludePaths.push_back(absoluteOutputPath.string());
     }
-    //dedupFiles(filesFound);
-    printf("\nHeaders to pre-compile:\n");
+
     for (auto && file : filesFound)
     {
-        printf("  -%s\n", file.c_str());
-    }
+        auto relativeFilePath = fs::relative(file, absRootPath);
+        auto relativeFolderPath = relativeFilePath.parent_path();
+        auto absoluteOutputPath = fs::absolute(relativeFolderPath, headersOutputRootPath);
+        absoluteOutputPath = createDirectory(absoluteOutputPath);
+        
+        auto absoluteOutputFilePath = fs::absolute(file.filename(), absoluteOutputPath);
 
-    auto compilerPath = bp::search_path(fs::path(cppCompileTask.cppCompilerPath));
-    if (!fs::exists(compilerPath) || !fs::is_regular_file(compilerPath))
+        if (cppCompileTask.forceHeaderCopy 
+            || !fs::exists(absoluteOutputFilePath)
+            || (fs::last_write_time(file) > fs::last_write_time(absoluteOutputFilePath)))
+        {
+            //fs::copy_file(file, headerFilePath, fs::copy_option::overwrite_if_exists);
+            auto args = std::vector<std::string>();
+            args.push_back("-p");
+            args.push_back(file.string());
+            args.push_back(absoluteOutputFilePath.string());
+
+            auto command = std::make_shared<Process>();
+            command->description = "Copy header for pre-compile " + file.filename().string();
+            command->exePath = fs::path("cp");
+            command->args = args;
+            command->stdOutFile = logFile;
+            processManager->processQueue.push(command);
+        }
+    }
+}
+
+bool getCompilerPath(const std::string & compilerPath, fs::path & path)
+{
+    path = bp::search_path(fs::path(compilerPath));
+    if (!fs::exists(path) || !fs::is_regular_file(path))
     {
         printf("\Error: Compiler not found.\n");
-        printf("  Compiler path: %s\n", cppCompileTask.cppCompilerPath.c_str());
+        printf("  Compiler path: %s\n", compilerPath.c_str());
+        return false;
     }
-    printf("Compiler found: %s\n", compilerPath.c_str());
+    printf("Compiler found: %s at %s \n", compilerPath.c_str(), path.c_str());
+    return true;
+}
 
-    auto outputRootPath = fs::absolute(fs::path(cppCompileTask.outputPath), absRootPath).append("/headers/");
-    if (!fs::exists(outputRootPath))
+bool getCanonicalPath(fs::path & path)
+{
+    if (!fs::exists(path) || !fs::is_directory(path))
     {
-        fs::create_directory(outputRootPath);
+        printf("Error: Directory does not exist: %s\n", path.c_str());
+        return false;
     }
-    outputRootPath = fs::canonical(outputRootPath);
+    path = fs::canonical(path);
+    return true;
+}
+
+
+void createClangCompileCommand(const std::list<fs::path> & filesFound,const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath)
+{
+    auto outputRootPath = absolutePath(cppCompileTask.outputPath, absRootPath);
+    auto headersOutputRootPath = createSubDirectory(outputRootPath, "/headers/");
+    auto objectsOutputRootPath = createSubDirectory(outputRootPath, "/objs/");
+
+    fs::path compilerPath;
+    if (!getCompilerPath(cppCompileTask.cppCompilerPath, compilerPath))
+    {
+        return;
+    }
 
     auto commonArgs = std::vector<std::string>();
-    commonArgs.push_back("-x");
-    commonArgs.push_back("c++-header");
     for (auto && option : cppCompileTask.options)
     {
         commonArgs.push_back(option);
     }
-    for (auto && includePath : cppCompileTask.includePaths)
+    for (auto && includePath : cppCompileTask.preCompiledIncludePaths)
     {
         auto absIncludePath = fs::absolute(fs::path(includePath), absRootPath);
-        if (!fs::exists(absIncludePath))
+        if (!getCanonicalPath(absIncludePath))
         {
-            printf("Error: Directory does not exist: %s\n", absIncludePath.c_str());
-            printf("Error: Invalid path: %s\n", includePath.c_str());
             continue;
         }
-        absIncludePath = fs::canonical(absIncludePath);
         commonArgs.push_back("-I"+absIncludePath.string());
     }
 
     for (auto && file : filesFound)
     {
-        auto outputFolderPath = fs::absolute(fs::relative(file, absRootPath).parent_path(), outputRootPath);
-        if (!fs::exists(outputFolderPath))
-        {
-            fs::create_directories(outputFolderPath);
-        }
-        outputFolderPath = fs::canonical(outputFolderPath);
-
-        auto filePath = fs::path(file);
-        auto hppFilePath = fs::absolute(filePath.filename(), outputFolderPath);
-        auto pchFilePath = fs::absolute(fs::change_extension(filePath.filename(),filePath.extension().string() + ".pch"), outputFolderPath);
-        auto stdOutFilePath = fs::absolute(fs::change_extension(filePath.filename(),filePath.extension().string() + ".out.log"), outputFolderPath);
-        auto stdErrorFilePath = fs::absolute(fs::change_extension(filePath.filename(),filePath.extension().string() + ".err.log"), outputFolderPath);
-
-        if (cppCompileTask.alwaysRecompile 
-            || !fs::exists(hppFilePath)
-            || (fs::last_write_time(file) > fs::last_write_time(hppFilePath)))
-        {
-            fs::copy_file(file, hppFilePath);
-        }
-
-        if (!cppCompileTask.alwaysRecompile && fs::exists(pchFilePath))
-        {
-            if (fs::last_write_time(pchFilePath) > fs::last_write_time(hppFilePath))
-            {
-                printf("Skipping %s\n", file.c_str());
-                continue;
-            }
-        }
-        if (!cppCompileTask.alwaysRecompile && fs::exists(stdOutFilePath))
-        {
-            if (fs::last_write_time(stdOutFilePath) > fs::last_write_time(hppFilePath))
-            {
-                printf("Skipping %s\n", file.c_str());
-                continue;
-            }
-        }
-
-        auto args = commonArgs;            
-        args.push_back("-o");
-        args.push_back(pchFilePath.string());
-        args.push_back(hppFilePath.string());
+        auto outputFilePath = file;
 
         auto compilerProcess = std::make_shared<Process>();
-        compilerProcess->description = "Header pre-compile " + file.filename().string();
         compilerProcess->exePath = compilerPath;
-        compilerProcess->args = args;
+        compilerProcess->args = commonArgs;            
+        compilerProcess->args.push_back(file.string());
+        compilerProcess->args.push_back("-std=c++17");
+        compilerProcess->args.push_back("-stdlib=libc++");
+
+        auto fileExtension = file.extension().string();
+        std::string outputExtension;
+        auto forceRecompilation = false;
+        auto skipIfLogIsPresent = true;
+        if (boost::iequals(fileExtension, ".c") || boost::iequals(fileExtension, ".cpp"))
+        {
+            outputFilePath = createCorrespondingPath(outputFilePath, absRootPath, objectsOutputRootPath);
+            skipIfLogIsPresent = false;
+            compilerProcess->description = "C++ compile " + file.filename().string();
+            forceRecompilation = cppCompileTask.forceCppRecompilation;
+            outputExtension = ".o";
+            compilerProcess->args.push_back("-x");
+            compilerProcess->args.push_back("c++");
+            compilerProcess->args.push_back("-c");
+            compilerProcess->args.push_back("-emit-obj");
+        }
+        else if (boost::iequals(fileExtension, ".h") || boost::iequals(fileExtension, ".hpp"))
+        {
+            outputFilePath = createCorrespondingPath(outputFilePath, absRootPath, headersOutputRootPath);
+
+            compilerProcess->description = "Header pre-compile " + file.filename().string();
+            forceRecompilation = cppCompileTask.forceHeaderRecompilation;
+            outputExtension = ".pch";
+            compilerProcess->args.push_back("-x");
+            compilerProcess->args.push_back("c++-header");
+            //args.push_back("c-header");//for pure c headers
+            //args.push_back("-std=c17");//for pure c headers
+        }
+        else
+        {
+            printf("Unsupported extension %s for %s\n", fileExtension.c_str(), file.c_str());
+            continue;
+        }
+        
+        auto stdOutFilePath = fs::change_extension(outputFilePath, fileExtension + ".build.log");
+        outputFilePath = fs::change_extension(outputFilePath, fileExtension + outputExtension);
+
+        if (!forceRecompilation)
+        {
+            if ((fs::exists(outputFilePath) && fs::last_write_time(outputFilePath) > fs::last_write_time(file))
+                || (skipIfLogIsPresent && fs::exists(stdOutFilePath) && fs::last_write_time(stdOutFilePath) > fs::last_write_time(file)))
+            {
+                printf("Skipping %s\n", file.c_str());
+                continue;
+            }
+        }
+
+        compilerProcess->args.push_back("-o");
+        compilerProcess->args.push_back(outputFilePath.string());
+
         compilerProcess->stdOutPath = stdOutFilePath;
-        compilerProcess->stdErrorPath = stdErrorFilePath;
         processManager->processQueue.push(compilerProcess);
     }
+}
+
+void createHppPreCompileProcessRequest(const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath)
+{
+    auto filesFound = std::list<fs::path>();
+    auto extensions = std::list<std::string>();
+    extensions.push_back(".h");
+    extensions.push_back(".hpp");
+    getFiles(cppCompileTask.preCompiledIncludePaths, extensions, absRootPath, filesFound);
+    //dedupFiles(filesFound);
+    printPathList("Headers to pre-compile:", filesFound);
+
+    createClangCompileCommand(filesFound, processManager, cppCompileTask, absRootPath);
 }
 
 void createCppCompileProcessRequest(const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath)
 {
     auto filesFound = std::list<fs::path>();
-    getFiles(cppCompileTask.inputPaths, absRootPath.string(), cppCompileTask.inputExtensions, filesFound);
-    dedupFiles(filesFound);
-    printf("\nFiles to compile:\n");
-    for (auto && file : filesFound)
-    {
-        printf("  -%s\n", file.c_str());
-    }
+    auto extensions = std::list<std::string>();
+    extensions.push_back(".c");
+    extensions.push_back(".cpp");
+    getFiles(cppCompileTask.sourcePaths, extensions, absRootPath, filesFound);
+    //dedupFiles(filesFound);
+    printPathList("C++ to compile:", filesFound);
 
-    auto compilerPath = bp::search_path(fs::path(cppCompileTask.cppCompilerPath));
-    if (!fs::exists(compilerPath) || !fs::is_regular_file(compilerPath))
-    {
-        printf("\Error: Compiler not found.\n");
-        printf("  Compiler path: %s\n", cppCompileTask.cppCompilerPath.c_str());
-    }
-    printf("Compiler found: %s\n", compilerPath.c_str());
+    createClangCompileCommand(filesFound, processManager, cppCompileTask, absRootPath);
+}
 
-    auto outputRootPath = fs::absolute(fs::path(cppCompileTask.outputPath), absRootPath);
-    if (!fs::exists(outputRootPath))
+void createExeLinkerProcessRequest(const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath)
+{
+    auto filesFound = std::list<fs::path>();
+    auto extensions = std::list<std::string>();
+    extensions.push_back(".c");
+    extensions.push_back(".cpp");
+    getFiles(cppCompileTask.sourcePaths, extensions, absRootPath, filesFound);
+    //dedupFiles(filesFound);
+    printPathList("C++ to link:", filesFound);
+
+    auto outputRootPath = absolutePath(cppCompileTask.outputPath, absRootPath);
+    auto objectsOutputRootPath = createSubDirectory(outputRootPath, "/objs/");
+    auto binOutputRootPath = createSubDirectory(outputRootPath, "/bin/");
+
+    fs::path linkerPath;
+    if (!getCompilerPath("ld", linkerPath))
     {
-        fs::create_directory(outputRootPath);
+        return;
     }
-    outputRootPath = fs::canonical(outputRootPath);
 
     auto commonArgs = std::vector<std::string>();
-    commonArgs.push_back("-c");
-    commonArgs.push_back("-x");
-    commonArgs.push_back("c++");
-    commonArgs.push_back("-emit-obj");
-    for (auto && option : cppCompileTask.options)
-    {
-        commonArgs.push_back(option);
-    }
-    for (auto && includePath : cppCompileTask.includePaths)
-    {
-        auto absIncludePath = fs::absolute(fs::path(includePath), absRootPath);
-        if (!fs::exists(absIncludePath))
-        {
-            printf("Error: Directory does not exist: %s\n", absIncludePath.c_str());
-            printf("Error: Invalid path: %s\n", includePath.c_str());
-            continue;
-        }
-        absIncludePath = fs::canonical(absIncludePath);
-        commonArgs.push_back("-I"+absIncludePath.string());
-    }
+    commonArgs.push_back("-t"); //trace
+    commonArgs.push_back("-demangle"); 
+    //commonArgs.push_back("-lto_library"); 
+    //commonArgs.push_back("/Library/Developer/CommandLineTools/usr/lib/libLTO.dylib "); 
+    commonArgs.push_back("-no_deduplicate"); //for debug only
+    commonArgs.push_back("-dynamic"); 
+    commonArgs.push_back("-arch"); 
+    commonArgs.push_back("x86_64"); 
+    commonArgs.push_back("-macosx_version_min"); 
+    commonArgs.push_back("10.14.0 "); 
+    commonArgs.push_back("-lc++ "); 
+    commonArgs.push_back("-lSystem"); 
 
+    for (auto && framework : cppCompileTask.frameworks)
+    {
+        commonArgs.push_back("-framework");
+        commonArgs.push_back(framework);
+    }
+    for (auto && libraryPath : cppCompileTask.libraryPaths)
+    {
+        commonArgs.push_back("-L" + fs::absolute(fs::path(libraryPath), absRootPath).string());
+    }
+    for (auto && library : cppCompileTask.libraries)
+    {
+        commonArgs.push_back("-l" + library);
+    }
     for (auto && file : filesFound)
     {
-        if (boost::iequals(fs::extension(file),  ".cpp"))
-        {
-            auto outputFolderPath = fs::absolute(fs::relative(file, absRootPath).parent_path(), outputRootPath);
-            if (!fs::exists(outputFolderPath))
-            {
-                fs::create_directories(outputFolderPath);
-            }
-            outputFolderPath = fs::canonical(outputFolderPath);
-            auto objFilePath = fs::change_extension(fs::path(file).filename(),".o");
-            objFilePath = fs::absolute(objFilePath, outputFolderPath);
-
-            if (!cppCompileTask.alwaysRecompile && fs::exists(objFilePath))
-            {
-                if (fs::last_write_time(objFilePath) > fs::last_write_time(file))
-                {
-                    printf("Skipping %s\n", file.c_str());
-                    continue;
-                }
-            }
-
-            auto args = commonArgs;            
-            args.push_back("-o");
-            args.push_back(objFilePath.string());
-            args.push_back(file.string());
-
-            auto compilerProcess = std::make_shared<Process>();
-            compilerProcess->description = "C++ compile " + file.filename().string();
-            compilerProcess->exePath = compilerPath;
-            compilerProcess->args = args;
-            processManager->processQueue.push(compilerProcess);
-        }
+        auto objectFile = createCorrespondingPath(fs::change_extension(file,file.extension().string() + ".o"), absRootPath, objectsOutputRootPath);
+        commonArgs.push_back(objectFile.string());
     }
+
+    auto stdOutFilePath = fs::absolute(fs::path("exe.build.log"), binOutputRootPath);
+    auto outputFilePath = fs::absolute(fs::path("exe"), binOutputRootPath);
+
+    auto compilerProcess = std::make_shared<Process>();
+    compilerProcess->exePath = linkerPath;
+    compilerProcess->args = commonArgs;
+    compilerProcess->args.push_back("-o");
+    compilerProcess->args.push_back(outputFilePath.string());
+    compilerProcess->stdOutPath = stdOutFilePath;
+    processManager->processQueue.push(compilerProcess);
 }
 
 int main()
@@ -574,63 +651,85 @@ int main()
     absRootPath = fs::canonical(absRootPath);
 
     CppCompileTask cppCompileTask;
-    cppCompileTask.alwaysRecompile = false;
     cppCompileTask.cppCompilerPath = "clang++";
-    cppCompileTask.inputPaths.push_back("./src/**.cpp");
+    //cppCompileTask.sourcePaths.push_back("./src/**.cpp");
+    cppCompileTask.sourcePaths.push_back("./src/vxGraphics/**.cpp");
+    cppCompileTask.sourcePaths.push_back("./src/vxCommon/**.cpp");
     //cppCompileTask.inputExtensions.push_back(".cpp");
     cppCompileTask.includePaths.push_back("./include/");
     cppCompileTask.includePaths.push_back("./extern/boost/boost/");
     cppCompileTask.includePaths.push_back("./extern/glfw/include/");
     cppCompileTask.includePaths.push_back("./extern/vulkansdk/macos/macOS/include/");
-    cppCompileTask.options.push_back("-std=c++17");
-    cppCompileTask.options.push_back("-stdlib=libc++");
     cppCompileTask.options.push_back("-D_DEBUG");
     cppCompileTask.options.push_back("-DVK_USE_PLATFORM_MACOS_MVK");
     cppCompileTask.options.push_back("-DVK_USE_PLATFORM_METAL_EXT");
     cppCompileTask.options.push_back("-v");
     cppCompileTask.options.push_back("-g");
-    cppCompileTask.outputPath = "./build/bin/";
+    cppCompileTask.outputPath = "./build/temp/";
+    cppCompileTask.frameworks.push_back("Cocoa");
+    cppCompileTask.frameworks.push_back("OpenGL");
+    cppCompileTask.frameworks.push_back("IOKit");
+    cppCompileTask.frameworks.push_back("CoreVideo");
+    cppCompileTask.libraryPaths.push_back("./build/bin/glfw/src");
+    cppCompileTask.libraryPaths.push_back("./extern/vulkansdk/macos/macOS/lib");
+    cppCompileTask.libraries.push_back("glfw3");
+    cppCompileTask.libraries.push_back("vulkan");
 
     auto processManager = std::make_shared<ProcessManager>();
     processManager->maxCurrentProcesses = 8;
 
+    int exitCode = 0;
+    bool containsFailures;
+
+    auto outputRootPath = absolutePath(cppCompileTask.outputPath, absRootPath);
+    auto headersOutputRootPath = createSubDirectory(outputRootPath, "/headers/");
+    auto copyHeaderLogPath = fs::absolute("copyHeaders.build.log", headersOutputRootPath);
+
+    auto copyHeaderLog = std::ofstream(copyHeaderLogPath.c_str());
+    if (copyHeaderLog.is_open())
+    {
+        copyHeaderFilesForPreCompilation(processManager, cppCompileTask, absRootPath, &copyHeaderLog);
+        processJobs(processManager);
+        copyHeaderLog.close();
+    }
+    printCompletedProcesses(processManager->completedProcesses, containsFailures);
+    processManager->completedProcesses.clear();
+
     createHppPreCompileProcessRequest(processManager, cppCompileTask, absRootPath);
     processJobs(processManager);
+    printCompletedProcesses(processManager->completedProcesses, containsFailures);
+    processManager->completedProcesses.clear();
 
-    //createCppCompileProcessRequest(processManager, cppCompileTask, absRootPath);
-    //processJobs(processManager);
+    containsFailures = false;
+    createCppCompileProcessRequest(processManager, cppCompileTask, absRootPath);
+    processJobs(processManager);
+    printCompletedProcesses(processManager->completedProcesses, containsFailures);
+    processManager->completedProcesses.clear();
 
+    if (!containsFailures)
+    {
+        createExeLinkerProcessRequest(processManager, cppCompileTask, absRootPath);
+        processJobs(processManager);
+        printCompletedProcesses(processManager->completedProcesses, containsFailures);
+        processManager->completedProcesses.clear();
+    }
 
     /*
-    -framework Cocoa 
-    -framework OpenGL 
-    -framework IOKit 
-    -framework CoreVideo 
-    -L/Users/vitorciaramella/Documents/GitHub/vx/build/bin/glfw/src 
-    -lglfw3 
-    $VULKAN_SDK/lib/libvulkan.1.dylib 
-
     -o /Users/vitorciaramella/Documents/GitHub/vx/build/bin/vxGraphics/vxGraphics
+
+    linker
+    to export dynamic library
+        -E
+    reference libraries
+        -L searchDir
+        -l namespec
+            search a directory for a library called libnamespec.so before searching for one called libnamespec.a
+        -l :filename
+            search the library path for a file called filename, otherwise it will search the library path for a file called libnamespec.a
+
+     /Library/Developer/CommandLineTools/usr/lib/clang/10.0.1/lib/darwin/libclang_rt.osx.a
     */
 
-    //clang -x c-header test.h -o test.h.pch
-
-
-
-    int exitCode = 0;
-    if (processManager->completedProcessesWithSuccess.size() > 0)
-    {
-        printf("\nSuccesses:\n");
-        printProcessOutput(processManager->completedProcessesWithSuccess);
-    }
-    if (processManager->completedProcessesWithError.size() > 0)
-    {
-        printf("\nErrors:\n");
-        printProcessOutput(processManager->completedProcessesWithError);
-        exitCode = 1;
-    }
-    printf("\n");
-
-    return exitCode;
+    return containsFailures ? 1 : 0;
 }
 

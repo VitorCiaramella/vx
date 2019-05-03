@@ -139,8 +139,8 @@
         {
             "label": "Build",
             //"dependsOn": ["BuildShaders", "FixVulkanLibPath"],
-            //"dependsOn": ["BuildShaders", "BuildWithClang"],
-            "dependsOn": ["BuildWithClang2"],
+            "dependsOn": ["BuildShaders", "BuildWithClang"],
+            //"dependsOn": ["BuildWithClang2"],
             "group": {
                 "kind": "build",
                 "isDefault": true

@@ -37,6 +37,7 @@
 
 # Build Binaries
 build/bin
+build/temp
 
 # Intellisense
 .vscode/ipch

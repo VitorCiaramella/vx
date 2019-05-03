@@ -25,7 +25,7 @@
          9,8,7,6,5,4,3,2,1,0
 
 #define VX_MAKE_VERSION(major, minor, patch) \
-    (((major) < <  22) | ((minor) < <  12) | (patch))
+    (((major) <<  22) | ((minor) <<  12) | (patch))
 
 #define VX_CURRENT_VERSION VX_MAKE_VERSION(0,1,0)
 
