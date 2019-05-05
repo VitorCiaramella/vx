@@ -5,63 +5,7 @@
     "tasks": [        
         {
             "type": "shell",
-            "label": "BuildWithClang",
-            "command": "/Library/Developer/CommandLineTools/usr/bin/clang++",
-            "args": [
-                "-std=c++17",
-                //"-isystem/Library/Developer/CommandLineTools/usr/include",
-                "-stdlib=libc++",
-                
-                "-DVK_USE_PLATFORM_MACOS_MVK",
-                "-DVK_USE_PLATFORM_METAL_EXT",
-                "-D_DEBUG",
-
-                "-v",//verbose
-                "-g",//debug
-
-                "-framework",
-                "Cocoa",
-                "-framework",
-                "OpenGL",
-                "-framework",
-                "IOKit",
-                "-framework",
-                "CoreVideo",
-
-                "-I${workspaceFolder}/include",
-
-                "-I${workspaceFolder}/extern/boost/boost",
-
-                "-I${workspaceFolder}/extern/glfw/include",
-
-                "-L${workspaceFolder}/build/bin/glfw/src",
-                "-lglfw3",
-
-                "-I${workspaceFolder}/extern/vulkansdk/macos/macOS/include",
-                "$VULKAN_SDK/lib/libvulkan.1.dylib",
-
-                "${workspaceFolder}/src/vxCommon/debug.cpp",
-
-                "${workspaceFolder}/src/vxGraphics/pipeline.cpp",
-                "${workspaceFolder}/src/vxGraphics/main.cpp",
-                "${workspaceFolder}/src/vxGraphics/instance.cpp",
-                "${workspaceFolder}/src/vxGraphics/window.cpp",
-                "${workspaceFolder}/src/vxGraphics/debug.cpp",
-                "${workspaceFolder}/src/vxGraphics/synchronization.cpp",
-                "${workspaceFolder}/src/vxGraphics/device.cpp",
-                "${workspaceFolder}/src/vxGraphics/macos/window.cpp",
-                "${workspaceFolder}/src/vxGraphics/win32/window.cpp",
-                
-                "-o",
-                "${workspaceFolder}/build/bin/vxGraphics/vxGraphics",
-            ],
-            "options": {
-              "cwd": "/Library/Developer/CommandLineTools/usr/bin"
-            },
-        },
-        {
-            "type": "shell",
-            "label": "BuildWithClang2",
+            "label": "Build vxBuild",
             "command": "/Library/Developer/CommandLineTools/usr/bin/clang++",
             "args": [
                 "-std=c++17",
@@ -99,18 +43,6 @@
             },
         },
         {
-            "label": "FixVulkanLibPath",
-            "type": "shell",
-            "command": "install_name_tool",
-            "args": [
-                "-change",
-                "'@rpath/libvulkan.1.dylib'",
-                "'@executable_path/vulkan/lib/libvulkan.1.dylib'",
-                "${workspaceFolder}/build/bin/vxGraphics/vxGraphics",
-            ],
-            "dependsOn": ["BuildWithClang"],
-        },
-        {
             "label": "cs1",
             "type": "shell",
             "command": "${workspaceFolder}/extern/vulkansdk/macos/macOS/bin/glslc",
@@ -137,10 +69,20 @@
             "dependsOn": ["cs1", "cs2"],
         },
         {
+            "label": "vxBuild vxGraphics",
+            "type": "shell",
+            "command": "${workspaceFolder}/build/bin/vxBuild/vxBuild",
+            "args": [
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/build/bin/vxBuild"
+            },
+            "dependsOn": [],
+        },
+        {
             "label": "Build",
-            //"dependsOn": ["BuildShaders", "FixVulkanLibPath"],
-            "dependsOn": ["BuildShaders", "BuildWithClang"],
-            //"dependsOn": ["BuildWithClang2"],
+            "dependsOn": ["Build vxBuild"],
+            //"dependsOn": ["vxBuild vxGraphics","BuildShaders"],
             "group": {
                 "kind": "build",
                 "isDefault": true

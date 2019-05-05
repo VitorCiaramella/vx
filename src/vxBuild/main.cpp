@@ -150,9 +150,6 @@ void printCompletedProcesses(const std::list<std::shared_ptr<Process>> & process
                 headerPrinted = true;
             }
             printf("  %s\n", process->description.c_str());
-            printf("    Exit code: %i\n", process->exitCode);
-            printf("    %s\n", process->cmdWithArgs.c_str());
-            printf("\n\n");
         }
     }
     headerPrinted = false;
@@ -160,18 +157,14 @@ void printCompletedProcesses(const std::list<std::shared_ptr<Process>> & process
     {        
         if (process->exitCode != 0)
         {
+            containsFailures = true;
             if (!headerPrinted)
             {
-                printf("\nFailures:\n");
+                printf("\n\nFailures:\n");
                 headerPrinted = true;
             }
             printf("  %s\n", process->description.c_str());
             printf("    Exit code: %i\n", process->exitCode);
-            printf("    %s\n", process->cmdWithArgs.c_str());
-            while (process->stdOutStream && std::getline(process->stdOutStream, line) && !line.empty())
-            {
-                printf("    %s\n", line.c_str());
-            }
             if (!process->stdOutPath.empty())
             {
                 auto logFile = std::ifstream(process->stdOutPath.c_str());
@@ -184,6 +177,13 @@ void printCompletedProcesses(const std::list<std::shared_ptr<Process>> & process
                     logFile.close();
                 }
             }
+            else
+            {
+                while (process->stdOutStream && std::getline(process->stdOutStream, line) && !line.empty())
+                {
+                    printf("    %s\n", line.c_str());
+                }
+            }            
             printf("\n\n");
         }
     }
@@ -243,15 +243,20 @@ void getFiles(const std::list<std::string> & searchPaths, const std::list<std::s
             filesFound.push_back(fs::canonical(absPath));
             continue;
         }
-        auto filename = absPath.filename();
-        auto directory = absPath.parent_path();
-        if (!fs::exists(directory))
+        auto filename = fs::path("**");
+        auto directory = absPath;
+        if (!fs::is_directory(absPath))
         {
-            printf("Error: Directory does not exist: %s\n", directory.c_str());
-            printf("Error: Invalid path: %s\n", originalPath.c_str());
-            continue;
+            filename = absPath.filename();        
+            directory = absPath.parent_path();
+            if (!fs::exists(directory))
+            {
+                printf("Error: Directory does not exist: %s\n", directory.c_str());
+                printf("Error: Invalid path: %s\n", originalPath.c_str());
+                continue;
+            }
+            directory = fs::canonical(directory);
         }
-        directory = fs::canonical(directory);
         auto extension = filename.extension().string();
         filename.replace_extension("");
         auto isRecursiveWildcard = boost::iequals(filename.string(), "**") || boost::iequals(filename.string(), ".");
@@ -334,6 +339,7 @@ bool assertDirectoryExists(const fs::path & path)
 
 void printPathList(const std::string & header, const std::list<fs::path> & pathList)
 {
+    return;
     printf("\n%s\n", header.c_str());
     for (auto && path : pathList)
     {
@@ -390,12 +396,17 @@ void copyHeaderFilesForPreCompilation(const std::shared_ptr<ProcessManager> & pr
     auto extensions = std::list<std::string>();
     extensions.push_back(".h");
     extensions.push_back(".hpp");
-    getFiles(cppCompileTask.includePaths, extensions, absRootPath, filesFound);
+
+    //TODO
+    auto reducedIncludePaths = std::list<std::string>();
+    reducedIncludePaths.push_back(cppCompileTask.includePaths.front());
+
+    getFiles(reducedIncludePaths, extensions, absRootPath, filesFound);
     //dedupFiles(filesFound);
     printPathList("Headers to copy an pre-compile:", filesFound);
 
     auto outputRootPath = absolutePath(cppCompileTask.outputPath, absRootPath);
-    auto headersOutputRootPath = createSubDirectory(outputRootPath, "/headers/");
+    auto headersOutputRootPath = createSubDirectory(outputRootPath, "/temp/headers/");
 
     for (auto && includePath : cppCompileTask.includePaths)
     {
@@ -460,8 +471,8 @@ bool getCanonicalPath(fs::path & path)
 void createClangCompileCommand(const std::list<fs::path> & filesFound,const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath)
 {
     auto outputRootPath = absolutePath(cppCompileTask.outputPath, absRootPath);
-    auto headersOutputRootPath = createSubDirectory(outputRootPath, "/headers/");
-    auto objectsOutputRootPath = createSubDirectory(outputRootPath, "/objs/");
+    auto headersOutputRootPath = createSubDirectory(outputRootPath, "/temp/headers/");
+    auto objectsOutputRootPath = createSubDirectory(outputRootPath, "/temp/objs/");
 
     fs::path compilerPath;
     if (!getCompilerPath(cppCompileTask.cppCompilerPath, compilerPath))
@@ -537,7 +548,7 @@ void createClangCompileCommand(const std::list<fs::path> & filesFound,const std:
             if ((fs::exists(outputFilePath) && fs::last_write_time(outputFilePath) > fs::last_write_time(file))
                 || (skipIfLogIsPresent && fs::exists(stdOutFilePath) && fs::last_write_time(stdOutFilePath) > fs::last_write_time(file)))
             {
-                printf("Skipping %s\n", file.c_str());
+                //printf("Skipping %s\n", file.c_str());
                 continue;
             }
         }
@@ -587,8 +598,8 @@ void createExeLinkerProcessRequest(const std::shared_ptr<ProcessManager> & proce
     printPathList("C++ to link:", filesFound);
 
     auto outputRootPath = absolutePath(cppCompileTask.outputPath, absRootPath);
-    auto objectsOutputRootPath = createSubDirectory(outputRootPath, "/objs/");
-    auto binOutputRootPath = createSubDirectory(outputRootPath, "/bin/");
+    auto objectsOutputRootPath = createSubDirectory(outputRootPath, "/temp/objs/");
+    auto binOutputRootPath = createSubDirectory(outputRootPath, "/bin/vxGraphics/");
 
     fs::path linkerPath;
     if (!getCompilerPath("ld", linkerPath))
@@ -629,10 +640,11 @@ void createExeLinkerProcessRequest(const std::shared_ptr<ProcessManager> & proce
         commonArgs.push_back(objectFile.string());
     }
 
-    auto stdOutFilePath = fs::absolute(fs::path("exe.build.log"), binOutputRootPath);
-    auto outputFilePath = fs::absolute(fs::path("exe"), binOutputRootPath);
+    auto stdOutFilePath = fs::absolute(fs::path("vxGraphics.build.log"), binOutputRootPath);
+    auto outputFilePath = fs::absolute(fs::path("vxGraphics"), binOutputRootPath);
 
     auto compilerProcess = std::make_shared<Process>();
+    compilerProcess->description = "Linker";
     compilerProcess->exePath = linkerPath;
     compilerProcess->args = commonArgs;
     compilerProcess->args.push_back("-o");
@@ -665,7 +677,7 @@ int main()
     cppCompileTask.options.push_back("-DVK_USE_PLATFORM_METAL_EXT");
     cppCompileTask.options.push_back("-v");
     cppCompileTask.options.push_back("-g");
-    cppCompileTask.outputPath = "./build/temp/";
+    cppCompileTask.outputPath = "./build/";
     cppCompileTask.frameworks.push_back("Cocoa");
     cppCompileTask.frameworks.push_back("OpenGL");
     cppCompileTask.frameworks.push_back("IOKit");
@@ -682,7 +694,7 @@ int main()
     bool containsFailures;
 
     auto outputRootPath = absolutePath(cppCompileTask.outputPath, absRootPath);
-    auto headersOutputRootPath = createSubDirectory(outputRootPath, "/headers/");
+    auto headersOutputRootPath = createSubDirectory(outputRootPath, "/temp/headers/");
     auto copyHeaderLogPath = fs::absolute("copyHeaders.build.log", headersOutputRootPath);
 
     auto copyHeaderLog = std::ofstream(copyHeaderLogPath.c_str());
@@ -699,7 +711,7 @@ int main()
     processJobs(processManager);
     printCompletedProcesses(processManager->completedProcesses, containsFailures);
     processManager->completedProcesses.clear();
-
+   
     containsFailures = false;
     createCppCompileProcessRequest(processManager, cppCompileTask, absRootPath);
     processJobs(processManager);
@@ -715,6 +727,8 @@ int main()
     }
 
     /*
+    "/Library/Developer/CommandLineTools/usr/bin/dsymutil" -o /Users/vitorciaramella/Documents/GitHub/vx/build/bin/vxBuild/vxBuild.dSYM /Users/vitorciaramella/Documents/GitHub/vx/build/bin/vxBuild/vxBuild
+    
     -o /Users/vitorciaramella/Documents/GitHub/vx/build/bin/vxGraphics/vxGraphics
 
     linker

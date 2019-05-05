@@ -92,3 +92,33 @@ copy from /Library/Developer/CommandLineTools/usr/bin/clang
 to /usr/bin/
 
 -DBOOST_SYSTEM_NO_DEPRECATED
+
+
+LLVM build
+brew update
+brew upgrade
+brew install ocaml
+brew install z3
+brew install swig
+brew install doxygen
+brew install graphviz
+sudo pip install --upgrade pip
+sudo pip install epydoc
+
+FOR APPLE
+sudo xcode-select -r
+rm -r *
+cmake \
+    -G Ninja \
+    -DLLVM_ENABLE_PROJECTS="clang;lldb;lld;libcxx;libcxxabi" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=./ \
+    -C ../../../extern/llvm-project/clang/cmake/caches/Apple-stage1.cmake \
+    -DLLVM_CREATE_XCODE_TOOLCHAIN=On \
+    ../../../extern/llvm-project/llvm
+ninja stage2-distribution
+ninja stage2-install-distribution
+ninja cxx
+ninja lld
+ninja lldb
+

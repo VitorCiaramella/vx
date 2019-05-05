@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [        
         {
-            "name": "clang++ build and debug active file",
+            "name": "vxGraphics",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/bin/vxGraphics/vxGraphics",
@@ -27,9 +27,8 @@
                 "engineLogging": true
             }
         },
-        /*
         {
-            "name": "clang++ build and debug active file",
+            "name": "vxBuild",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/bin/vxBuild/vxBuild",
@@ -47,6 +46,6 @@
                 "engineLogging": true
             }
         }
-        */
+        
     ]
 }
