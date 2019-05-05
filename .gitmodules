@@ -22,3 +22,6 @@
 [submodule "extern/tiny-process-library"]
 	path = extern/tiny-process-library
 	url = https://gitlab.com/eidheim/tiny-process-library.git
+[submodule "extern/llvm-project"]
+	path = extern/llvm-project
+	url = https://github.com/llvm/llvm-project.git
