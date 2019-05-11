@@ -35,16 +35,21 @@ public:
     int exitCode;
     std::stringstream stdOutStream;
     fs::path stdOutPath;
-    std::string cmdWithArgs;
     std::ofstream * stdOutFile;
     
-    void runAsync()
+    std::string getCmdWithArgs()
     {
-        cmdWithArgs = exePath.string();
+        auto cmdWithArgs = exePath.string();
         for (auto && arg : args)
         {
             cmdWithArgs += " " + arg;
         }
+        return cmdWithArgs;
+    }
+
+    void runAsync()
+    {
+        auto cmdWithArgs = getCmdWithArgs();
         auto logFunction = [&](const char *bytes, size_t n) 
         {
             stdOutStream.write(bytes, n);
@@ -73,7 +78,7 @@ public:
                 auto file = std::ofstream(stdOutPath.c_str());
                 if (file.is_open())
                 {
-                    file << cmdWithArgs << "\n";
+                    file << getCmdWithArgs() << "\n";
                     file << "Exit code: " << exitCode << "\n\n";
                     file << stdOutStream.rdbuf();
                     file.close();
@@ -326,6 +331,14 @@ typedef struct CppCompileTask
     bool forceHeaderRecompilation;
 } CppCompileTask;
 
+typedef struct GlslCompileTask
+{
+    std::string glslCompilerPath;
+    std::list<std::string> sourcePaths;
+    std::string outputPath;
+    bool forceRecompilation;
+} GlslCompileTask;
+
 bool assertDirectoryExists(const fs::path & path)
 {
     if (!fs::exists(path) || !fs::is_directory(path))
@@ -467,8 +480,7 @@ bool getCanonicalPath(fs::path & path)
     return true;
 }
 
-
-void createClangCompileCommand(const std::list<fs::path> & filesFound,const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath)
+void createClangCompileCommand(const std::list<fs::path> & filesFound,const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath, std::ofstream & compilerComandsJson)
 {
     auto outputRootPath = absolutePath(cppCompileTask.outputPath, absRootPath);
     auto headersOutputRootPath = createSubDirectory(outputRootPath, "/temp/headers/");
@@ -543,6 +555,17 @@ void createClangCompileCommand(const std::list<fs::path> & filesFound,const std:
         auto stdOutFilePath = fs::change_extension(outputFilePath, fileExtension + ".build.log");
         outputFilePath = fs::change_extension(outputFilePath, fileExtension + outputExtension);
 
+        compilerProcess->args.push_back("-o");
+        compilerProcess->args.push_back(outputFilePath.string());
+        compilerProcess->stdOutPath = stdOutFilePath;
+
+        compilerComandsJson << "  {\n";
+        compilerComandsJson << "    \"command\":\"" << compilerProcess->getCmdWithArgs() << "\",\n";
+        compilerComandsJson << "    \"directory\":\"" << absRootPath.string() << "\",\n";
+        compilerComandsJson << "    \"file\":\"" << file.string() << "\",\n";
+        compilerComandsJson << "    \"output\":\"" << outputFilePath.string() << "\"\n";
+        compilerComandsJson << "  },\n";
+
         if (!forceRecompilation)
         {
             if ((fs::exists(outputFilePath) && fs::last_write_time(outputFilePath) > fs::last_write_time(file))
@@ -552,16 +575,77 @@ void createClangCompileCommand(const std::list<fs::path> & filesFound,const std:
                 continue;
             }
         }
-
-        compilerProcess->args.push_back("-o");
-        compilerProcess->args.push_back(outputFilePath.string());
-
-        compilerProcess->stdOutPath = stdOutFilePath;
         processManager->processQueue.push(compilerProcess);
     }
 }
 
-void createHppPreCompileProcessRequest(const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath)
+void createGlslCompileCommand(const std::list<fs::path> & filesFound,const std::shared_ptr<ProcessManager> & processManager, const GlslCompileTask & glslCompileTask, const fs::path & absRootPath)
+{
+    auto outputRootPath = absolutePath(glslCompileTask.outputPath, absRootPath);
+    auto spvOutputRootPath = createSubDirectory(outputRootPath, "/temp/spvs/");
+
+    auto compilerPath = absolutePath(glslCompileTask.glslCompilerPath, absRootPath);
+    if (!fs::exists(compilerPath) || !fs::is_regular_file(compilerPath))
+    {
+        printf("Glsl compiler not found at %s\n", compilerPath.c_str());
+        return;
+    }
+    compilerPath = fs::canonical(compilerPath);
+
+    auto commonArgs = std::vector<std::string>();
+
+    for (auto && file : filesFound)
+    {
+        auto outputFilePath = file;
+
+        auto compilerProcess = std::make_shared<Process>();
+        compilerProcess->exePath = compilerPath;
+        compilerProcess->args = commonArgs;
+
+        auto fileExtension = file.extension().string();
+        auto fileSubExtension = fs::change_extension(file, "").extension().string();
+        std::string outputExtension;
+        auto forceRecompilation = false;
+        auto skipIfLogIsPresent = false;
+        if (boost::iequals(fileExtension, ".glsl"))
+        {
+            outputExtension = ".spv";
+            outputFilePath = createCorrespondingPath(outputFilePath, absRootPath, spvOutputRootPath);
+            compilerProcess->description = "Shader compile " + file.filename().string();
+            if (fileSubExtension.size() > 1)
+            {
+                fileSubExtension.erase(0,1);
+                compilerProcess->args.push_back("-fshader-stage=" + fileSubExtension);
+            }
+        }
+        else
+        {
+            printf("Unsupported extension %s for %s\n", fileExtension.c_str(), file.c_str());
+            continue;
+        }
+        
+        auto stdOutFilePath = fs::change_extension(outputFilePath, fileExtension + ".build.log");
+        outputFilePath = fs::change_extension(outputFilePath, fileExtension + outputExtension);
+
+        compilerProcess->args.push_back(file.string());
+        compilerProcess->args.push_back("-o");
+        compilerProcess->args.push_back(outputFilePath.string());
+        compilerProcess->stdOutPath = stdOutFilePath;
+
+        if (!forceRecompilation)
+        {
+            if ((fs::exists(outputFilePath) && fs::last_write_time(outputFilePath) > fs::last_write_time(file))
+                || (skipIfLogIsPresent && fs::exists(stdOutFilePath) && fs::last_write_time(stdOutFilePath) > fs::last_write_time(file)))
+            {
+                //printf("Skipping %s\n", file.c_str());
+                continue;
+            }
+        }
+        processManager->processQueue.push(compilerProcess);
+    }
+}
+
+void createHppPreCompileProcessRequest(const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath, std::ofstream & compilerComandsJson)
 {
     auto filesFound = std::list<fs::path>();
     auto extensions = std::list<std::string>();
@@ -571,10 +655,10 @@ void createHppPreCompileProcessRequest(const std::shared_ptr<ProcessManager> & p
     //dedupFiles(filesFound);
     printPathList("Headers to pre-compile:", filesFound);
 
-    createClangCompileCommand(filesFound, processManager, cppCompileTask, absRootPath);
+    createClangCompileCommand(filesFound, processManager, cppCompileTask, absRootPath, compilerComandsJson);
 }
 
-void createCppCompileProcessRequest(const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath)
+void createCppCompileProcessRequest(const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath, std::ofstream & compilerComandsJson)
 {
     auto filesFound = std::list<fs::path>();
     auto extensions = std::list<std::string>();
@@ -584,7 +668,19 @@ void createCppCompileProcessRequest(const std::shared_ptr<ProcessManager> & proc
     //dedupFiles(filesFound);
     printPathList("C++ to compile:", filesFound);
 
-    createClangCompileCommand(filesFound, processManager, cppCompileTask, absRootPath);
+    createClangCompileCommand(filesFound, processManager, cppCompileTask, absRootPath, compilerComandsJson);
+}
+
+void createGlslCompileProcessRequest(const std::shared_ptr<ProcessManager> & processManager, const GlslCompileTask & glslCompileTask, const fs::path & absRootPath)
+{
+    auto filesFound = std::list<fs::path>();
+    auto extensions = std::list<std::string>();
+    extensions.push_back(".glsl");
+    getFiles(glslCompileTask.sourcePaths, extensions, absRootPath, filesFound);
+    //dedupFiles(filesFound);
+    printPathList("Shader to compile:", filesFound);
+
+    createGlslCompileCommand(filesFound, processManager, glslCompileTask, absRootPath);
 }
 
 void createExeLinkerProcessRequest(const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath)
@@ -697,6 +793,18 @@ int main()
     auto headersOutputRootPath = createSubDirectory(outputRootPath, "/temp/headers/");
     auto copyHeaderLogPath = fs::absolute("copyHeaders.build.log", headersOutputRootPath);
 
+
+    GlslCompileTask glslCompileTask;
+    glslCompileTask.forceRecompilation = false;
+    glslCompileTask.glslCompilerPath = fs::absolute("./extern/vulkansdk/macos/macOS/bin/glslc", absRootPath).string();
+    glslCompileTask.outputPath = "./build/";
+    glslCompileTask.sourcePaths.push_back("./src/vxGraphics/**");
+    createGlslCompileProcessRequest(processManager, glslCompileTask, absRootPath);
+    processJobs(processManager);
+    printCompletedProcesses(processManager->completedProcesses, containsFailures);
+    processManager->completedProcesses.clear();
+
+
     auto copyHeaderLog = std::ofstream(copyHeaderLogPath.c_str());
     if (copyHeaderLog.is_open())
     {
@@ -707,16 +815,27 @@ int main()
     printCompletedProcesses(processManager->completedProcesses, containsFailures);
     processManager->completedProcesses.clear();
 
-    createHppPreCompileProcessRequest(processManager, cppCompileTask, absRootPath);
-    processJobs(processManager);
-    printCompletedProcesses(processManager->completedProcesses, containsFailures);
-    processManager->completedProcesses.clear();
-   
-    containsFailures = false;
-    createCppCompileProcessRequest(processManager, cppCompileTask, absRootPath);
-    processJobs(processManager);
-    printCompletedProcesses(processManager->completedProcesses, containsFailures);
-    processManager->completedProcesses.clear();
+    auto compileCommandsJsonPath = fs::absolute(".vscode/compile_commands.json", absRootPath);
+    auto compilerComandsJson = std::ofstream(compileCommandsJsonPath.c_str());
+    if (compilerComandsJson.is_open())
+    {
+        compilerComandsJson << "[\n";
+
+        createHppPreCompileProcessRequest(processManager, cppCompileTask, absRootPath, compilerComandsJson);
+        processJobs(processManager);
+        printCompletedProcesses(processManager->completedProcesses, containsFailures);
+        processManager->completedProcesses.clear();
+    
+        containsFailures = false;
+        createCppCompileProcessRequest(processManager, cppCompileTask, absRootPath, compilerComandsJson);
+        processJobs(processManager);
+        printCompletedProcesses(processManager->completedProcesses, containsFailures);
+        processManager->completedProcesses.clear();
+
+        compilerComandsJson << "  {}\n";
+        compilerComandsJson << "]\n";
+        compilerComandsJson.close();
+    }
 
     if (!containsFailures)
     {

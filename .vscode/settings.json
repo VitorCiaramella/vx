@@ -89,7 +89,9 @@
         "typeindex": "cpp",
         "valarray": "cpp",
         "variant": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp"
     },
     "C_Cpp.configurationWarnings": "Disabled",
     "git.ignoreLimitWarning": true

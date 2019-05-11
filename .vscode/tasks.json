@@ -9,18 +9,13 @@
             "command": "/Library/Developer/CommandLineTools/usr/bin/clang++",
             "args": [
                 "-std=c++17",
-                //"-isystem/Library/Developer/CommandLineTools/usr/include",
                 "-stdlib=libc++",
                 
                 "-D_DEBUG",
 
                 "-v",//verbose
                 "-g",//debug
-                //"-L${workspaceFolder}/build/bin/boost/lib",
-                //"-lboost_system",
-                //"-lboost_filesystem",
-                //"-lboost_process",
-                //"-lboost_thread-mt",
+
                 "${workspaceFolder}/build/bin/boost/lib/libboost_filesystem-mt-d-x64.a",
                 "${workspaceFolder}/build/bin/boost/lib/libboost_chrono-mt-d-x64.a",
                 "${workspaceFolder}/build/bin/boost/lib/libboost_system-mt-d-x64.a",
@@ -43,32 +38,6 @@
             },
         },
         {
-            "label": "cs1",
-            "type": "shell",
-            "command": "${workspaceFolder}/extern/vulkansdk/macos/macOS/bin/glslc",
-            "args": [
-                "-fshader-stage=vert",                
-                "-o",
-                "${workspaceFolder}/build/bin/vxGraphics/shaders/triangle.vert.spv",
-                "${workspaceFolder}/src/vxGraphics/shaders/triangle.vert.glsl",
-            ],
-        },
-        {
-            "label": "cs2",
-            "type": "shell",
-            "command": "${workspaceFolder}/extern/vulkansdk/macos/macOS/bin/glslc",
-            "args": [
-                "-fshader-stage=frag",                
-                "-o",
-                "${workspaceFolder}/build/bin/vxGraphics/shaders/triangle.frag.spv",
-                "${workspaceFolder}/src/vxGraphics/shaders/triangle.frag.glsl",
-            ],
-        },
-        {
-            "label": "BuildShaders",
-            "dependsOn": ["cs1", "cs2"],
-        },
-        {
             "label": "vxBuild vxGraphics",
             "type": "shell",
             "command": "${workspaceFolder}/build/bin/vxBuild/vxBuild",
@@ -77,12 +46,12 @@
             "options": {
                 "cwd": "${workspaceFolder}/build/bin/vxBuild"
             },
+            //"dependsOn": ["Build vxBuild"],
             "dependsOn": [],
         },
         {
             "label": "Build",
-            "dependsOn": ["Build vxBuild"],
-            //"dependsOn": ["vxBuild vxGraphics","BuildShaders"],
+            "dependsOn": ["vxBuild vxGraphics"],
             "group": {
                 "kind": "build",
                 "isDefault": true
