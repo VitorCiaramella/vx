@@ -25,3 +25,9 @@
 [submodule "extern/llvm-project"]
 	path = extern/llvm-project
 	url = https://github.com/llvm/llvm-project.git
+[submodule "extern/julia"]
+	path = extern/julia
+	url = https://github.com/JuliaLang/julia.git
+[submodule "extern/cpython"]
+	path = extern/cpython
+	url = https://github.com/python/cpython.git
