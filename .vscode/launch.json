@@ -18,14 +18,22 @@
                 {"name": "VK_ICD_FILENAMES", "value": "${workspaceFolder}/extern/vulkansdk/macos/macOS/etc/vulkan/icd.d/MoltenVK_icd.json"},
             ],
             "externalConsole": true,
-            "MIMode": "lldb",
             "preLaunchTask": "Build",
             "postDebugTask": "postdebugKill",
             "logging": {
                 "trace": true,
                 "traceResponse": true,
                 "engineLogging": true
-            }
+            },
+            "MIMode": "lldb",
+            /*
+            "miDebuggerPath" : "${workspaceFolder}/build/bin/llvm-project/bin/lldb",
+            "miDebuggerArgs": "--arch=x86_64 --disable-aslr",
+            "customLaunchSetupCommands": [
+                { "text": "target-run", "description": "run target", "ignoreFailures": false }
+             ],
+             "launchCompleteCommand": "exec-run",
+             */
         },
         {
             "name": "vxBuild",

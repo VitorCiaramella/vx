@@ -62,7 +62,7 @@
             "type": "process",
             "command":[
                "${command:workbench.action.tasks.terminate}",
-               "${command:workbench.action.acceptSelectedQuickOpenItem}",
+               //"${command:workbench.action.acceptSelectedQuickOpenItem}",
             ],
          },
     ]
