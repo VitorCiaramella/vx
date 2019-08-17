@@ -16,9 +16,6 @@
 [submodule "extern/meshoptimizer"]
 	path = extern/meshoptimizer
 	url = https://github.com/zeux/meshoptimizer.git
-[submodule "extern/boost"]
-	path = extern/boost
-	url = https://github.com/boostorg/boost.git
 [submodule "extern/tiny-process-library"]
 	path = extern/tiny-process-library
 	url = https://gitlab.com/eidheim/tiny-process-library.git
