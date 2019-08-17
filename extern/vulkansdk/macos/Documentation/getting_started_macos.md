@@ -152,8 +152,6 @@ Installing is a simple operation involving expanding a "tar" archive file
 into your work area.
 The macOS SDK is intended to be installed anywhere the user can place files
 such as the user's `$HOME` directory.
-The SDK isn't configured to install to protected system locations such as
-`/usr/lib` or `/System`.
 
 If using `Finder`, navigate to the downloaded file and drag it to where you
 want to install it.
@@ -166,7 +164,32 @@ If using the command line in `Terminal`, use shell commands to move the `tar.gz`
 file to where you want to install it and run `tar -xzf filename` to expand.
 If the file is a `tar` file, then `tar -xf filename` will suffice.
 
-**Note**: Since each SDK version has a unique name, multiple versions of the Vulkan SDK can be installed on a single system.
+**Note**: Since each SDK version has a unique name, multiple versions of the
+Vulkan SDK can be installed on a single system using this method.
+
+### Install the SDK - Alternate method using system paths
+
+macOS allows the installation of files to `/usr/local` which may be more
+convenient for some users. Installing the Vulkan SDK to this system path removes
+the need to set `PATH`, `DYLD_LIBRARY_PATH`, `VK_LAYER_PATH`, and
+`VK_ICD_FILENAMES` environment variables in order to use SDK components.
+
+An install script is provided with the SDK named `install_vulkan.py`.  To run
+the script, navigate to the root directory of the SDK in your terminal and run:
+
+    ./install_vulkan.py
+
+This will copy the SDK files to the appropriate system directories and generate
+a log file named `INSTALL.log` and a companion uninstall script named
+`uninstall.sh`. To run the uninstall script, navigate to the root directory of
+the SDK in your terminal and run:
+
+    ./uninstall.sh
+
+**Note**: Since SDK components are copied directly to the `/usr/local` tree,
+only a single versions of the Vulkan SDK can be installed using this method.  To
+upgrade the installed version of the Vulkan SDK, first run `uninstall.sh` from
+the current SDK directory before installing the new version.
 
 ## SDK Contents
 
@@ -290,21 +313,6 @@ to the bundled application workflow.
 This typically requires you to set Xcode Environment variables and or
 Xcode custom paths to point to your SDK location.
 
-### Install to System Directories
-
-macOS discourages third-parties from installing libraries or frameworks to
-system directories.
-But it is possible for application developers to put together
-their own macOS "Packages"
-that come with an application and are installed when the application is installed.
-This may be a good approach for putting the Vulkan components into a place where they
-can be updated without updating the application.
-
-macOS also allows users to install files to `/usr/local` which may be convenient
-for users who prefer this approach.
-There are no "install" scripts provided with this SDK, but you can manually
-install desired SDK files to the appropriate system locations.
-
 ## Using the SDK
 
 ### Pre-built Applications
@@ -419,30 +427,6 @@ But if you use non-bundled Vulkan applications from the command line
 frequently, you may wish to set these environment variables in your
 login scripts or install the components to system locations.
 
-#### Installing Vulkan Components to System Directories
-
-macOS is comparable to other UNIX-like operating systems in that you can install
-components to system directories as a "super-user".
-macOS is also a bit more locked down in the sense that a super-user can't easily
-install to places like `/usr/bin`.
-However, it is fairly easy to install to places like `/usr/local/bin`.
-
-This SDK currently does not directly support or encourage installing SDK components to
-system directories.
-
-But if you are interested in installing SDK components to system directories,
-you can do so manually and pick only the components you need to install.
-This may be helpful for reducing the need to set
-environment variables to locate the components that reside in your SDK directory.
-
-For example, to install the ICD to the system directories:
-
-1. copy `vulkansdk/macOS/lib/libMoltenvVK.dylib` to `/usr/local/lib`
-1. create directory: `/etc/vulkan/icd.d`
-1. copy `vulkansdk/macOS/etc/icd.d/MoltenVK_icd.json` to `/etc/vulkan/icd.d`
-1. edit `/etc/vulkan/icd.d/MoltenVK_icd.json`
-    1. Change the `library_path` to remove any leading path, leaving just `libMoltenVK.dylib`
-
 ### Enable validation and utility layers
 
 The Vulkan SDK includes runtime support for validation and utility layers.
@@ -469,7 +453,7 @@ The layers can be enabled either by using the graphical tool, Vulkan Configurato
 3. Check the "Use custom layer paths" box on the top left. Then click the "Search" button and navigate to the SDK in the popup window. Select the SDK's directory. A popup will ask you to confirm the layers that were found by the SDK. Click ok on this popup.
 4. Find the pane labeled "Unset Explicit Layers". One of the layers in that pane should read "LunarG: Api Dump". Select this layer by clicking on it.
 5. Click the left arrow directly to the left of the "Unset Explicit Layers" pane. The API dump layer should now move to the "Enabled Layers" pane.
-6. Click the "Save" button at the bottom left of the window.
+6. Click the "Save" button at the bottom left of the window, and do not exit the Vulkan Configurator.
 7. Run the Vulkan Cube program from a console:
 
     ```shell
@@ -799,7 +783,7 @@ You can experiment further by fixing this problem and see what happens next.
 
 You can also build applications using this SDK with CMake.
 
-For MacOS, [CMake 3.11.3](https://github.com/Kitware/CMake/releases/tag/v3.11.3) is recommended.
+[CMake 3.10.2](https://cmake.org/files/v3.10/cmake-3.10.2-Darwin-x86_64.tar.gz) is recommended.
 
 Recent CMake versions include a `FindVulkan.cmake` module that
 is useful for locating the SDK and using it in CMake projects.
@@ -886,13 +870,13 @@ There are a few ways to fix this:
 * You can export the `VK_ICD_FILENAMES` environment variable.
   * Instructions for this can be found under the section ["Useful Environment Variables."](#useful-environment-variables)
 * You can install the ICD in a system directory.
-  * Instructions for this can be found under the section ["Install to System Directories."](#install-to-system-directories)
+  * Instructions for this can be found under the section ["Install the SDK - Alternate method using system paths."](#install-the-sdk---alternate-method-using-system-paths)
 * If your application is contained in a bundle, you can relink the app to place the driver in the bundle.
   * Instructions for this can be found under the section ["Create a Bundled Application"](#create-a-bundled-application)
 
 Encountered "Could not start Vulkan Info" message in "Vulkan Info" tab of `vkconfig.app`:
 To use the "Vulkan Info" tab in `vkconfig.app` you must install the SDK to
-your system directories as described in the section ["Install to System Directories."](#install-to-system-directories)
+your system directories as described in the section ["Install the SDK - Alternate method using system paths."](#install-the-sdk---alternate-method-using-system-paths)
 
 Invisible text in `vkconfig.app`:
 Some text in `vkconfig.app` does not display properly in Dark Theme on MacOS Mojave.

@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.6">
+<meta name="generator" content="Asciidoctor 1.5.8">
 <meta name="author" content="The Khronos® Vulkan Working Group">
-<title>Vulkan® 1.1.106 - A Specification (with all published extensions)</title>
+<title>Vulkan® 1.1.114 - A Specification (with all published extensions)</title>
 <style>
 /*! normalize.css v2.1.2 | MIT License | git.io/normalize */
 /* ========================================================================== HTML5 display definitions ========================================================================== */
@@ -728,6 +728,97 @@ a code { color: inherit; }
 
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+/* Stylesheet for CodeRay to match GitHub theme | MIT License | http://foundation.zurb.com */
+/*pre.CodeRay {background-color:#f7f7f8;}*/
+.CodeRay .line-numbers{border-right:1px solid #d8d8d8;padding:0 0.5em 0 .25em}
+.CodeRay span.line-numbers{display:inline-block;margin-right:.5em;color:rgba(0,0,0,.3)}
+.CodeRay .line-numbers strong{color:rgba(0,0,0,.4)}
+table.CodeRay{border-collapse:separate;border-spacing:0;margin-bottom:0;border:0;background:none}
+table.CodeRay td{vertical-align: top;line-height:1.45}
+table.CodeRay td.line-numbers{text-align:right}
+table.CodeRay td.line-numbers>pre{padding:0;color:rgba(0,0,0,.3)}
+table.CodeRay td.code{padding:0 0 0 .5em}
+table.CodeRay td.code>pre{padding:0}
+.CodeRay .debug{color:#fff !important;background:#000080 !important}
+.CodeRay .annotation{color:#007}
+.CodeRay .attribute-name{color:#000080}
+.CodeRay .attribute-value{color:#700}
+.CodeRay .binary{color:#509}
+.CodeRay .comment{color:#998;font-style:italic}
+.CodeRay .char{color:#04d}
+.CodeRay .char .content{color:#04d}
+.CodeRay .char .delimiter{color:#039}
+.CodeRay .class{color:#458;font-weight:bold}
+.CodeRay .complex{color:#a08}
+.CodeRay .constant,.CodeRay .predefined-constant{color:#008080}
+.CodeRay .color{color:#099}
+.CodeRay .class-variable{color:#369}
+.CodeRay .decorator{color:#b0b}
+.CodeRay .definition{color:#099}
+.CodeRay .delimiter{color:#000}
+.CodeRay .doc{color:#970}
+.CodeRay .doctype{color:#34b}
+.CodeRay .doc-string{color:#d42}
+.CodeRay .escape{color:#666}
+.CodeRay .entity{color:#800}
+.CodeRay .error{color:#808}
+.CodeRay .exception{color:inherit}
+.CodeRay .filename{color:#099}
+.CodeRay .function{color:#900;font-weight:bold}
+.CodeRay .global-variable{color:#008080}
+.CodeRay .hex{color:#058}
+.CodeRay .integer,.CodeRay .float{color:#099}
+.CodeRay .include{color:#555}
+.CodeRay .inline{color:#000}
+.CodeRay .inline .inline{background:#ccc}
+.CodeRay .inline .inline .inline{background:#bbb}
+.CodeRay .inline .inline-delimiter{color:#d14}
+.CodeRay .inline-delimiter{color:#d14}
+.CodeRay .important{color:#555;font-weight:bold}
+.CodeRay .interpreted{color:#b2b}
+.CodeRay .instance-variable{color:#008080}
+.CodeRay .label{color:#970}
+.CodeRay .local-variable{color:#963}
+.CodeRay .octal{color:#40e}
+.CodeRay .predefined{color:#369}
+.CodeRay .preprocessor{color:#579}
+.CodeRay .pseudo-class{color:#555}
+.CodeRay .directive{font-weight:bold}
+.CodeRay .type{font-weight:bold}
+.CodeRay .predefined-type{color:inherit}
+.CodeRay .reserved,.CodeRay .keyword {color:#000;font-weight:bold}
+.CodeRay .key{color:#808}
+.CodeRay .key .delimiter{color:#606}
+.CodeRay .key .char{color:#80f}
+.CodeRay .value{color:#088}
+.CodeRay .regexp .delimiter{color:#808}
+.CodeRay .regexp .content{color:#808}
+.CodeRay .regexp .modifier{color:#808}
+.CodeRay .regexp .char{color:#d14}
+.CodeRay .regexp .function{color:#404;font-weight:bold}
+.CodeRay .string{color:#d20}
+.CodeRay .string .string .string{background:#ffd0d0}
+.CodeRay .string .content{color:#d14}
+.CodeRay .string .char{color:#d14}
+.CodeRay .string .delimiter{color:#d14}
+.CodeRay .shell{color:#d14}
+.CodeRay .shell .delimiter{color:#d14}
+.CodeRay .symbol{color:#990073}
+.CodeRay .symbol .content{color:#a60}
+.CodeRay .symbol .delimiter{color:#630}
+.CodeRay .tag{color:#008080}
+.CodeRay .tag-special{color:#d70}
+.CodeRay .variable{color:#036}
+.CodeRay .insert{background:#afa}
+.CodeRay .delete{background:#faa}
+.CodeRay .change{color:#aaf;background:#007}
+.CodeRay .head{color:#f8f;background:#505}
+.CodeRay .insert .insert{color:#080}
+.CodeRay .delete .delete{color:#800}
+.CodeRay .change .change{color:#66f}
+.CodeRay .head .head{color:#f4f}
+</style>
 <link rel="stylesheet" href="../katex/katex.min.css">
 <link href="chunked.css?4" rel="stylesheet">
 <script>var searchindexurl = 'search.index.js?4' + (document.title.replace(/[^0-9.]/g, ''));</script>
@@ -753,12 +844,12 @@ a code { color: inherit; }
 </script></head>
 <body class="book toc2 toc-left" style="max-width: 100;">
 <div id="header">
-<h1>Vulkan<sup>®</sup> 1.1.106 - A Specification (with all published extensions)</h1>
+<h1>Vulkan<sup>®</sup> 1.1.114 - A Specification (with all published extensions)</h1>
 <div class="details">
 <span id="author" class="author">The Khronos<sup>®</sup> Vulkan Working Group</span><br>
-<span id="revnumber">version 1.1.106,</span>
-<span id="revdate">2019-04-15 21:10:00Z</span>
-<br><span id="revremark">from git branch: Git branch information not available commit: b1042a3204aba3319e2a9b42afa969789472a458</span>
+<span id="revnumber">version 1.1.114,</span>
+<span id="revdate">2019-07-26 16:21:27Z</span>
+<br><span id="revremark">from git branch: Git branch information not available commit: 7eb07044df67e19e768080c7f378fc0938ead346</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -922,7 +1013,7 @@ a code { color: inherit; }
 <li><a href="chap15.html#_conversion_formulas">15.2. Conversion Formulas</a></li>
 <li><a href="chap15.html#_texel_input_operations">15.3. Texel Input Operations</a></li>
 <li><a href="chap15.html#_texel_output_operations">15.4. Texel Output Operations</a></li>
-<li><a href="chap15.html#_derivative_operations">15.5. Derivative Operations</a></li>
+<li><a href="chap15.html#texture-derivatives">15.5. Derivative Operations</a></li>
 <li><a href="chap15.html#textures-normalized-operations">15.6. Normalized Texel Coordinate Operations</a></li>
 <li><a href="chap15.html#_unnormalized_texel_coordinate_operations">15.7. Unnormalized Texel Coordinate Operations</a></li>
 <li><a href="chap15.html#textures-integer-coordinate-operations">15.8. Integer Texel Coordinate Operations</a></li>
@@ -946,6 +1037,7 @@ a code { color: inherit; }
 <li><a href="chap17.html#queries-pipestats">17.4. Pipeline Statistics Queries</a></li>
 <li><a href="chap17.html#queries-timestamps">17.5. Timestamp Queries</a></li>
 <li><a href="chap17.html#queries-transform-feedback">17.6. Transform Feedback Queries</a></li>
+<li><a href="chap17.html#queries-performance-intel">17.7. Intel performance queries</a></li>
 </ul>
 </li>
 <li><a href="chap18.html#clears">18. Clear Commands</a>
@@ -2263,8 +2355,9 @@ not a multiple of the <a href="chap37.html#texel-block-size">texel block size</a
 <code>offset</code> <strong class="purple">must</strong> be less than the size of <code>buffer</code></p>
 </li>
 <li>
-<p><a id="VUID-VkBufferViewCreateInfo-offset-00926"></a>
-<code>offset</code> <strong class="purple">must</strong> be a multiple of
+<p><a id="VUID-VkBufferViewCreateInfo-offset-02749"></a>
+If the <a href="chap35.html#features-features-texelBufferAlignment">texelBufferAlignment</a>
+feature is not enabled, <code>offset</code> <strong class="purple">must</strong> be a multiple of
 <code>VkPhysicalDeviceLimits</code>::<code>minTexelBufferOffsetAlignment</code></p>
 </li>
 <li>
@@ -2319,6 +2412,32 @@ supported for storage texel buffers, as specified by the
 <p><a id="VUID-VkBufferViewCreateInfo-buffer-00935"></a>
 If <code>buffer</code> is non-sparse then it <strong class="purple">must</strong> be bound completely and
 contiguously to a single <code>VkDeviceMemory</code> object</p>
+</li>
+<li>
+<p><a id="VUID-VkBufferViewCreateInfo-buffer-02750"></a>
+If the <a href="chap35.html#features-features-texelBufferAlignment">texelBufferAlignment</a>
+feature is enabled and if <code>buffer</code> was created with <code>usage</code>
+containing <code>VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT</code>, <code>offset</code>
+<strong class="purple">must</strong> be a multiple of the lesser of
+<a href="chap36.html#VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT">VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT</a>::<code>storageTexelBufferOffsetAlignmentBytes</code>
+or, if
+<a href="chap36.html#VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT">VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT</a>::<code>storageTexelBufferOffsetSingleTexelAlignment</code>
+is <code>VK_TRUE</code>, the size of a texel of the requested <code>format</code>.
+If the size of a texel is a multiple of three bytes, then the size of a
+single component of <code>format</code> is used instead</p>
+</li>
+<li>
+<p><a id="VUID-VkBufferViewCreateInfo-buffer-02751"></a>
+If the <a href="chap35.html#features-features-texelBufferAlignment">texelBufferAlignment</a>
+feature is enabled and if <code>buffer</code> was created with <code>usage</code>
+containing <code>VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT</code>, <code>offset</code>
+<strong class="purple">must</strong> be a multiple of the lesser of
+<a href="chap36.html#VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT">VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT</a>::<code>uniformTexelBufferOffsetAlignmentBytes</code>
+or, if
+<a href="chap36.html#VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT">VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT</a>::<code>uniformTexelBufferOffsetSingleTexelAlignment</code>
+is <code>VK_TRUE</code>, the size of a texel of the requested <code>format</code>.
+If the size of a texel is a multiple of three bytes, then the size of a
+single component of <code>format</code> is used instead</p>
 </li>
 </ul>
 </div>
@@ -5392,12 +5511,21 @@ miplevel provided, down to the <em>minimum miplevel size</em>.</p>
 <p>For conventional images, the dimensions of each successive miplevel,
 <span class="eq">n+1</span>, are:</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>:: [eq]#pname:width~n+1~ = max({lfloor}pname:width~n~/2{rfloor}, 1)#
-:: [eq]#pname:height~n+1~ = max({lfloor}pname:height~n~/2{rfloor}, 1)#
-:: [eq]#pname:depth~n+1~ = max({lfloor}pname:depth~n~/2{rfloor}, 1)#</pre>
-</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"></dt>
+<dd>
+<p><span class="eq"><code>width</code><sub>n+1</sub> = max(⌊<code>width</code><sub>n</sub>/2⌋, 1)</span></p>
+</dd>
+<dt class="hdlist1"></dt>
+<dd>
+<p><span class="eq"><code>height</code><sub>n+1</sub> = max(⌊<code>height</code><sub>n</sub>/2⌋, 1)</span></p>
+</dd>
+<dt class="hdlist1"></dt>
+<dd>
+<p><span class="eq"><code>depth</code><sub>n+1</sub> = max(⌊<code>depth</code><sub>n</sub>/2⌋, 1)</span></p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>where <span class="eq"><code>width</code><sub>n</sub></span>, <span class="eq"><code>height</code><sub>n</sub></span>, and <span class="eq"><code>depth</code><sub>n</sub></span>
@@ -5422,11 +5550,14 @@ are the dimensions of the next larger miplevel, <span class="eq">n</span>.</p>
 <div class="paragraph">
 <p>The number of levels in a complete mipmap chain is:</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>:: [eq]#{lfloor}log~2~(max(pname:width~0~, pname:height~0~,
-   pname:depth~0~)){rfloor} {plus} 1#</pre>
-</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"></dt>
+<dd>
+<p><span class="eq">⌊log<sub>2</sub>(max(<code>width</code><sub>0</sub>, <code>height</code><sub>0</sub>,
+<code>depth</code><sub>0</sub>))⌋ +  1</span></p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>where <span class="eq"><code>width</code><sub>0</sub></span>, <span class="eq"><code>height</code><sub>0</sub></span>, and <span class="eq"><code>depth</code><sub>0</sub></span>
@@ -5439,12 +5570,21 @@ are the dimensions of the largest (most detailed) miplevel, <code>0</code>.</p>
 <p>For corner-sampled images, the dimensions of each successive miplevel,
 <span class="eq">n+1</span>, are:</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>:: [eq]#pname:width~n+1~ = max({lceil}pname:width~n~/2{rceil}, 2)#
-:: [eq]#pname:height~n+1~ = max({lceil}pname:height~n~/2{rceil}, 2)#
-:: [eq]#pname:depth~n+1~ = max({lceil}pname:depth~n~/2{rceil}, 2)#</pre>
-</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"></dt>
+<dd>
+<p><span class="eq"><code>width</code><sub>n+1</sub> = max(⌈<code>width</code><sub>n</sub>/2⌉, 2)</span></p>
+</dd>
+<dt class="hdlist1"></dt>
+<dd>
+<p><span class="eq"><code>height</code><sub>n+1</sub> = max(⌈<code>height</code><sub>n</sub>/2⌉, 2)</span></p>
+</dd>
+<dt class="hdlist1"></dt>
+<dd>
+<p><span class="eq"><code>depth</code><sub>n+1</sub> = max(⌈<code>depth</code><sub>n</sub>/2⌉, 2)</span></p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>where <span class="eq"><code>width</code><sub>n</sub></span>, <span class="eq"><code>height</code><sub>n</sub></span>, and <span class="eq"><code>depth</code><sub>n</sub></span>
@@ -5466,11 +5606,14 @@ are the dimensions of the next larger miplevel, <span class="eq">n</span>.</p>
 <div class="paragraph">
 <p>The number of levels in a complete mipmap chain is:</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre>:: [eq]#{lceil}log~2~(max(pname:width~0~, pname:height~0~,
-   pname:depth~0~)){rceil}#</pre>
-</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"></dt>
+<dd>
+<p><span class="eq">⌈log<sub>2</sub>(max(<code>width</code><sub>0</sub>, <code>height</code><sub>0</sub>,
+<code>depth</code><sub>0</sub>))⌉</span></p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>where <span class="eq"><code>width</code><sub>0</sub></span>, <span class="eq"><code>height</code><sub>0</sub></span>, and <span class="eq"><code>depth</code><sub>0</sub></span>
@@ -6001,11 +6144,10 @@ of <a href="#VkImageStencilUsageCreateInfoEXT">VkImageStencilUsageCreateInfoEXT<
     implicit <code>usage</code> is equal to
     <a href="#VkImageStencilUsageCreateInfoEXT">VkImageStencilUsageCreateInfoEXT</a>::<code>stencilUsage</code>.
   * If <code>aspectMask</code> includes only <code>VK_IMAGE_ASPECT_DEPTH_BIT</code>, the
-    implicit <code>usage</code> is equal to
-    <a href="#VkImageCreateInfo">VkImageCreateInfo</a>::<code>stencilUsage</code>.
+    implicit <code>usage</code> is equal to <a href="#VkImageCreateInfo">VkImageCreateInfo</a>::<code>usage</code>.
   * If both aspects are included in <code>aspectMask</code>, the implicit
     <code>usage</code> is equal to the intersection of
-    slinkVkImageCreateInfo::<code>usage</code> and
+    <a href="#VkImageCreateInfo">VkImageCreateInfo</a>::<code>usage</code> and
     <a href="#VkImageStencilUsageCreateInfoEXT">VkImageStencilUsageCreateInfoEXT</a>::<code>stencilUsage</code>.
 The implicit <code>usage</code> <strong class="purple">can</strong> be overriden by including an instance of
 <a href="#VkImageViewUsageCreateInfo">VkImageViewUsageCreateInfo</a> structure in the <code>pNext</code> chain.</p>
@@ -6065,7 +6207,10 @@ rounded up.</p>
 defined object</em> of type <a href="chap12.html#VkSamplerYcbcrConversion">VkSamplerYcbcrConversion</a> to that used to
 create the sampler <strong class="purple">must</strong> be passed to <a href="#vkCreateImageView">vkCreateImageView</a> in a
 <a href="chap12.html#VkSamplerYcbcrConversionInfo">VkSamplerYcbcrConversionInfo</a> added to the <code>pNext</code> chain of
-<a href="#VkImageViewCreateInfo">VkImageViewCreateInfo</a>.</p>
+<a href="#VkImageViewCreateInfo">VkImageViewCreateInfo</a>.
+Conversely, if a <a href="chap12.html#VkSamplerYcbcrConversion">VkSamplerYcbcrConversion</a> object is passed to
+<a href="#vkCreateImageView">vkCreateImageView</a>, an identically defined
+<a href="chap12.html#VkSamplerYcbcrConversion">VkSamplerYcbcrConversion</a> object <strong class="purple">must</strong> be used when sampling the image.</p>
 </div>
 <div class="paragraph">
 <p>If the image has a
@@ -6389,16 +6534,18 @@ the <code>arrayLayers</code> specified in <a href="#VkImageCreateInfo">VkImageCr
 <code>image</code> was created</p>
 </li>
 <li>
-<p><a id="VUID-VkImageViewCreateInfo-image-01484"></a>
+<p><a id="VUID-VkImageViewCreateInfo-image-02724"></a>
 If <code>image</code> is a 3D image created with
 <code>VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT</code> set, and <code>viewType</code> is
 <code>VK_IMAGE_VIEW_TYPE_2D</code> or <code>VK_IMAGE_VIEW_TYPE_2D_ARRAY</code>,
 <code>subresourceRange</code>::<code>baseArrayLayer</code> <strong class="purple">must</strong> be less than the
-<code>extent.depth</code> specified in <a href="#VkImageCreateInfo">VkImageCreateInfo</a> when <code>image</code>
-was created</p>
+depth computed from <code>baseMipLevel</code> and <code>extent.depth</code> specified
+in <a href="#VkImageCreateInfo">VkImageCreateInfo</a> when <code>image</code> was created, according to
+the formula defined in <a href="#resources-image-miplevel-sizing">Image Miplevel
+Sizing</a>.</p>
 </li>
 <li>
-<p><a id="VUID-VkImageViewCreateInfo-subresourceRange-01485"></a>
+<p><a id="VUID-VkImageViewCreateInfo-subresourceRange-02725"></a>
 If <code>subresourceRange</code>::<code>layerCount</code> is not
 <code>VK_REMAINING_ARRAY_LAYERS</code>, <code>image</code> is a 3D image created with
 <code>VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT</code> set, and <code>viewType</code> is
@@ -6406,8 +6553,10 @@ If <code>subresourceRange</code>::<code>layerCount</code> is not
 <code>subresourceRange</code>::<code>layerCount</code> <strong class="purple">must</strong> be non-zero and
 <span class="eq"><code>subresourceRange</code>::<code>baseArrayLayer</code> + 
 <code>subresourceRange</code>::<code>layerCount</code></span> <strong class="purple">must</strong> be less than or equal to
-the <code>extent.depth</code> specified in <a href="#VkImageCreateInfo">VkImageCreateInfo</a> when
-<code>image</code> was created</p>
+the depth computed from <code>baseMipLevel</code> and <code>extent.depth</code>
+specified in <a href="#VkImageCreateInfo">VkImageCreateInfo</a> when <code>image</code> was created,
+according to the formula defined in
+<a href="#resources-image-miplevel-sizing">Image Miplevel Sizing</a>.</p>
 </li>
 <li>
 <p><a id="VUID-VkImageViewCreateInfo-image-01018"></a>
@@ -6533,15 +6682,14 @@ feature is not enabled, <code>flags</code> <strong class="purple">must</strong> 
 </li>
 <li>
 <p><a id="VUID-VkImageViewCreateInfo-image-02573"></a>
-    If <a href="chap35.html#features-fragmentdensitymapdynamic">dynamic fragment density map</a>
-    feature is not enabled and <code>image</code> was created with <code>usage</code>
-    containing <code>VK_IMAGE_USAGE_FRAGMENT_DENSITY_MAP_BIT_EXT</code>,
-    <code>flags</code> <strong class="purple">must</strong> not contain any of
-    <code>VK_IMAGE_CREATE_PROTECTED_BIT</code>,
-    <code>VK_IMAGE_CREATE_SPARSE_BINDING_BIT</code>,
-    <code>VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT</code>, or
-    <code>VK_IMAGE_CREATE_SPARSE_ALIASED_BIT</code>
-ifdef::VK_VERSION_1_1,VK_KHR_maintenance2</p>
+If <a href="chap35.html#features-fragmentdensitymapdynamic">dynamic fragment density map</a>
+feature is not enabled and <code>image</code> was created with <code>usage</code>
+containing <code>VK_IMAGE_USAGE_FRAGMENT_DENSITY_MAP_BIT_EXT</code>,
+<code>flags</code> <strong class="purple">must</strong> not contain any of
+<code>VK_IMAGE_CREATE_PROTECTED_BIT</code>,
+<code>VK_IMAGE_CREATE_SPARSE_BINDING_BIT</code>,
+<code>VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT</code>, or
+<code>VK_IMAGE_CREATE_SPARSE_ALIASED_BIT</code></p>
 </li>
 <li>
 <p><a id="VUID-VkImageViewCreateInfo-pNext-02662"></a>
@@ -6566,15 +6714,14 @@ that were not set in the <code>usage</code> member of the
 </li>
 <li>
 <p><a id="VUID-VkImageViewCreateInfo-pNext-02664"></a>
-    If the <code>pNext</code> chain includes an instance of
-    <a href="#VkImageViewUsageCreateInfo">VkImageViewUsageCreateInfo</a>, <code>image</code> was created with an
-    instance of <a href="#VkImageStencilUsageCreateInfoEXT">VkImageStencilUsageCreateInfoEXT</a> in the <code>pNext</code>
-    chain of <a href="#VkImageCreateInfo">VkImageCreateInfo</a>, and <code>subResourceRange.aspectMask</code>
-    includes bits other than <code>VK_IMAGE_ASPECT_STENCIL_BIT</code>, the
-    <code>usage</code> member of the <a href="#VkImageViewUsageCreateInfo">VkImageViewUsageCreateInfo</a> instance
-    <strong class="purple">must</strong> not include any bits that were not set in the <code>usage</code> member
-    of the <a href="#VkImageCreateInfo">VkImageCreateInfo</a> structure used to create <code>image</code>
-endif::VK_VERSION_1_1,VK_KHR_maintenance2</p>
+If the <code>pNext</code> chain includes an instance of
+<a href="#VkImageViewUsageCreateInfo">VkImageViewUsageCreateInfo</a>, <code>image</code> was created with an
+instance of <a href="#VkImageStencilUsageCreateInfoEXT">VkImageStencilUsageCreateInfoEXT</a> in the <code>pNext</code>
+chain of <a href="#VkImageCreateInfo">VkImageCreateInfo</a>, and <code>subResourceRange.aspectMask</code>
+includes bits other than <code>VK_IMAGE_ASPECT_STENCIL_BIT</code>, the
+<code>usage</code> member of the <a href="#VkImageViewUsageCreateInfo">VkImageViewUsageCreateInfo</a> instance
+<strong class="purple">must</strong> not include any bits that were not set in the <code>usage</code> member
+of the <a href="#VkImageCreateInfo">VkImageCreateInfo</a> structure used to create <code>image</code></p>
 </li>
 </ul>
 </div>
@@ -8591,6 +8738,21 @@ equal to <code>VK_TRUE</code>, <code>memory</code> <strong class="purple">must</
 buffer handle created with identical creation parameters to <code>buffer</code>
 and <code>memoryOffset</code> <strong class="purple">must</strong> be zero</p>
 </li>
+<li>
+<p><a id="VUID-vkBindBufferMemory-memory-02726"></a>
+If <code>memory</code> was allocated with
+<a href="chap10.html#VkExportMemoryAllocateInfo">VkExportMemoryAllocateInfo</a>::<code>handleTypes</code> not equal to <code>0</code>, at
+least one handle type it contained must also have been set in
+<a href="#VkExternalMemoryBufferCreateInfo">VkExternalMemoryBufferCreateInfo</a>::<code>handleTypes</code> when
+<code>buffer</code> was created.</p>
+</li>
+<li>
+<p><a id="VUID-vkBindBufferMemory-memory-02727"></a>
+If <code>memory</code> was created by a memory import operation, the external
+handle type of the imported memory must also have been set in
+<a href="#VkExternalMemoryBufferCreateInfo">VkExternalMemoryBufferCreateInfo</a>::<code>handleTypes</code> when
+<code>buffer</code> was created.</p>
+</li>
 </ul>
 </div>
 </div>
@@ -9154,6 +9316,21 @@ equal to <code>VK_TRUE</code>, <code>memory</code> <strong class="purple">must</
 <a href="chap10.html#VkDedicatedAllocationMemoryAllocateInfoNV">VkDedicatedAllocationMemoryAllocateInfoNV</a>::<code>image</code> equal to an
 image handle created with identical creation parameters to <code>image</code>
 and <code>memoryOffset</code> <strong class="purple">must</strong> be zero</p>
+</li>
+<li>
+<p><a id="VUID-vkBindImageMemory-memory-02728"></a>
+If <code>memory</code> was allocated with
+<a href="chap10.html#VkExportMemoryAllocateInfo">VkExportMemoryAllocateInfo</a>::<code>handleTypes</code> not equal to <code>0</code>, at
+least one handle type it contained must also have been set in
+<a href="#VkExternalMemoryImageCreateInfo">VkExternalMemoryImageCreateInfo</a>::<code>handleTypes</code> when
+<code>image</code> was created.</p>
+</li>
+<li>
+<p><a id="VUID-vkBindImageMemory-memory-02729"></a>
+If <code>memory</code> was created by a memory import operation, the external
+handle type of the imported memory must also have been set in
+<a href="#VkExternalMemoryImageCreateInfo">VkExternalMemoryImageCreateInfo</a>::<code>handleTypes</code> when
+<code>image</code> was created.</p>
 </li>
 </ul>
 </div>
@@ -11807,99 +11984,10 @@ as described above</p>
 </div></div>
 <div id="footer">
 <div id="footer-text">
-Version 1.1.106<br>
+Version 1.1.114<br>
 Last updated 2019-04-11 14:02:22 -0600
 </div>
 </div>
-<style>
-/* Stylesheet for CodeRay to match GitHub theme | MIT License | http://foundation.zurb.com */
-pre.CodeRay{background:#f7f7f8}
-.CodeRay .line-numbers{border-right:1px solid currentColor;opacity:.35;padding:0 .5em 0 0}
-.CodeRay span.line-numbers{display:inline-block;margin-right:.75em}
-.CodeRay .line-numbers strong{color:#000}
-table.CodeRay{border-collapse:separate;border:0;margin-bottom:0;background:none}
-table.CodeRay td{vertical-align:top;line-height:inherit}
-table.CodeRay td.line-numbers{text-align:right}
-table.CodeRay td.code{padding:0 0 0 .75em}
-.CodeRay .debug{color:#fff !important;background:#000080 !important}
-.CodeRay .annotation{color:#007}
-.CodeRay .attribute-name{color:#000080}
-.CodeRay .attribute-value{color:#700}
-.CodeRay .binary{color:#509}
-.CodeRay .comment{color:#998;font-style:italic}
-.CodeRay .char{color:#04d}
-.CodeRay .char .content{color:#04d}
-.CodeRay .char .delimiter{color:#039}
-.CodeRay .class{color:#458;font-weight:bold}
-.CodeRay .complex{color:#a08}
-.CodeRay .constant,.CodeRay .predefined-constant{color:#008080}
-.CodeRay .color{color:#099}
-.CodeRay .class-variable{color:#369}
-.CodeRay .decorator{color:#b0b}
-.CodeRay .definition{color:#099}
-.CodeRay .delimiter{color:#000}
-.CodeRay .doc{color:#970}
-.CodeRay .doctype{color:#34b}
-.CodeRay .doc-string{color:#d42}
-.CodeRay .escape{color:#666}
-.CodeRay .entity{color:#800}
-.CodeRay .error{color:#808}
-.CodeRay .exception{color:inherit}
-.CodeRay .filename{color:#099}
-.CodeRay .function{color:#900;font-weight:bold}
-.CodeRay .global-variable{color:#008080}
-.CodeRay .hex{color:#058}
-.CodeRay .integer,.CodeRay .float{color:#099}
-.CodeRay .include{color:#555}
-.CodeRay .inline{color:#000}
-.CodeRay .inline .inline{background:#ccc}
-.CodeRay .inline .inline .inline{background:#bbb}
-.CodeRay .inline .inline-delimiter{color:#d14}
-.CodeRay .inline-delimiter{color:#d14}
-.CodeRay .important{color:#555;font-weight:bold}
-.CodeRay .interpreted{color:#b2b}
-.CodeRay .instance-variable{color:#008080}
-.CodeRay .label{color:#970}
-.CodeRay .local-variable{color:#963}
-.CodeRay .octal{color:#40e}
-.CodeRay .predefined{color:#369}
-.CodeRay .preprocessor{color:#579}
-.CodeRay .pseudo-class{color:#555}
-.CodeRay .directive{font-weight:bold}
-.CodeRay .type{font-weight:bold}
-.CodeRay .predefined-type{color:inherit}
-.CodeRay .reserved,.CodeRay .keyword {color:#000;font-weight:bold}
-.CodeRay .key{color:#808}
-.CodeRay .key .delimiter{color:#606}
-.CodeRay .key .char{color:#80f}
-.CodeRay .value{color:#088}
-.CodeRay .regexp .delimiter{color:#808}
-.CodeRay .regexp .content{color:#808}
-.CodeRay .regexp .modifier{color:#808}
-.CodeRay .regexp .char{color:#d14}
-.CodeRay .regexp .function{color:#404;font-weight:bold}
-.CodeRay .string{color:#d20}
-.CodeRay .string .string .string{background:#ffd0d0}
-.CodeRay .string .content{color:#d14}
-.CodeRay .string .char{color:#d14}
-.CodeRay .string .delimiter{color:#d14}
-.CodeRay .shell{color:#d14}
-.CodeRay .shell .delimiter{color:#d14}
-.CodeRay .symbol{color:#990073}
-.CodeRay .symbol .content{color:#a60}
-.CodeRay .symbol .delimiter{color:#630}
-.CodeRay .tag{color:#008080}
-.CodeRay .tag-special{color:#d70}
-.CodeRay .variable{color:#036}
-.CodeRay .insert{background:#afa}
-.CodeRay .delete{background:#faa}
-.CodeRay .change{color:#aaf;background:#007}
-.CodeRay .head{color:#f8f;background:#505}
-.CodeRay .insert .insert{color:#080}
-.CodeRay .delete .delete{color:#800}
-.CodeRay .change .change{color:#66f}
-.CodeRay .head .head{color:#f4f}
-</style>
 
 
 </body>

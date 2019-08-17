@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.6">
+<meta name="generator" content="Asciidoctor 1.5.8">
 <meta name="author" content="The Khronos® Vulkan Working Group">
-<title>Vulkan® 1.1.106 - A Specification (with all published extensions)</title>
+<title>Vulkan® 1.1.114 - A Specification (with all published extensions)</title>
 <style>
 /*! normalize.css v2.1.2 | MIT License | git.io/normalize */
 /* ========================================================================== HTML5 display definitions ========================================================================== */
@@ -728,6 +728,97 @@ a code { color: inherit; }
 
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+/* Stylesheet for CodeRay to match GitHub theme | MIT License | http://foundation.zurb.com */
+/*pre.CodeRay {background-color:#f7f7f8;}*/
+.CodeRay .line-numbers{border-right:1px solid #d8d8d8;padding:0 0.5em 0 .25em}
+.CodeRay span.line-numbers{display:inline-block;margin-right:.5em;color:rgba(0,0,0,.3)}
+.CodeRay .line-numbers strong{color:rgba(0,0,0,.4)}
+table.CodeRay{border-collapse:separate;border-spacing:0;margin-bottom:0;border:0;background:none}
+table.CodeRay td{vertical-align: top;line-height:1.45}
+table.CodeRay td.line-numbers{text-align:right}
+table.CodeRay td.line-numbers>pre{padding:0;color:rgba(0,0,0,.3)}
+table.CodeRay td.code{padding:0 0 0 .5em}
+table.CodeRay td.code>pre{padding:0}
+.CodeRay .debug{color:#fff !important;background:#000080 !important}
+.CodeRay .annotation{color:#007}
+.CodeRay .attribute-name{color:#000080}
+.CodeRay .attribute-value{color:#700}
+.CodeRay .binary{color:#509}
+.CodeRay .comment{color:#998;font-style:italic}
+.CodeRay .char{color:#04d}
+.CodeRay .char .content{color:#04d}
+.CodeRay .char .delimiter{color:#039}
+.CodeRay .class{color:#458;font-weight:bold}
+.CodeRay .complex{color:#a08}
+.CodeRay .constant,.CodeRay .predefined-constant{color:#008080}
+.CodeRay .color{color:#099}
+.CodeRay .class-variable{color:#369}
+.CodeRay .decorator{color:#b0b}
+.CodeRay .definition{color:#099}
+.CodeRay .delimiter{color:#000}
+.CodeRay .doc{color:#970}
+.CodeRay .doctype{color:#34b}
+.CodeRay .doc-string{color:#d42}
+.CodeRay .escape{color:#666}
+.CodeRay .entity{color:#800}
+.CodeRay .error{color:#808}
+.CodeRay .exception{color:inherit}
+.CodeRay .filename{color:#099}
+.CodeRay .function{color:#900;font-weight:bold}
+.CodeRay .global-variable{color:#008080}
+.CodeRay .hex{color:#058}
+.CodeRay .integer,.CodeRay .float{color:#099}
+.CodeRay .include{color:#555}
+.CodeRay .inline{color:#000}
+.CodeRay .inline .inline{background:#ccc}
+.CodeRay .inline .inline .inline{background:#bbb}
+.CodeRay .inline .inline-delimiter{color:#d14}
+.CodeRay .inline-delimiter{color:#d14}
+.CodeRay .important{color:#555;font-weight:bold}
+.CodeRay .interpreted{color:#b2b}
+.CodeRay .instance-variable{color:#008080}
+.CodeRay .label{color:#970}
+.CodeRay .local-variable{color:#963}
+.CodeRay .octal{color:#40e}
+.CodeRay .predefined{color:#369}
+.CodeRay .preprocessor{color:#579}
+.CodeRay .pseudo-class{color:#555}
+.CodeRay .directive{font-weight:bold}
+.CodeRay .type{font-weight:bold}
+.CodeRay .predefined-type{color:inherit}
+.CodeRay .reserved,.CodeRay .keyword {color:#000;font-weight:bold}
+.CodeRay .key{color:#808}
+.CodeRay .key .delimiter{color:#606}
+.CodeRay .key .char{color:#80f}
+.CodeRay .value{color:#088}
+.CodeRay .regexp .delimiter{color:#808}
+.CodeRay .regexp .content{color:#808}
+.CodeRay .regexp .modifier{color:#808}
+.CodeRay .regexp .char{color:#d14}
+.CodeRay .regexp .function{color:#404;font-weight:bold}
+.CodeRay .string{color:#d20}
+.CodeRay .string .string .string{background:#ffd0d0}
+.CodeRay .string .content{color:#d14}
+.CodeRay .string .char{color:#d14}
+.CodeRay .string .delimiter{color:#d14}
+.CodeRay .shell{color:#d14}
+.CodeRay .shell .delimiter{color:#d14}
+.CodeRay .symbol{color:#990073}
+.CodeRay .symbol .content{color:#a60}
+.CodeRay .symbol .delimiter{color:#630}
+.CodeRay .tag{color:#008080}
+.CodeRay .tag-special{color:#d70}
+.CodeRay .variable{color:#036}
+.CodeRay .insert{background:#afa}
+.CodeRay .delete{background:#faa}
+.CodeRay .change{color:#aaf;background:#007}
+.CodeRay .head{color:#f8f;background:#505}
+.CodeRay .insert .insert{color:#080}
+.CodeRay .delete .delete{color:#800}
+.CodeRay .change .change{color:#66f}
+.CodeRay .head .head{color:#f4f}
+</style>
 <link rel="stylesheet" href="../katex/katex.min.css">
 <link href="chunked.css?4" rel="stylesheet">
 <script>var searchindexurl = 'search.index.js?4' + (document.title.replace(/[^0-9.]/g, ''));</script>
@@ -753,12 +844,12 @@ a code { color: inherit; }
 </script></head>
 <body class="book toc2 toc-left" style="max-width: 100;">
 <div id="header">
-<h1>Vulkan<sup>®</sup> 1.1.106 - A Specification (with all published extensions)</h1>
+<h1>Vulkan<sup>®</sup> 1.1.114 - A Specification (with all published extensions)</h1>
 <div class="details">
 <span id="author" class="author">The Khronos<sup>®</sup> Vulkan Working Group</span><br>
-<span id="revnumber">version 1.1.106,</span>
-<span id="revdate">2019-04-15 21:10:00Z</span>
-<br><span id="revremark">from git branch: Git branch information not available commit: b1042a3204aba3319e2a9b42afa969789472a458</span>
+<span id="revnumber">version 1.1.114,</span>
+<span id="revdate">2019-07-26 16:21:27Z</span>
+<br><span id="revremark">from git branch: Git branch information not available commit: 7eb07044df67e19e768080c7f378fc0938ead346</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -922,7 +1013,7 @@ a code { color: inherit; }
 <li><a href="chap15.html#_conversion_formulas">15.2. Conversion Formulas</a></li>
 <li><a href="chap15.html#_texel_input_operations">15.3. Texel Input Operations</a></li>
 <li><a href="chap15.html#_texel_output_operations">15.4. Texel Output Operations</a></li>
-<li><a href="chap15.html#_derivative_operations">15.5. Derivative Operations</a></li>
+<li><a href="chap15.html#texture-derivatives">15.5. Derivative Operations</a></li>
 <li><a href="chap15.html#textures-normalized-operations">15.6. Normalized Texel Coordinate Operations</a></li>
 <li><a href="chap15.html#_unnormalized_texel_coordinate_operations">15.7. Unnormalized Texel Coordinate Operations</a></li>
 <li><a href="chap15.html#textures-integer-coordinate-operations">15.8. Integer Texel Coordinate Operations</a></li>
@@ -946,6 +1037,7 @@ a code { color: inherit; }
 <li><a href="chap17.html#queries-pipestats">17.4. Pipeline Statistics Queries</a></li>
 <li><a href="chap17.html#queries-timestamps">17.5. Timestamp Queries</a></li>
 <li><a href="chap17.html#queries-transform-feedback">17.6. Transform Feedback Queries</a></li>
+<li><a href="chap17.html#queries-performance-intel">17.7. Intel performance queries</a></li>
 </ul>
 </li>
 <li><a href="chap18.html#clears">18. Clear Commands</a>
@@ -1742,7 +1834,35 @@ or
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>CooperativeMatrixNV</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="chap35.html#features-cooperativeMatrix">cooperativeMatrix</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="chap35.html#features-cooperativeMatrix">cooperativeMatrix</a>
+<a id="spirvenv-capabilities-table-shaderIntegerFunctions2"></a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ShaderIntegerFunctions2INTEL</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="chap35.html#features-shaderIntegerFunctions2">shaderIntegerFunctions2</a>
+<a id="spirvenv-capabilities-table-shadersmbuiltins"></a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ShaderSMBuiltinsNV</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="chap35.html#features-features-shadersmbuiltins">shaderSMBuiltins</a>
+<a id="spirvenv-capabilities-table-fragmentShaderInterlock"></a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>FragmentShaderSampleInterlockEXT</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="chap35.html#features-features-fragmentShaderSampleInterlock">fragmentShaderSampleInterlock</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>FragmentShaderPixelInterlockEXT</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="chap35.html#features-features-fragmentShaderPixelInterlock">fragmentShaderPixelInterlock</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>FragmentShaderShadingRateInterlockEXT</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="chap35.html#features-features-fragmentShaderShadingRateInterlock">fragmentShaderShadingRateInterlock</a>, <a href="chap35.html#features-shadingRateImage">shadingRateImage</a>
+<a id="spirvenv-capabilities-table-demote"></a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>DemoteToHelperInvocationEXT</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="chap35.html#features-features-shaderDemoteToHelperInvocation">shaderDemoteToHelperInvocation</a></p></td>
 </tr>
 </tbody>
 </table>
@@ -1846,6 +1966,10 @@ uses the <code>SPV_NV_viewport_array2</code> SPIR-V extension.</p>
 </div>
 <div class="paragraph">
 <p>The application <strong class="purple">can</strong> pass a SPIR-V module to <a href="chap8.html#vkCreateShaderModule">vkCreateShaderModule</a> that
+uses the <code>SPV_NV_shader_subgroup_partitioned</code> SPIR-V extension.</p>
+</div>
+<div class="paragraph">
+<p>The application <strong class="purple">can</strong> pass a SPIR-V module to <a href="chap8.html#vkCreateShaderModule">vkCreateShaderModule</a> that
 uses the <code>SPV_EXT_shader_viewport_index_layer</code> SPIR-V extension.</p>
 </div>
 <div class="paragraph">
@@ -1899,6 +2023,18 @@ uses the <code>SPV_EXT_physical_storage_buffer</code> SPIR-V extension.</p>
 <div class="paragraph">
 <p>The application <strong class="purple">can</strong> pass a SPIR-V module to <a href="chap8.html#vkCreateShaderModule">vkCreateShaderModule</a> that
 uses the <code>SPV_NV_cooperative_matrix</code> SPIR-V extension.</p>
+</div>
+<div class="paragraph">
+<p>The application <strong class="purple">can</strong> pass a SPIR-V module to <a href="chap8.html#vkCreateShaderModule">vkCreateShaderModule</a> that
+uses the <code>SPV_NV_shader_sm_builtins</code> SPIR-V extension.</p>
+</div>
+<div class="paragraph">
+<p>The application <strong class="purple">can</strong> pass a SPIR-V module to <a href="chap8.html#vkCreateShaderModule">vkCreateShaderModule</a> that
+uses the <code>SPV_EXT_fragment_shader_interlock</code> SPIR-V extension.</p>
+</div>
+<div class="paragraph">
+<p>The application <strong class="purple">can</strong> pass a SPIR-V module to <a href="chap8.html#vkCreateShaderModule">vkCreateShaderModule</a> that
+uses the <code>SPV_EXT_demote_to_helper_invocation</code> SPIR-V extension.</p>
 </div>
 <div class="paragraph">
 <p>The application <strong class="purple">must</strong> not pass a SPIR-V module containing any of the
@@ -2173,6 +2309,13 @@ to or modified.</p>
 </li>
 </ul>
 </div>
+</li>
+<li>
+<p>The “Component” operand of <code>OpImageGather</code>, and
+<code>OpImageSparseGather</code> <strong class="purple">must</strong> be the &lt;id&gt; of a constant instruction.</p>
+</li>
+<li>
+<p>Structure types <strong class="purple">must</strong> not contain opaque types.</p>
 </li>
 <li>
 <p>Decorations</p>
@@ -2807,7 +2950,7 @@ precision.</p>
 <p>The precision of operations is defined either in terms of rounding, as an
 error bound in ULP, or as inherited from a formula as follows.</p>
 </div>
-<div class="paragraph">
+<div id="spirvenv-correctly-rounded" class="paragraph">
 <div class="title">Correctly Rounded</div>
 <p>Operations described as “correctly rounded” will return the infinitely
 precise result, <span class="eq">x</span>, rounded so as to be representable in
@@ -2830,14 +2973,17 @@ an operation with infinitely precise result <mark>x</mark> the value returned <s
 in the range <mark>[x - n * ulp(x), x + n * ulp(x)]</mark>.
 The function <mark>ulp(x)</mark> is defined as follows:</p>
 </div>
-<div class="literalblock">
-<div class="content">
-<pre> :: If there exist non-equal floating-point numbers #a# and #b# such that
-[eq]#a {leq} x {leq} b# then #ulp(x)# is the minimum possible distance
-between such numbers, latexmath:[ulp(x) = \mathrm{min}_{a,b} | b - a |].
-If such numbers do not exist then #ulp(x)# is defined to be the difference
-between the two finite floating-point numbers nearest to #x#.</pre>
-</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"></dt>
+<dd>
+<p>If there exist non-equal floating-point numbers <mark>a</mark> and <mark>b</mark> such that
+<span class="eq">a ≤ x ≤ b</span> then <mark>ulp(x)</mark> is the minimum possible distance
+between such numbers, \(ulp(x) = \mathrm{min}_{a,b} | b - a |\).
+If such numbers do not exist then <mark>ulp(x)</mark> is defined to be the difference
+between the two finite floating-point numbers nearest to <mark>x</mark>.</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
 <p>Where the range of allowed return values includes any value of magnitude
@@ -2905,7 +3051,9 @@ are <strong class="purple">required</strong> to be at least as follows:</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>OpDot</code>(x, y)</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from \(\sum_{i = 0}^{n - 1} x_{i} \times y_{i}\).</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \(\sum_{i = 0}^{n - 1} x_{i} \times y_{i}\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>OpFOrdEqual</code>, <code>OpFUnordEqual</code></p></td>
@@ -2929,18 +3077,16 @@ are <strong class="purple">required</strong> to be at least as follows:</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>OpFDiv</code>(x,y)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">2.5 ULP for y in the range [2<sup>-126</sup>, 2<sup>126</sup>].</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">2.5 ULP for y in the range [2<sup>-14</sup>, 2<sup>14</sup>].</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2.5 ULP for <span class="eq">|y|</span> in the range [2<sup>-126</sup>, 2<sup>126</sup>].</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2.5 ULP for <span class="eq">|y|</span> in the range [2<sup>-14</sup>, 2<sup>14</sup>].</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>OpFRem</code>(x,y)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Inherited from <span class="eq">x - y × trunc(x/y)</span>, for y in the range [2<sup>-126</sup>, 2<sup>126</sup>].</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Inherited from <span class="eq">x - y × trunc(x/y)</span>, for y in the range [2<sup>-14</sup>, 2<sup>14</sup>].</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from <span class="eq">x - y × trunc(x/y)</span>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>OpFMod</code>(x,y)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Inherited from <span class="eq">x - y × floor(x/y)</span>, for y in the range [2<sup>-126</sup>, 2<sup>126</sup>].</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Inherited from <span class="eq">x - y × floor(x/y)</span>, for y in the range [2<sup>-14</sup>, 2<sup>14</sup>].</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from <span class="eq">x - y × floor(x/y)</span>.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">conversions between types</p></td>
@@ -2989,13 +3135,21 @@ different sign than the infinitely precise result.</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>exp</code>(x),  <code>exp2</code>(x)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><span class="eq">3 + 2 × |x|</span> ULP.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><span class="eq">1 + 2 × |x|</span> ULP.</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>\(3 + 2 \times \vert x \vert\) ULP.</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>\(1 + 2 \times \vert x \vert\) ULP.</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>log</code>(),  <code>log2</code>()</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">3 ULP outside the range <span class="eq">[0.5, 2.0]</span>. Absolute error &lt; <span class="eq">2<sup>-21</sup></span> inside the range <span class="eq">[0.5, 2.0]</span>.</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">3 ULP outside the range <span class="eq">[0.5, 2.0]</span>. Absolute error &lt; <span class="eq">2<sup>-7</sup></span> inside the range <span class="eq">[0.5, 2.0]</span>.</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>3 ULP outside the range \([0.5, 2.0]\). Absolute error &lt; \(2^{-21}\) inside the range \([0.5, 2.0]\).</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>3 ULP outside the range \([0.5, 2.0]\). Absolute error &lt; \(2^{-7}\) inside the range \([0.5, 2.0]\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>pow</code>(x, y)</p></td>
@@ -3011,33 +3165,51 @@ different sign than the infinitely precise result.</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>radians</code>(x)</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from \(\frac{x \times \pi}{180}\).</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \(\frac{x \times \pi}{180}\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>degrees</code>(x)</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from \(\frac{x \times 180}{\pi}\).</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \(\frac{x \times 180}{\pi}\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>sin</code>()</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Absolute error \(\leq 2^{-11}\) inside the range \([-\pi, \pi]\).</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Absolute error \(\leq 2^{-7}\) inside the range \([-\pi, \pi]\).</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>Absolute error \(\leq 2^{-11}\) inside the range \([-\pi, \pi]\).</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>Absolute error \(\leq 2^{-7}\) inside the range \([-\pi, \pi]\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>cos</code>()</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Absolute error \(\leq 2^{-11}\) inside the range \([-\pi, \pi]\).</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Absolute error \(\leq 2^{-7}\) inside the range \([-\pi, \pi]\).</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>Absolute error \(\leq 2^{-11}\) inside the range \([-\pi, \pi]\).</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>Absolute error \(\leq 2^{-7}\) inside the range \([-\pi, \pi]\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>tan</code>()</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from \(\frac{sin()}{cos()}\).</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \(\frac{\sin()}{\cos()}\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>asin</code>(x)</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from \(atan2(x, sqrt(1.0 - x^2))\).</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \(\mathrm{atan2}(x, sqrt(1.0 - x^2))\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>acos</code>(x)</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from \(atan2(sqrt(1.0 - x^2), x)\).</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \(\mathrm{atan2}(sqrt(1.0 - x^2), x)\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>atan</code>(), <code>atan2</code>()</p></td>
@@ -3046,27 +3218,39 @@ different sign than the infinitely precise result.</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>sinh</code>(x)</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from \((exp(x) - exp(-x)) \times 0.5\).</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \((\exp(x) - \exp(-x)) \times 0.5\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>cosh</code>(x)</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from \((exp(x) + exp(-x)) \times 0.5\).</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \((\exp(x) + \exp(-x)) \times 0.5\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>tanh</code>()</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from \(\frac{sinh()}{cosh()}\).</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \(\frac{\sinh()}{\cosh()}\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>asinh</code>(x)</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from \(log(x + sqrt(x^2 + 1.0))\).</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \(\log(x + sqrt(x^2 + 1.0))\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>acosh</code>(x)</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from \(log(x + sqrt(x^2 - 1.0))\).</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \(\log(x + sqrt(x^2 - 1.0))\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>atanh</code>(x)</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from \(log(\frac{1.0 + x}{1.0 - x}) \times 0.5\).</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \(\log(\frac{1.0 + x}{1.0 - x}) \times 0.5\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>frexp</code>()</p></td>
@@ -3078,11 +3262,15 @@ different sign than the infinitely precise result.</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>length</code>(x)</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from \(sqrt(dot(x, x))\).</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \(sqrt(dot(x, x))\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>distance</code>(x, y)</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from \(length(x - y)\).</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \(length(x - y)\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>cross</code>()</p></td>
@@ -3090,7 +3278,9 @@ different sign than the infinitely precise result.</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>normalize</code>(x)</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from \(\frac{x}{length(x)}\).</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \(\frac{x}{length(x)}\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>faceforward</code></p></td>
@@ -3154,7 +3344,9 @@ different sign than the infinitely precise result.</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>fmix</code>(x, y, a)</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from <span class="eq">x × (1.0 - a) + y × a</span>.</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \(x \times (1.0 - a) + y \times a\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>step</code></p></td>
@@ -3162,8 +3354,10 @@ different sign than the infinitely precise result.</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>smoothStep</code>(edge0, edge1, x)</p></td>
-<td class="tableblock halign-left valign-top" colspan="2"><p class="tableblock">Inherited from <span class="eq">t × t × (3.0 - 2.0 × t)</span>,
-where \(t = clamp(\frac{x - edge0}{edge1 - edge0}, 0.0, 1.0)\).</p></td>
+<td class="tableblock halign-left valign-top" colspan="2"><div class="content"><div class="paragraph">
+<p>Inherited from \(t^{2} \times (3.0 - 2.0 \times t)\),
+where \(t = clamp(\frac{x - edge0}{edge1 - edge0}, 0.0, 1.0)\).</p>
+</div></div></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>nmin</code></p></td>
@@ -3183,8 +3377,7 @@ where \(t = clamp(\frac{x - edge0}{edge1 - edge0}, 0.0, 1.0)\).</p></td>
 <p>GLSL.std.450 extended instructions specifically defined in terms of the
 above instructions inherit the above errors.
 GLSL.std.450 extended instructions not listed above and not defined in terms
-of the above have undefined precision.
-These include, for example, the trigonometric functions and determinant.</p>
+of the above have undefined precision.</p>
 </div>
 <div class="paragraph">
 <p>For the <code>OpSRem</code> and <code>OpSMod</code> instructions, if either operand is
@@ -3397,99 +3590,10 @@ The compatibile formats are:</p>
 </div></div>
 <div id="footer">
 <div id="footer-text">
-Version 1.1.106<br>
+Version 1.1.114<br>
 Last updated 2019-04-11 14:02:22 -0600
 </div>
 </div>
-<style>
-/* Stylesheet for CodeRay to match GitHub theme | MIT License | http://foundation.zurb.com */
-pre.CodeRay{background:#f7f7f8}
-.CodeRay .line-numbers{border-right:1px solid currentColor;opacity:.35;padding:0 .5em 0 0}
-.CodeRay span.line-numbers{display:inline-block;margin-right:.75em}
-.CodeRay .line-numbers strong{color:#000}
-table.CodeRay{border-collapse:separate;border:0;margin-bottom:0;background:none}
-table.CodeRay td{vertical-align:top;line-height:inherit}
-table.CodeRay td.line-numbers{text-align:right}
-table.CodeRay td.code{padding:0 0 0 .75em}
-.CodeRay .debug{color:#fff !important;background:#000080 !important}
-.CodeRay .annotation{color:#007}
-.CodeRay .attribute-name{color:#000080}
-.CodeRay .attribute-value{color:#700}
-.CodeRay .binary{color:#509}
-.CodeRay .comment{color:#998;font-style:italic}
-.CodeRay .char{color:#04d}
-.CodeRay .char .content{color:#04d}
-.CodeRay .char .delimiter{color:#039}
-.CodeRay .class{color:#458;font-weight:bold}
-.CodeRay .complex{color:#a08}
-.CodeRay .constant,.CodeRay .predefined-constant{color:#008080}
-.CodeRay .color{color:#099}
-.CodeRay .class-variable{color:#369}
-.CodeRay .decorator{color:#b0b}
-.CodeRay .definition{color:#099}
-.CodeRay .delimiter{color:#000}
-.CodeRay .doc{color:#970}
-.CodeRay .doctype{color:#34b}
-.CodeRay .doc-string{color:#d42}
-.CodeRay .escape{color:#666}
-.CodeRay .entity{color:#800}
-.CodeRay .error{color:#808}
-.CodeRay .exception{color:inherit}
-.CodeRay .filename{color:#099}
-.CodeRay .function{color:#900;font-weight:bold}
-.CodeRay .global-variable{color:#008080}
-.CodeRay .hex{color:#058}
-.CodeRay .integer,.CodeRay .float{color:#099}
-.CodeRay .include{color:#555}
-.CodeRay .inline{color:#000}
-.CodeRay .inline .inline{background:#ccc}
-.CodeRay .inline .inline .inline{background:#bbb}
-.CodeRay .inline .inline-delimiter{color:#d14}
-.CodeRay .inline-delimiter{color:#d14}
-.CodeRay .important{color:#555;font-weight:bold}
-.CodeRay .interpreted{color:#b2b}
-.CodeRay .instance-variable{color:#008080}
-.CodeRay .label{color:#970}
-.CodeRay .local-variable{color:#963}
-.CodeRay .octal{color:#40e}
-.CodeRay .predefined{color:#369}
-.CodeRay .preprocessor{color:#579}
-.CodeRay .pseudo-class{color:#555}
-.CodeRay .directive{font-weight:bold}
-.CodeRay .type{font-weight:bold}
-.CodeRay .predefined-type{color:inherit}
-.CodeRay .reserved,.CodeRay .keyword {color:#000;font-weight:bold}
-.CodeRay .key{color:#808}
-.CodeRay .key .delimiter{color:#606}
-.CodeRay .key .char{color:#80f}
-.CodeRay .value{color:#088}
-.CodeRay .regexp .delimiter{color:#808}
-.CodeRay .regexp .content{color:#808}
-.CodeRay .regexp .modifier{color:#808}
-.CodeRay .regexp .char{color:#d14}
-.CodeRay .regexp .function{color:#404;font-weight:bold}
-.CodeRay .string{color:#d20}
-.CodeRay .string .string .string{background:#ffd0d0}
-.CodeRay .string .content{color:#d14}
-.CodeRay .string .char{color:#d14}
-.CodeRay .string .delimiter{color:#d14}
-.CodeRay .shell{color:#d14}
-.CodeRay .shell .delimiter{color:#d14}
-.CodeRay .symbol{color:#990073}
-.CodeRay .symbol .content{color:#a60}
-.CodeRay .symbol .delimiter{color:#630}
-.CodeRay .tag{color:#008080}
-.CodeRay .tag-special{color:#d70}
-.CodeRay .variable{color:#036}
-.CodeRay .insert{background:#afa}
-.CodeRay .delete{background:#faa}
-.CodeRay .change{color:#aaf;background:#007}
-.CodeRay .head{color:#f8f;background:#505}
-.CodeRay .insert .insert{color:#080}
-.CodeRay .delete .delete{color:#800}
-.CodeRay .change .change{color:#66f}
-.CodeRay .head .head{color:#f4f}
-</style>
 
 
 </body>

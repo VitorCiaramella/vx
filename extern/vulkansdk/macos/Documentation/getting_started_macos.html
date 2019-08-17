@@ -98,10 +98,19 @@
 <h4 id="downloading-with-safari-note">Downloading With Safari Note</h4>
 <p>The Safari web browser is often configured to &quot;open&quot; files after downloading. This may cause Safari to uncompress the <code>tar.gz</code> file after downloading, resulting in a <code>tar</code> file. In this case, you need to locate the <code>tar</code> file and not the <code>tar.gz</code> file and proceed with the rest of the steps in the same manner with the <code>tar</code> file.</p>
 <h3 id="install-the-sdk">Install the SDK</h3>
-<p>Installing is a simple operation involving expanding a &quot;tar&quot; archive file into your work area. The macOS SDK is intended to be installed anywhere the user can place files such as the user's <code>$HOME</code> directory. The SDK isn't configured to install to protected system locations such as <code>/usr/lib</code> or <code>/System</code>.</p>
+<p>Installing is a simple operation involving expanding a &quot;tar&quot; archive file into your work area. The macOS SDK is intended to be installed anywhere the user can place files such as the user's <code>$HOME</code> directory.</p>
 <p>If using <code>Finder</code>, navigate to the downloaded file and drag it to where you want to install it. Once the <code>tar.gz</code> or <code>tar</code> file is in the desired location, double-click on it in <code>Finder</code> to expand the archive. The archive expansion creates a directory containing the SDK contents that has the same name as the file.</p>
 <p>If using the command line in <code>Terminal</code>, use shell commands to move the <code>tar.gz</code> file to where you want to install it and run <code>tar -xzf filename</code> to expand. If the file is a <code>tar</code> file, then <code>tar -xf filename</code> will suffice.</p>
-<p><strong>Note</strong>: Since each SDK version has a unique name, multiple versions of the Vulkan SDK can be installed on a single system.</p>
+<p><strong>Note</strong>: Since each SDK version has a unique name, multiple versions of the Vulkan SDK can be installed on a single system using this method.</p>
+<h3 id="install-the-sdk---alternate-method-using-system-paths">Install the SDK - Alternate method using system paths</h3>
+<p>macOS allows the installation of files to <code>/usr/local</code> which may be more convenient for some users. Installing the Vulkan SDK to this system path removes the need to set <code>PATH</code>, <code>DYLD_LIBRARY_PATH</code>, <code>VK_LAYER_PATH</code>, and <code>VK_ICD_FILENAMES</code> environment variables in order to use SDK components.</p>
+<p>An install script is provided with the SDK named <code>install_vulkan.py</code>. To run the script, navigate to the root directory of the SDK in your terminal and run:</p>
+<pre><code>./install_vulkan.py
+</code></pre>
+<p>This will copy the SDK files to the appropriate system directories and generate a log file named <code>INSTALL.log</code> and a companion uninstall script named <code>uninstall.sh</code>. To run the uninstall script, navigate to the root directory of the SDK in your terminal and run:</p>
+<pre><code>./uninstall.sh
+</code></pre>
+<p><strong>Note</strong>: Since SDK components are copied directly to the <code>/usr/local</code> tree, only a single versions of the Vulkan SDK can be installed using this method. To upgrade the installed version of the Vulkan SDK, first run <code>uninstall.sh</code> from the current SDK directory before installing the new version.</p>
 <h2 id="sdk-contents">SDK Contents</h2>
 <p>This section describes how the SDK contents are organized.</p>
 <h3 id="applications">Applications</h3>
@@ -152,9 +161,6 @@
 <p>This presents a trade-off between potential improved stability of the application versus the flexibility of being able to upgrade the Vulkan components.</p>
 <h3 id="xcode-with-sdk-side-install">Xcode With SDK Side-Install</h3>
 <p>Your Xcode project has references to the SDK and requires an SDK be installed on your system. This workflow might be a development phase that eventually leads to the bundled application workflow. This typically requires you to set Xcode Environment variables and or Xcode custom paths to point to your SDK location.</p>
-<h3 id="install-to-system-directories">Install to System Directories</h3>
-<p>macOS discourages third-parties from installing libraries or frameworks to system directories. But it is possible for application developers to put together their own macOS &quot;Packages&quot; that come with an application and are installed when the application is installed. This may be a good approach for putting the Vulkan components into a place where they can be updated without updating the application.</p>
-<p>macOS also allows users to install files to <code>/usr/local</code> which may be convenient for users who prefer this approach. There are no &quot;install&quot; scripts provided with this SDK, but you can manually install desired SDK files to the appropriate system locations.</p>
 <h2 id="using-the-sdk">Using the SDK</h2>
 <h3 id="pre-built-applications">Pre-built Applications</h3>
 <p>The applications in the Applications directory are simple pre-built demos that you can launch immediately from <code>Finder</code>.</p>
@@ -219,20 +225,6 @@ VK_INSTANCE_LAYERS=VK_LAYER_KHRONOS_validation vulkaninfo
 </code></pre>
 <p>Since there shouldn't be any validation errors in Vulkan Info, you can expect the same output.</p>
 <p><strong>Note</strong>: There's a bundled version of Vulkan Info in the SDK's Applications directory which may be easier to use since the above configuring is not required. But if you use non-bundled Vulkan applications from the command line frequently, you may wish to set these environment variables in your login scripts or install the components to system locations.</p>
-<h4 id="installing-vulkan-components-to-system-directories">Installing Vulkan Components to System Directories</h4>
-<p>macOS is comparable to other UNIX-like operating systems in that you can install components to system directories as a &quot;super-user&quot;. macOS is also a bit more locked down in the sense that a super-user can't easily install to places like <code>/usr/bin</code>. However, it is fairly easy to install to places like <code>/usr/local/bin</code>.</p>
-<p>This SDK currently does not directly support or encourage installing SDK components to system directories.</p>
-<p>But if you are interested in installing SDK components to system directories, you can do so manually and pick only the components you need to install. This may be helpful for reducing the need to set environment variables to locate the components that reside in your SDK directory.</p>
-<p>For example, to install the ICD to the system directories:</p>
-<ol>
-<li>copy <code>vulkansdk/macOS/lib/libMoltenvVK.dylib</code> to <code>/usr/local/lib</code></li>
-<li>create directory: <code>/etc/vulkan/icd.d</code></li>
-<li>copy <code>vulkansdk/macOS/etc/icd.d/MoltenVK_icd.json</code> to <code>/etc/vulkan/icd.d</code></li>
-<li>edit <code>/etc/vulkan/icd.d/MoltenVK_icd.json</code>
-<ol>
-<li>Change the <code>library_path</code> to remove any leading path, leaving just <code>libMoltenVK.dylib</code></li>
-</ol></li>
-</ol>
 <h3 id="enable-validation-and-utility-layers">Enable validation and utility layers</h3>
 <p>The Vulkan SDK includes runtime support for validation and utility layers. These layers can be explicitly enabled for an application run by setting the <code>VK_INSTANCE_LAYERS</code> environment variable to a colon-separated list of layer or extension names as found in the layer manifest files. Refer to the <a href="./layer_configuration.md">Vulkan Validation and Utility Layers</a> document for more information on layer manifest files.</p>
 <p>The Vulkan SDK includes the following layers:</p>
@@ -265,7 +257,7 @@ VK_INSTANCE_LAYERS=VK_LAYER_KHRONOS_validation vulkaninfo
 <li><p>Check the &quot;Use custom layer paths&quot; box on the top left. Then click the &quot;Search&quot; button and navigate to the SDK in the popup window. Select the SDK's directory. A popup will ask you to confirm the layers that were found by the SDK. Click ok on this popup.</p></li>
 <li><p>Find the pane labeled &quot;Unset Explicit Layers&quot;. One of the layers in that pane should read &quot;LunarG: Api Dump&quot;. Select this layer by clicking on it.</p></li>
 <li><p>Click the left arrow directly to the left of the &quot;Unset Explicit Layers&quot; pane. The API dump layer should now move to the &quot;Enabled Layers&quot; pane.</p></li>
-<li><p>Click the &quot;Save&quot; button at the bottom left of the window.</p></li>
+<li><p>Click the &quot;Save&quot; button at the bottom left of the window, and do not exit the Vulkan Configurator.</p></li>
 <li><p>Run the Vulkan Cube program from a console:</p>
 <pre class="shell"><code>open vkcube.app
 </code></pre></li>
@@ -303,21 +295,21 @@ VK_INSTANCE_LAYERS=VK_LAYER_KHRONOS_validation vulkaninfo
 <p>If you wish to bundle the MoltenVK ICD into your application, you need to put a modified version of the <code>MoltenVK_icd.json</code> file in your bundle's <code>Resources/vulkan/icd.d</code> folder to allow the loader to find the MoltenVK library in your bundle. Assuming that you intend to ship the MoltenVK library in the <code>Frameworks</code> directory, as in the Vulkan Cube example above, you would make a copy of the file <code>vulkansdk/macOS/etc/icd.d/MoltenVK_icd.json</code> from the SDK.</p>
 <p>Edit this copy to modify the <code>library_path</code>:</p>
 <p>Original:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode json"><code class="sourceCode json"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="fu">{</span></a>
-<a class="sourceLine" id="cb10-2" data-line-number="2">    <span class="dt">&quot;file_format_version&quot;</span> <span class="fu">:</span> <span class="st">&quot;1.0.0&quot;</span><span class="fu">,</span></a>
-<a class="sourceLine" id="cb10-3" data-line-number="3">    <span class="dt">&quot;ICD&quot;</span><span class="fu">:</span> <span class="fu">{</span></a>
-<a class="sourceLine" id="cb10-4" data-line-number="4">        <span class="dt">&quot;library_path&quot;</span><span class="fu">:</span> <span class="st">&quot;./libMoltenVK.dylib&quot;</span><span class="fu">,</span></a>
-<a class="sourceLine" id="cb10-5" data-line-number="5">        <span class="dt">&quot;api_version&quot;</span> <span class="fu">:</span> <span class="st">&quot;1.0.0&quot;</span></a>
-<a class="sourceLine" id="cb10-6" data-line-number="6">    <span class="fu">}</span></a>
-<a class="sourceLine" id="cb10-7" data-line-number="7"><span class="fu">}</span></a></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode json"><code class="sourceCode json"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="fu">{</span></a>
+<a class="sourceLine" id="cb12-2" data-line-number="2">    <span class="dt">&quot;file_format_version&quot;</span> <span class="fu">:</span> <span class="st">&quot;1.0.0&quot;</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb12-3" data-line-number="3">    <span class="dt">&quot;ICD&quot;</span><span class="fu">:</span> <span class="fu">{</span></a>
+<a class="sourceLine" id="cb12-4" data-line-number="4">        <span class="dt">&quot;library_path&quot;</span><span class="fu">:</span> <span class="st">&quot;./libMoltenVK.dylib&quot;</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb12-5" data-line-number="5">        <span class="dt">&quot;api_version&quot;</span> <span class="fu">:</span> <span class="st">&quot;1.0.0&quot;</span></a>
+<a class="sourceLine" id="cb12-6" data-line-number="6">    <span class="fu">}</span></a>
+<a class="sourceLine" id="cb12-7" data-line-number="7"><span class="fu">}</span></a></code></pre></div>
 <p>Modified:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode json"><code class="sourceCode json"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="fu">{</span></a>
-<a class="sourceLine" id="cb11-2" data-line-number="2">    <span class="dt">&quot;file_format_version&quot;</span> <span class="fu">:</span> <span class="st">&quot;1.0.0&quot;</span><span class="fu">,</span></a>
-<a class="sourceLine" id="cb11-3" data-line-number="3">    <span class="dt">&quot;ICD&quot;</span><span class="fu">:</span> <span class="fu">{</span></a>
-<a class="sourceLine" id="cb11-4" data-line-number="4">        <span class="dt">&quot;library_path&quot;</span><span class="fu">:</span> <span class="st">&quot;../../../Frameworks/libMoltenVK.dylib&quot;</span><span class="fu">,</span></a>
-<a class="sourceLine" id="cb11-5" data-line-number="5">        <span class="dt">&quot;api_version&quot;</span> <span class="fu">:</span> <span class="st">&quot;1.0.0&quot;</span></a>
-<a class="sourceLine" id="cb11-6" data-line-number="6">    <span class="fu">}</span></a>
-<a class="sourceLine" id="cb11-7" data-line-number="7"><span class="fu">}</span></a></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode json"><code class="sourceCode json"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="fu">{</span></a>
+<a class="sourceLine" id="cb13-2" data-line-number="2">    <span class="dt">&quot;file_format_version&quot;</span> <span class="fu">:</span> <span class="st">&quot;1.0.0&quot;</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb13-3" data-line-number="3">    <span class="dt">&quot;ICD&quot;</span><span class="fu">:</span> <span class="fu">{</span></a>
+<a class="sourceLine" id="cb13-4" data-line-number="4">        <span class="dt">&quot;library_path&quot;</span><span class="fu">:</span> <span class="st">&quot;../../../Frameworks/libMoltenVK.dylib&quot;</span><span class="fu">,</span></a>
+<a class="sourceLine" id="cb13-5" data-line-number="5">        <span class="dt">&quot;api_version&quot;</span> <span class="fu">:</span> <span class="st">&quot;1.0.0&quot;</span></a>
+<a class="sourceLine" id="cb13-6" data-line-number="6">    <span class="fu">}</span></a>
+<a class="sourceLine" id="cb13-7" data-line-number="7"><span class="fu">}</span></a></code></pre></div>
 <p>Then use this modifed file when creating your application bundle.</p>
 <h2 id="working-with-xcode">Working with Xcode</h2>
 <p>Since the Vulkan header files and loader are provided in a framework (<code>macOS/Frameworks/vulkan.framework</code>), it is fairly easy to add these to your Xcode project, just like any other framework. However, if you wish your project to have run-time access to the MoltenVK ICD and Vulkan validation layers, you will have to guide the Xcode project to those components residing in the SDK.</p>
@@ -354,21 +346,21 @@ VK_INSTANCE_LAYERS=VK_LAYER_KHRONOS_validation vulkaninfo
 <li>Replace the existing code with:</li>
 </ul></li>
 </ul>
-<div class="sourceCode" id="cb13"><pre class="sourceCode C"><code class="sourceCode c"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></a>
-<a class="sourceLine" id="cb13-2" data-line-number="2"><span class="pp">#include </span><span class="im">&lt;vulkan/vulkan.h&gt;</span></a>
-<a class="sourceLine" id="cb13-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb13-4" data-line-number="4"><span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">const</span> <span class="dt">char</span> * argv[]) {</a>
-<a class="sourceLine" id="cb13-5" data-line-number="5">    VkInstance instance;</a>
-<a class="sourceLine" id="cb13-6" data-line-number="6">    VkResult result;</a>
-<a class="sourceLine" id="cb13-7" data-line-number="7">    VkInstanceCreateInfo info = {};</a>
-<a class="sourceLine" id="cb13-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb13-9" data-line-number="9">    result = vkCreateInstance(&amp;info, NULL, &amp;instance);</a>
-<a class="sourceLine" id="cb13-10" data-line-number="10">    std::cout &lt;&lt; <span class="st">&quot;vkCreateInstance result: &quot;</span> &lt;&lt; result  &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>;</a>
-<a class="sourceLine" id="cb13-11" data-line-number="11"></a>
-<a class="sourceLine" id="cb13-12" data-line-number="12">    vkDestroyInstance(instance, nullptr);</a>
-<a class="sourceLine" id="cb13-13" data-line-number="13">    <span class="cf">return</span> <span class="dv">0</span>;</a>
-<a class="sourceLine" id="cb13-14" data-line-number="14">}</a>
-<a class="sourceLine" id="cb13-15" data-line-number="15"></a></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode C"><code class="sourceCode c"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></a>
+<a class="sourceLine" id="cb15-2" data-line-number="2"><span class="pp">#include </span><span class="im">&lt;vulkan/vulkan.h&gt;</span></a>
+<a class="sourceLine" id="cb15-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb15-4" data-line-number="4"><span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">const</span> <span class="dt">char</span> * argv[]) {</a>
+<a class="sourceLine" id="cb15-5" data-line-number="5">    VkInstance instance;</a>
+<a class="sourceLine" id="cb15-6" data-line-number="6">    VkResult result;</a>
+<a class="sourceLine" id="cb15-7" data-line-number="7">    VkInstanceCreateInfo info = {};</a>
+<a class="sourceLine" id="cb15-8" data-line-number="8"></a>
+<a class="sourceLine" id="cb15-9" data-line-number="9">    result = vkCreateInstance(&amp;info, NULL, &amp;instance);</a>
+<a class="sourceLine" id="cb15-10" data-line-number="10">    std::cout &lt;&lt; <span class="st">&quot;vkCreateInstance result: &quot;</span> &lt;&lt; result  &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>;</a>
+<a class="sourceLine" id="cb15-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb15-12" data-line-number="12">    vkDestroyInstance(instance, nullptr);</a>
+<a class="sourceLine" id="cb15-13" data-line-number="13">    <span class="cf">return</span> <span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb15-14" data-line-number="14">}</a>
+<a class="sourceLine" id="cb15-15" data-line-number="15"></a></code></pre></div>
 <p><strong>Note</strong>: Xcode will produce a few errors, including not finding <code>vulkan.h</code> and unknown Vulkan types and symbols.</p>
 <ul>
 <li>Add the Vulkan framework
@@ -407,32 +399,32 @@ VK_INSTANCE_LAYERS=VK_LAYER_KHRONOS_validation vulkaninfo
 <h4 id="get-a-list-of-layers">Get a List of Layers</h4>
 <p>Next, we'll add code to get a list of layers installed on the system.</p>
 <p>Update your code to look like:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode C"><code class="sourceCode c"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></a>
-<a class="sourceLine" id="cb14-2" data-line-number="2"><span class="pp">#include </span><span class="im">&lt;vulkan/vulkan.h&gt;</span></a>
-<a class="sourceLine" id="cb14-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb14-4" data-line-number="4"><span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">const</span> <span class="dt">char</span> * argv[]) {</a>
-<a class="sourceLine" id="cb14-5" data-line-number="5">    VkInstance instance;</a>
-<a class="sourceLine" id="cb14-6" data-line-number="6">    VkResult result;</a>
-<a class="sourceLine" id="cb14-7" data-line-number="7">    VkInstanceCreateInfo info = {};</a>
-<a class="sourceLine" id="cb14-8" data-line-number="8">    <span class="dt">uint32_t</span> instance_layer_count;</a>
-<a class="sourceLine" id="cb14-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb14-10" data-line-number="10">    result = vkEnumerateInstanceLayerProperties(&amp;instance_layer_count, nullptr);</a>
-<a class="sourceLine" id="cb14-11" data-line-number="11">    std::cout &lt;&lt; instance_layer_count &lt;&lt; <span class="st">&quot; layers found!</span><span class="sc">\n</span><span class="st">&quot;</span>;</a>
-<a class="sourceLine" id="cb14-12" data-line-number="12">    <span class="cf">if</span> (instance_layer_count &gt; <span class="dv">0</span>) {</a>
-<a class="sourceLine" id="cb14-13" data-line-number="13">        std::unique_ptr&lt;VkLayerProperties[]&gt; instance_layers(new VkLayerProperties[instance_layer_count]);</a>
-<a class="sourceLine" id="cb14-14" data-line-number="14">        result = vkEnumerateInstanceLayerProperties(&amp;instance_layer_count, instance_layers.get());</a>
-<a class="sourceLine" id="cb14-15" data-line-number="15">        <span class="cf">for</span> (<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; instance_layer_count; ++i) {</a>
-<a class="sourceLine" id="cb14-16" data-line-number="16">            std::cout &lt;&lt; instance_layers[i].layerName &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>;</a>
-<a class="sourceLine" id="cb14-17" data-line-number="17">        }</a>
-<a class="sourceLine" id="cb14-18" data-line-number="18">    }</a>
-<a class="sourceLine" id="cb14-19" data-line-number="19"></a>
-<a class="sourceLine" id="cb14-20" data-line-number="20">    result = vkCreateInstance(&amp;info, NULL, &amp;instance);</a>
-<a class="sourceLine" id="cb14-21" data-line-number="21">    std::cout &lt;&lt; <span class="st">&quot;vkCreateInstance result: &quot;</span> &lt;&lt; result  &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>;</a>
-<a class="sourceLine" id="cb14-22" data-line-number="22"></a>
-<a class="sourceLine" id="cb14-23" data-line-number="23">    vkDestroyInstance(instance, nullptr);</a>
-<a class="sourceLine" id="cb14-24" data-line-number="24">    <span class="cf">return</span> <span class="dv">0</span>;</a>
-<a class="sourceLine" id="cb14-25" data-line-number="25">}</a>
-<a class="sourceLine" id="cb14-26" data-line-number="26"></a></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode C"><code class="sourceCode c"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></a>
+<a class="sourceLine" id="cb16-2" data-line-number="2"><span class="pp">#include </span><span class="im">&lt;vulkan/vulkan.h&gt;</span></a>
+<a class="sourceLine" id="cb16-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb16-4" data-line-number="4"><span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">const</span> <span class="dt">char</span> * argv[]) {</a>
+<a class="sourceLine" id="cb16-5" data-line-number="5">    VkInstance instance;</a>
+<a class="sourceLine" id="cb16-6" data-line-number="6">    VkResult result;</a>
+<a class="sourceLine" id="cb16-7" data-line-number="7">    VkInstanceCreateInfo info = {};</a>
+<a class="sourceLine" id="cb16-8" data-line-number="8">    <span class="dt">uint32_t</span> instance_layer_count;</a>
+<a class="sourceLine" id="cb16-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb16-10" data-line-number="10">    result = vkEnumerateInstanceLayerProperties(&amp;instance_layer_count, nullptr);</a>
+<a class="sourceLine" id="cb16-11" data-line-number="11">    std::cout &lt;&lt; instance_layer_count &lt;&lt; <span class="st">&quot; layers found!</span><span class="sc">\n</span><span class="st">&quot;</span>;</a>
+<a class="sourceLine" id="cb16-12" data-line-number="12">    <span class="cf">if</span> (instance_layer_count &gt; <span class="dv">0</span>) {</a>
+<a class="sourceLine" id="cb16-13" data-line-number="13">        std::unique_ptr&lt;VkLayerProperties[]&gt; instance_layers(new VkLayerProperties[instance_layer_count]);</a>
+<a class="sourceLine" id="cb16-14" data-line-number="14">        result = vkEnumerateInstanceLayerProperties(&amp;instance_layer_count, instance_layers.get());</a>
+<a class="sourceLine" id="cb16-15" data-line-number="15">        <span class="cf">for</span> (<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; instance_layer_count; ++i) {</a>
+<a class="sourceLine" id="cb16-16" data-line-number="16">            std::cout &lt;&lt; instance_layers[i].layerName &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>;</a>
+<a class="sourceLine" id="cb16-17" data-line-number="17">        }</a>
+<a class="sourceLine" id="cb16-18" data-line-number="18">    }</a>
+<a class="sourceLine" id="cb16-19" data-line-number="19"></a>
+<a class="sourceLine" id="cb16-20" data-line-number="20">    result = vkCreateInstance(&amp;info, NULL, &amp;instance);</a>
+<a class="sourceLine" id="cb16-21" data-line-number="21">    std::cout &lt;&lt; <span class="st">&quot;vkCreateInstance result: &quot;</span> &lt;&lt; result  &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>;</a>
+<a class="sourceLine" id="cb16-22" data-line-number="22"></a>
+<a class="sourceLine" id="cb16-23" data-line-number="23">    vkDestroyInstance(instance, nullptr);</a>
+<a class="sourceLine" id="cb16-24" data-line-number="24">    <span class="cf">return</span> <span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb16-25" data-line-number="25">}</a>
+<a class="sourceLine" id="cb16-26" data-line-number="26"></a></code></pre></div>
 <p>Compile and run this code and notice no layers are found. We need to tell the Vulkan loader where to find the layers.</p>
 <ul>
 <li>Add the path to the layer JSON files to the environment
@@ -449,42 +441,42 @@ VK_INSTANCE_LAYERS=VK_LAYER_KHRONOS_validation vulkaninfo
 <h4 id="load-the-validation-layers">Load the Validation Layers</h4>
 <p>Finally, we'll actually load the validation layers and make sure they are working.</p>
 <p>Update your code:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode C"><code class="sourceCode c"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></a>
-<a class="sourceLine" id="cb15-2" data-line-number="2"><span class="pp">#include </span><span class="im">&lt;vulkan/vulkan.h&gt;</span></a>
-<a class="sourceLine" id="cb15-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb15-4" data-line-number="4"><span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">const</span> <span class="dt">char</span> * argv[]) {</a>
-<a class="sourceLine" id="cb15-5" data-line-number="5">    VkInstance instance;</a>
-<a class="sourceLine" id="cb15-6" data-line-number="6">    VkResult result;</a>
-<a class="sourceLine" id="cb15-7" data-line-number="7">    VkInstanceCreateInfo info = {};</a>
-<a class="sourceLine" id="cb15-8" data-line-number="8">    <span class="dt">uint32_t</span> instance_layer_count;</a>
-<a class="sourceLine" id="cb15-9" data-line-number="9"></a>
-<a class="sourceLine" id="cb15-10" data-line-number="10">    result = vkEnumerateInstanceLayerProperties(&amp;instance_layer_count, nullptr);</a>
-<a class="sourceLine" id="cb15-11" data-line-number="11">    std::cout &lt;&lt; instance_layer_count &lt;&lt; <span class="st">&quot; layers found!</span><span class="sc">\n</span><span class="st">&quot;</span>;</a>
-<a class="sourceLine" id="cb15-12" data-line-number="12">    <span class="cf">if</span> (instance_layer_count &gt; <span class="dv">0</span>) {</a>
-<a class="sourceLine" id="cb15-13" data-line-number="13">        std::unique_ptr&lt;VkLayerProperties[]&gt; instance_layers(new VkLayerProperties[instance_layer_count]);</a>
-<a class="sourceLine" id="cb15-14" data-line-number="14">        result = vkEnumerateInstanceLayerProperties(&amp;instance_layer_count, instance_layers.get());</a>
-<a class="sourceLine" id="cb15-15" data-line-number="15">        <span class="cf">for</span> (<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; instance_layer_count; ++i) {</a>
-<a class="sourceLine" id="cb15-16" data-line-number="16">            std::cout &lt;&lt; instance_layers[i].layerName &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>;</a>
-<a class="sourceLine" id="cb15-17" data-line-number="17">        }</a>
-<a class="sourceLine" id="cb15-18" data-line-number="18">    }</a>
-<a class="sourceLine" id="cb15-19" data-line-number="19"></a>
-<a class="sourceLine" id="cb15-20" data-line-number="20">    <span class="dt">const</span> <span class="dt">char</span> * names[] = {</a>
-<a class="sourceLine" id="cb15-21" data-line-number="21">        <span class="st">&quot;VK_LAYER_KHRONOS_validation&quot;</span></a>
-<a class="sourceLine" id="cb15-22" data-line-number="22">    };</a>
-<a class="sourceLine" id="cb15-23" data-line-number="23">    info.enabledLayerCount = <span class="dv">1</span>;</a>
-<a class="sourceLine" id="cb15-24" data-line-number="24">    info.ppEnabledLayerNames = names;</a>
-<a class="sourceLine" id="cb15-25" data-line-number="25"></a>
-<a class="sourceLine" id="cb15-26" data-line-number="26">    result = vkCreateInstance(&amp;info, NULL, &amp;instance);</a>
-<a class="sourceLine" id="cb15-27" data-line-number="27">    std::cout &lt;&lt; <span class="st">&quot;vkCreateInstance result: &quot;</span> &lt;&lt; result  &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>;</a>
-<a class="sourceLine" id="cb15-28" data-line-number="28"></a>
-<a class="sourceLine" id="cb15-29" data-line-number="29">    vkDestroyInstance(instance, nullptr);</a>
-<a class="sourceLine" id="cb15-30" data-line-number="30">    <span class="cf">return</span> <span class="dv">0</span>;</a>
-<a class="sourceLine" id="cb15-31" data-line-number="31">}</a></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode C"><code class="sourceCode c"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></a>
+<a class="sourceLine" id="cb17-2" data-line-number="2"><span class="pp">#include </span><span class="im">&lt;vulkan/vulkan.h&gt;</span></a>
+<a class="sourceLine" id="cb17-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb17-4" data-line-number="4"><span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">const</span> <span class="dt">char</span> * argv[]) {</a>
+<a class="sourceLine" id="cb17-5" data-line-number="5">    VkInstance instance;</a>
+<a class="sourceLine" id="cb17-6" data-line-number="6">    VkResult result;</a>
+<a class="sourceLine" id="cb17-7" data-line-number="7">    VkInstanceCreateInfo info = {};</a>
+<a class="sourceLine" id="cb17-8" data-line-number="8">    <span class="dt">uint32_t</span> instance_layer_count;</a>
+<a class="sourceLine" id="cb17-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb17-10" data-line-number="10">    result = vkEnumerateInstanceLayerProperties(&amp;instance_layer_count, nullptr);</a>
+<a class="sourceLine" id="cb17-11" data-line-number="11">    std::cout &lt;&lt; instance_layer_count &lt;&lt; <span class="st">&quot; layers found!</span><span class="sc">\n</span><span class="st">&quot;</span>;</a>
+<a class="sourceLine" id="cb17-12" data-line-number="12">    <span class="cf">if</span> (instance_layer_count &gt; <span class="dv">0</span>) {</a>
+<a class="sourceLine" id="cb17-13" data-line-number="13">        std::unique_ptr&lt;VkLayerProperties[]&gt; instance_layers(new VkLayerProperties[instance_layer_count]);</a>
+<a class="sourceLine" id="cb17-14" data-line-number="14">        result = vkEnumerateInstanceLayerProperties(&amp;instance_layer_count, instance_layers.get());</a>
+<a class="sourceLine" id="cb17-15" data-line-number="15">        <span class="cf">for</span> (<span class="dt">int</span> i = <span class="dv">0</span>; i &lt; instance_layer_count; ++i) {</a>
+<a class="sourceLine" id="cb17-16" data-line-number="16">            std::cout &lt;&lt; instance_layers[i].layerName &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>;</a>
+<a class="sourceLine" id="cb17-17" data-line-number="17">        }</a>
+<a class="sourceLine" id="cb17-18" data-line-number="18">    }</a>
+<a class="sourceLine" id="cb17-19" data-line-number="19"></a>
+<a class="sourceLine" id="cb17-20" data-line-number="20">    <span class="dt">const</span> <span class="dt">char</span> * names[] = {</a>
+<a class="sourceLine" id="cb17-21" data-line-number="21">        <span class="st">&quot;VK_LAYER_KHRONOS_validation&quot;</span></a>
+<a class="sourceLine" id="cb17-22" data-line-number="22">    };</a>
+<a class="sourceLine" id="cb17-23" data-line-number="23">    info.enabledLayerCount = <span class="dv">1</span>;</a>
+<a class="sourceLine" id="cb17-24" data-line-number="24">    info.ppEnabledLayerNames = names;</a>
+<a class="sourceLine" id="cb17-25" data-line-number="25"></a>
+<a class="sourceLine" id="cb17-26" data-line-number="26">    result = vkCreateInstance(&amp;info, NULL, &amp;instance);</a>
+<a class="sourceLine" id="cb17-27" data-line-number="27">    std::cout &lt;&lt; <span class="st">&quot;vkCreateInstance result: &quot;</span> &lt;&lt; result  &lt;&lt; <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>;</a>
+<a class="sourceLine" id="cb17-28" data-line-number="28"></a>
+<a class="sourceLine" id="cb17-29" data-line-number="29">    vkDestroyInstance(instance, nullptr);</a>
+<a class="sourceLine" id="cb17-30" data-line-number="30">    <span class="cf">return</span> <span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb17-31" data-line-number="31">}</a></code></pre></div>
 <p>Compile and run and you should see a validation error message complaining the <code>sType</code> field is not set to the expected value.</p>
 <p>This is not surprising because the <code>VkInstanceCreateInfo</code> structure was simply initialized to 0, except for the validation layer name list. You can experiment further by fixing this problem and see what happens next.</p>
 <h2 id="working-with-cmake">Working with CMake</h2>
 <p>You can also build applications using this SDK with CMake.</p>
-<p>For MacOS, <a href="https://github.com/Kitware/CMake/releases/tag/v3.11.3">CMake 3.11.3</a> is recommended.</p>
+<p><a href="https://cmake.org/files/v3.10/cmake-3.10.2-Darwin-x86_64.tar.gz">CMake 3.10.2</a> is recommended.</p>
 <p>Recent CMake versions include a <code>FindVulkan.cmake</code> module that is useful for locating the SDK and using it in CMake projects. This module relies on the <code>VULKAN_SDK</code> environment variable to locate the SDK. If this variable is not set, the module looks in the standard system locations such as <code>/usr/local</code>.</p>
 <p>Assuming the <code>VULKAN_SDK</code> environment variable is set to the <code>macOS</code> directory in your SDK installation:</p>
 <pre><code>export VULKAN_SDK=path-to-sdk/macOS
@@ -494,10 +486,10 @@ VK_INSTANCE_LAYERS=VK_LAYER_KHRONOS_validation vulkaninfo
 <p>This example uses CMake to create both &quot;Unix Makefiles&quot; and Xcode projects to build the console version of the Vulkan Info application.</p>
 <p>Create an empty directory and copy the source code for Vulkan Info from the Khronos Group Vulkan-Tools GitHub <a href="https://github.com/KhronosGroup/Vulkan-Tools">repository</a>. The file is <code>vulkaninfo/vulkaninfo.c</code>.</p>
 <p>Create the file <code>CMakeLists.txt</code> and populate it with the following contents:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode CMake"><code class="sourceCode cmake"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="kw">project</span>(vulkaninfo)</a>
-<a class="sourceLine" id="cb17-2" data-line-number="2"><span class="kw">find_package</span>(vulkan <span class="ot">REQUIRED</span>)</a>
-<a class="sourceLine" id="cb17-3" data-line-number="3"><span class="kw">add_executable</span>(vulkaninfo vulkaninfo.c)</a>
-<a class="sourceLine" id="cb17-4" data-line-number="4"><span class="kw">target_link_libraries</span>(vulkaninfo Vulkan::Vulkan)</a></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode CMake"><code class="sourceCode cmake"><a class="sourceLine" id="cb19-1" data-line-number="1"><span class="kw">project</span>(vulkaninfo)</a>
+<a class="sourceLine" id="cb19-2" data-line-number="2"><span class="kw">find_package</span>(vulkan <span class="ot">REQUIRED</span>)</a>
+<a class="sourceLine" id="cb19-3" data-line-number="3"><span class="kw">add_executable</span>(vulkaninfo vulkaninfo.c)</a>
+<a class="sourceLine" id="cb19-4" data-line-number="4"><span class="kw">target_link_libraries</span>(vulkaninfo Vulkan::Vulkan)</a></code></pre></div>
 <p>Assuming the current directory is this new directory now containing <code>vulkaninfo.c</code> and <code>CMakeLists.txt</code>, build the project:</p>
 <pre class="script"><code>mkdir build
 cd build
@@ -531,12 +523,12 @@ open vulkaninfo.xcodeproj
 </ul></li>
 <li>You can install the ICD in a system directory.
 <ul>
-<li>Instructions for this can be found under the section <a href="#install-to-system-directories">&quot;Install to System Directories.&quot;</a></li>
+<li>Instructions for this can be found under the section <a href="#install-the-sdk---alternate-method-using-system-paths">&quot;Install the SDK - Alternate method using system paths.&quot;</a></li>
 </ul></li>
 <li>If your application is contained in a bundle, you can relink the app to place the driver in the bundle.
 <ul>
 <li>Instructions for this can be found under the section <a href="#create-a-bundled-application">&quot;Create a Bundled Application&quot;</a></li>
 </ul></li>
 </ul>
-<p>Encountered &quot;Could not start Vulkan Info&quot; message in &quot;Vulkan Info&quot; tab of <code>vkconfig.app</code>: To use the &quot;Vulkan Info&quot; tab in <code>vkconfig.app</code> you must install the SDK to your system directories as described in the section <a href="#install-to-system-directories">&quot;Install to System Directories.&quot;</a></p>
+<p>Encountered &quot;Could not start Vulkan Info&quot; message in &quot;Vulkan Info&quot; tab of <code>vkconfig.app</code>: To use the &quot;Vulkan Info&quot; tab in <code>vkconfig.app</code> you must install the SDK to your system directories as described in the section <a href="#install-the-sdk---alternate-method-using-system-paths">&quot;Install the SDK - Alternate method using system paths.&quot;</a></p>
 <p>Invisible text in <code>vkconfig.app</code>: Some text in <code>vkconfig.app</code> does not display properly in Dark Theme on MacOS Mojave. If you are on Mojave, please switch to Light Theme while using <code>vkconfig.app</code> by navigating to &quot;System Preferences&quot; &gt; &quot;General&quot; and setting &quot;Appearance&quot; to &quot;Light&quot;.</p>

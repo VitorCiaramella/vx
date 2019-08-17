@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.6">
+<meta name="generator" content="Asciidoctor 1.5.8">
 <meta name="author" content="The Khronos® Vulkan Working Group">
-<title>Vulkan® 1.1.106 - A Specification (with all published extensions)</title>
+<title>Vulkan® 1.1.114 - A Specification (with all published extensions)</title>
 <style>
 /*! normalize.css v2.1.2 | MIT License | git.io/normalize */
 /* ========================================================================== HTML5 display definitions ========================================================================== */
@@ -728,6 +728,97 @@ a code { color: inherit; }
 
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+/* Stylesheet for CodeRay to match GitHub theme | MIT License | http://foundation.zurb.com */
+/*pre.CodeRay {background-color:#f7f7f8;}*/
+.CodeRay .line-numbers{border-right:1px solid #d8d8d8;padding:0 0.5em 0 .25em}
+.CodeRay span.line-numbers{display:inline-block;margin-right:.5em;color:rgba(0,0,0,.3)}
+.CodeRay .line-numbers strong{color:rgba(0,0,0,.4)}
+table.CodeRay{border-collapse:separate;border-spacing:0;margin-bottom:0;border:0;background:none}
+table.CodeRay td{vertical-align: top;line-height:1.45}
+table.CodeRay td.line-numbers{text-align:right}
+table.CodeRay td.line-numbers>pre{padding:0;color:rgba(0,0,0,.3)}
+table.CodeRay td.code{padding:0 0 0 .5em}
+table.CodeRay td.code>pre{padding:0}
+.CodeRay .debug{color:#fff !important;background:#000080 !important}
+.CodeRay .annotation{color:#007}
+.CodeRay .attribute-name{color:#000080}
+.CodeRay .attribute-value{color:#700}
+.CodeRay .binary{color:#509}
+.CodeRay .comment{color:#998;font-style:italic}
+.CodeRay .char{color:#04d}
+.CodeRay .char .content{color:#04d}
+.CodeRay .char .delimiter{color:#039}
+.CodeRay .class{color:#458;font-weight:bold}
+.CodeRay .complex{color:#a08}
+.CodeRay .constant,.CodeRay .predefined-constant{color:#008080}
+.CodeRay .color{color:#099}
+.CodeRay .class-variable{color:#369}
+.CodeRay .decorator{color:#b0b}
+.CodeRay .definition{color:#099}
+.CodeRay .delimiter{color:#000}
+.CodeRay .doc{color:#970}
+.CodeRay .doctype{color:#34b}
+.CodeRay .doc-string{color:#d42}
+.CodeRay .escape{color:#666}
+.CodeRay .entity{color:#800}
+.CodeRay .error{color:#808}
+.CodeRay .exception{color:inherit}
+.CodeRay .filename{color:#099}
+.CodeRay .function{color:#900;font-weight:bold}
+.CodeRay .global-variable{color:#008080}
+.CodeRay .hex{color:#058}
+.CodeRay .integer,.CodeRay .float{color:#099}
+.CodeRay .include{color:#555}
+.CodeRay .inline{color:#000}
+.CodeRay .inline .inline{background:#ccc}
+.CodeRay .inline .inline .inline{background:#bbb}
+.CodeRay .inline .inline-delimiter{color:#d14}
+.CodeRay .inline-delimiter{color:#d14}
+.CodeRay .important{color:#555;font-weight:bold}
+.CodeRay .interpreted{color:#b2b}
+.CodeRay .instance-variable{color:#008080}
+.CodeRay .label{color:#970}
+.CodeRay .local-variable{color:#963}
+.CodeRay .octal{color:#40e}
+.CodeRay .predefined{color:#369}
+.CodeRay .preprocessor{color:#579}
+.CodeRay .pseudo-class{color:#555}
+.CodeRay .directive{font-weight:bold}
+.CodeRay .type{font-weight:bold}
+.CodeRay .predefined-type{color:inherit}
+.CodeRay .reserved,.CodeRay .keyword {color:#000;font-weight:bold}
+.CodeRay .key{color:#808}
+.CodeRay .key .delimiter{color:#606}
+.CodeRay .key .char{color:#80f}
+.CodeRay .value{color:#088}
+.CodeRay .regexp .delimiter{color:#808}
+.CodeRay .regexp .content{color:#808}
+.CodeRay .regexp .modifier{color:#808}
+.CodeRay .regexp .char{color:#d14}
+.CodeRay .regexp .function{color:#404;font-weight:bold}
+.CodeRay .string{color:#d20}
+.CodeRay .string .string .string{background:#ffd0d0}
+.CodeRay .string .content{color:#d14}
+.CodeRay .string .char{color:#d14}
+.CodeRay .string .delimiter{color:#d14}
+.CodeRay .shell{color:#d14}
+.CodeRay .shell .delimiter{color:#d14}
+.CodeRay .symbol{color:#990073}
+.CodeRay .symbol .content{color:#a60}
+.CodeRay .symbol .delimiter{color:#630}
+.CodeRay .tag{color:#008080}
+.CodeRay .tag-special{color:#d70}
+.CodeRay .variable{color:#036}
+.CodeRay .insert{background:#afa}
+.CodeRay .delete{background:#faa}
+.CodeRay .change{color:#aaf;background:#007}
+.CodeRay .head{color:#f8f;background:#505}
+.CodeRay .insert .insert{color:#080}
+.CodeRay .delete .delete{color:#800}
+.CodeRay .change .change{color:#66f}
+.CodeRay .head .head{color:#f4f}
+</style>
 <link rel="stylesheet" href="../katex/katex.min.css">
 <link href="chunked.css?4" rel="stylesheet">
 <script>var searchindexurl = 'search.index.js?4' + (document.title.replace(/[^0-9.]/g, ''));</script>
@@ -753,12 +844,12 @@ a code { color: inherit; }
 </script></head>
 <body class="book toc2 toc-left" style="max-width: 100;">
 <div id="header">
-<h1>Vulkan<sup>®</sup> 1.1.106 - A Specification (with all published extensions)</h1>
+<h1>Vulkan<sup>®</sup> 1.1.114 - A Specification (with all published extensions)</h1>
 <div class="details">
 <span id="author" class="author">The Khronos<sup>®</sup> Vulkan Working Group</span><br>
-<span id="revnumber">version 1.1.106,</span>
-<span id="revdate">2019-04-15 21:10:00Z</span>
-<br><span id="revremark">from git branch: Git branch information not available commit: b1042a3204aba3319e2a9b42afa969789472a458</span>
+<span id="revnumber">version 1.1.114,</span>
+<span id="revdate">2019-07-26 16:21:27Z</span>
+<br><span id="revremark">from git branch: Git branch information not available commit: 7eb07044df67e19e768080c7f378fc0938ead346</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -922,7 +1013,7 @@ a code { color: inherit; }
 <li><a href="chap15.html#_conversion_formulas">15.2. Conversion Formulas</a></li>
 <li><a href="chap15.html#_texel_input_operations">15.3. Texel Input Operations</a></li>
 <li><a href="chap15.html#_texel_output_operations">15.4. Texel Output Operations</a></li>
-<li><a href="chap15.html#_derivative_operations">15.5. Derivative Operations</a></li>
+<li><a href="chap15.html#texture-derivatives">15.5. Derivative Operations</a></li>
 <li><a href="chap15.html#textures-normalized-operations">15.6. Normalized Texel Coordinate Operations</a></li>
 <li><a href="chap15.html#_unnormalized_texel_coordinate_operations">15.7. Unnormalized Texel Coordinate Operations</a></li>
 <li><a href="chap15.html#textures-integer-coordinate-operations">15.8. Integer Texel Coordinate Operations</a></li>
@@ -946,6 +1037,7 @@ a code { color: inherit; }
 <li><a href="chap17.html#queries-pipestats">17.4. Pipeline Statistics Queries</a></li>
 <li><a href="chap17.html#queries-timestamps">17.5. Timestamp Queries</a></li>
 <li><a href="chap17.html#queries-transform-feedback">17.6. Transform Feedback Queries</a></li>
+<li><a href="chap17.html#queries-performance-intel">17.7. Intel performance queries</a></li>
 </ul>
 </li>
 <li><a href="chap18.html#clears">18. Clear Commands</a>
@@ -2122,6 +2214,67 @@ reflects the coverage after the early fragment tests.
 Otherwise, it reflects the coverage before the early fragment tests.</p>
 </div>
 </div>
+<div class="sect3">
+<h4 id="shaders-fragment-shader-interlock">8.11.3. Fragment Shader Interlock</h4>
+<div class="paragraph">
+<p>In normal operation, it is possible for more than one fragment shader
+invocation to be executed simultaneously for the same pixel if there are
+overlapping primitives.
+If the <a href="chap35.html#features-features-fragmentShaderSampleInterlock">fragmentShaderSampleInterlock</a>,
+<a href="chap35.html#features-features-fragmentShaderPixelInterlock">fragmentShaderPixelInterlock</a>, or
+<a href="chap35.html#features-features-fragmentShaderShadingRateInterlock">fragmentShaderShadingRateInterlock</a> features are enabled, it is possible to
+define a critical section within the fragment shader that is guaranteed to
+not run simultaneously with another fragment shader invocation for the same
+sample(s) or pixel(s).
+It is also possible to control the relative ordering of execution of these
+critical sections across different fragment shader invovations.</p>
+</div>
+<div class="paragraph">
+<p>If the <a href="chap40.html#spirvenv-capabilities-table-fragmentShaderInterlock"><code>FragmentShaderSampleInterlockEXT</code>, <code>FragmentShaderPixelInterlockEXT</code>,
+or <code>FragmentShaderShadingRateInterlockEXT</code></a> capabilities are declared in
+the fragment shader, the <code>OpBeginInvocationInterlockEXT</code> and
+<code>OpEndInvocationInterlockEXT</code> instructions <strong class="purple">must</strong> be used to delimit a
+critical section of fragment shader code.</p>
+</div>
+<div class="paragraph">
+<p>To ensure each invocation of the critical section is executed in
+<a href="chap20.html#drawing-primitive-order">primitive order</a>, declare one of the
+<code>PixelInterlockOrderedEXT</code>, <code>SampleInterlockOrderedEXT</code>, or
+<code>ShadingRateInterlockOrderedEXT</code> execution modes.
+If the order of execution of each invocation of the critical section does
+not matter, declare one of the <code>PixelInterlockUnorderedEXT</code>,
+<code>SampleInterlockUnorderedEXT</code>, or <code>ShadingRateInterlockUnorderedEXT</code>
+execution modes.</p>
+</div>
+<div class="paragraph">
+<p>The <code>PixelInterlockOrderedEXT</code> and <code>PixelInterlockUnorderedEXT</code>
+execution modes provide mutual exclusion in the critical section for any
+pair of fragments corresponding to the same pixel, or pixels if the fragment
+covers more than one pixel.
+With sample shading enabled, these execution modes are treated like
+<code>SampleInterlockOrderedEXT</code> or <code>SampleInterlockUnorderedEXT</code>
+respectively.</p>
+</div>
+<div class="paragraph">
+<p>The <code>SampleInterlockOrderedEXT</code> and <code>SampleInterlockUnorderedEXT</code>
+execution modes only provide mutual exclusion for pairs of fragments that
+both cover at least one common sample in the same pixel; these are
+recommended for performance if shaders use per-sample data structures.
+If these execution modes are used in single-sample mode they are treated
+like <code>PixelInterlockOrderedEXT</code> or <code>PixelInterlockUnorderedEXT</code>
+respectively.</p>
+</div>
+<div class="paragraph">
+<p>The <code>ShadingRateInterlockOrderedEXT</code> and
+<code>ShadingRateInterlockUnorderedEXT</code> execution modes provide mutual
+exclusion for pairs of fragments that both have at least one common sample
+in the same pixel, even if none of the common samples are covered by both
+fragments.
+With sample shading enabled, these execution modes are treated like
+<code>SampleInterlockOrderedEXT</code> or <code>SampleInterlockUnorderedEXT</code>
+respectively.</p>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="shaders-compute">8.12. Compute Shaders</h3>
@@ -2521,7 +2674,7 @@ For reduction operations, each invocation in a subgroup will obtain the same
 result of these arithmetic operations applied across the subgroup.
 For scan operations, each invocation in the subgroup will perform an
 inclusive or exclusive scan, cumulatively applying the operation across the
-invocations in a subgroup in linear order.
+invocations in a subgroup in an implementation-defined order.
 The operations supported are add, mul, min, max, and, or, xor.</p>
 </div>
 </div>
@@ -2575,7 +2728,7 @@ share data efficiently with each other.
 For fragment shaders, if the <code>subgroupSize</code> field of
 <a href="chap36.html#VkPhysicalDeviceSubgroupProperties">VkPhysicalDeviceSubgroupProperties</a> is at least 4, each quad
 corresponds to one of the groups of four shader invocations used for
-<a href="chap15.html#texture-derivatives-compute">derivatives</a>.
+<a href="chap15.html#texture-derivatives">derivatives</a>.
 For compute shaders using the <code>DerivativeGroupQuadsNV</code> or
 <code>DerivativeGroupLinearNV</code> execution modes, each quad corresponds to one
 of the groups of four shader invocations used for
@@ -2587,11 +2740,11 @@ P<sub>i0,j0</sub>, P<sub>i1,j0</sub>, P<sub>i0,j1</sub>, and P<sub>i1,j1</sub>, 
 <div class="sect3">
 <h4 id="shaders-subgroup-partitioned">8.22.9. Partitioned Subgroup Operations</h4>
 <div class="paragraph">
-<p>The partitioned subgroup operations allow invocations to perform an
-operation among partitions of a subgroup, such that the operation is only
-performed within the subgroup invocations within a partition.
-The partitions for partitioned subgroup operations <strong class="purple">can</strong> group the
-invocations into arbitrary subsets and <strong class="purple">can</strong> be computed at runtime.
+<p>The partitioned subgroup operations allow a subgroup to partition its
+invocations into disjoint subsets and to perform scan and reduce operations
+among invocations belonging to the same subset.
+The partitions for partitioned subgroup operations are specified by a ballot
+operation and <strong class="purple">can</strong> be computed at runtime.
 The operations supported are add, mul, min, max, and, or, xor.</p>
 </div>
 </div>
@@ -3634,99 +3787,10 @@ If no <code>VkAllocationCallbacks</code> were provided when
 </div></div>
 <div id="footer">
 <div id="footer-text">
-Version 1.1.106<br>
+Version 1.1.114<br>
 Last updated 2019-04-11 14:02:22 -0600
 </div>
 </div>
-<style>
-/* Stylesheet for CodeRay to match GitHub theme | MIT License | http://foundation.zurb.com */
-pre.CodeRay{background:#f7f7f8}
-.CodeRay .line-numbers{border-right:1px solid currentColor;opacity:.35;padding:0 .5em 0 0}
-.CodeRay span.line-numbers{display:inline-block;margin-right:.75em}
-.CodeRay .line-numbers strong{color:#000}
-table.CodeRay{border-collapse:separate;border:0;margin-bottom:0;background:none}
-table.CodeRay td{vertical-align:top;line-height:inherit}
-table.CodeRay td.line-numbers{text-align:right}
-table.CodeRay td.code{padding:0 0 0 .75em}
-.CodeRay .debug{color:#fff !important;background:#000080 !important}
-.CodeRay .annotation{color:#007}
-.CodeRay .attribute-name{color:#000080}
-.CodeRay .attribute-value{color:#700}
-.CodeRay .binary{color:#509}
-.CodeRay .comment{color:#998;font-style:italic}
-.CodeRay .char{color:#04d}
-.CodeRay .char .content{color:#04d}
-.CodeRay .char .delimiter{color:#039}
-.CodeRay .class{color:#458;font-weight:bold}
-.CodeRay .complex{color:#a08}
-.CodeRay .constant,.CodeRay .predefined-constant{color:#008080}
-.CodeRay .color{color:#099}
-.CodeRay .class-variable{color:#369}
-.CodeRay .decorator{color:#b0b}
-.CodeRay .definition{color:#099}
-.CodeRay .delimiter{color:#000}
-.CodeRay .doc{color:#970}
-.CodeRay .doctype{color:#34b}
-.CodeRay .doc-string{color:#d42}
-.CodeRay .escape{color:#666}
-.CodeRay .entity{color:#800}
-.CodeRay .error{color:#808}
-.CodeRay .exception{color:inherit}
-.CodeRay .filename{color:#099}
-.CodeRay .function{color:#900;font-weight:bold}
-.CodeRay .global-variable{color:#008080}
-.CodeRay .hex{color:#058}
-.CodeRay .integer,.CodeRay .float{color:#099}
-.CodeRay .include{color:#555}
-.CodeRay .inline{color:#000}
-.CodeRay .inline .inline{background:#ccc}
-.CodeRay .inline .inline .inline{background:#bbb}
-.CodeRay .inline .inline-delimiter{color:#d14}
-.CodeRay .inline-delimiter{color:#d14}
-.CodeRay .important{color:#555;font-weight:bold}
-.CodeRay .interpreted{color:#b2b}
-.CodeRay .instance-variable{color:#008080}
-.CodeRay .label{color:#970}
-.CodeRay .local-variable{color:#963}
-.CodeRay .octal{color:#40e}
-.CodeRay .predefined{color:#369}
-.CodeRay .preprocessor{color:#579}
-.CodeRay .pseudo-class{color:#555}
-.CodeRay .directive{font-weight:bold}
-.CodeRay .type{font-weight:bold}
-.CodeRay .predefined-type{color:inherit}
-.CodeRay .reserved,.CodeRay .keyword {color:#000;font-weight:bold}
-.CodeRay .key{color:#808}
-.CodeRay .key .delimiter{color:#606}
-.CodeRay .key .char{color:#80f}
-.CodeRay .value{color:#088}
-.CodeRay .regexp .delimiter{color:#808}
-.CodeRay .regexp .content{color:#808}
-.CodeRay .regexp .modifier{color:#808}
-.CodeRay .regexp .char{color:#d14}
-.CodeRay .regexp .function{color:#404;font-weight:bold}
-.CodeRay .string{color:#d20}
-.CodeRay .string .string .string{background:#ffd0d0}
-.CodeRay .string .content{color:#d14}
-.CodeRay .string .char{color:#d14}
-.CodeRay .string .delimiter{color:#d14}
-.CodeRay .shell{color:#d14}
-.CodeRay .shell .delimiter{color:#d14}
-.CodeRay .symbol{color:#990073}
-.CodeRay .symbol .content{color:#a60}
-.CodeRay .symbol .delimiter{color:#630}
-.CodeRay .tag{color:#008080}
-.CodeRay .tag-special{color:#d70}
-.CodeRay .variable{color:#036}
-.CodeRay .insert{background:#afa}
-.CodeRay .delete{background:#faa}
-.CodeRay .change{color:#aaf;background:#007}
-.CodeRay .head{color:#f8f;background:#505}
-.CodeRay .insert .insert{color:#080}
-.CodeRay .delete .delete{color:#800}
-.CodeRay .change .change{color:#66f}
-.CodeRay .head .head{color:#f4f}
-</style>
 
 
 </body>

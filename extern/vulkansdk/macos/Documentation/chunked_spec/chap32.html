@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.6">
+<meta name="generator" content="Asciidoctor 1.5.8">
 <meta name="author" content="The Khronos® Vulkan Working Group">
-<title>Vulkan® 1.1.106 - A Specification (with all published extensions)</title>
+<title>Vulkan® 1.1.114 - A Specification (with all published extensions)</title>
 <style>
 /*! normalize.css v2.1.2 | MIT License | git.io/normalize */
 /* ========================================================================== HTML5 display definitions ========================================================================== */
@@ -728,6 +728,97 @@ a code { color: inherit; }
 
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+/* Stylesheet for CodeRay to match GitHub theme | MIT License | http://foundation.zurb.com */
+/*pre.CodeRay {background-color:#f7f7f8;}*/
+.CodeRay .line-numbers{border-right:1px solid #d8d8d8;padding:0 0.5em 0 .25em}
+.CodeRay span.line-numbers{display:inline-block;margin-right:.5em;color:rgba(0,0,0,.3)}
+.CodeRay .line-numbers strong{color:rgba(0,0,0,.4)}
+table.CodeRay{border-collapse:separate;border-spacing:0;margin-bottom:0;border:0;background:none}
+table.CodeRay td{vertical-align: top;line-height:1.45}
+table.CodeRay td.line-numbers{text-align:right}
+table.CodeRay td.line-numbers>pre{padding:0;color:rgba(0,0,0,.3)}
+table.CodeRay td.code{padding:0 0 0 .5em}
+table.CodeRay td.code>pre{padding:0}
+.CodeRay .debug{color:#fff !important;background:#000080 !important}
+.CodeRay .annotation{color:#007}
+.CodeRay .attribute-name{color:#000080}
+.CodeRay .attribute-value{color:#700}
+.CodeRay .binary{color:#509}
+.CodeRay .comment{color:#998;font-style:italic}
+.CodeRay .char{color:#04d}
+.CodeRay .char .content{color:#04d}
+.CodeRay .char .delimiter{color:#039}
+.CodeRay .class{color:#458;font-weight:bold}
+.CodeRay .complex{color:#a08}
+.CodeRay .constant,.CodeRay .predefined-constant{color:#008080}
+.CodeRay .color{color:#099}
+.CodeRay .class-variable{color:#369}
+.CodeRay .decorator{color:#b0b}
+.CodeRay .definition{color:#099}
+.CodeRay .delimiter{color:#000}
+.CodeRay .doc{color:#970}
+.CodeRay .doctype{color:#34b}
+.CodeRay .doc-string{color:#d42}
+.CodeRay .escape{color:#666}
+.CodeRay .entity{color:#800}
+.CodeRay .error{color:#808}
+.CodeRay .exception{color:inherit}
+.CodeRay .filename{color:#099}
+.CodeRay .function{color:#900;font-weight:bold}
+.CodeRay .global-variable{color:#008080}
+.CodeRay .hex{color:#058}
+.CodeRay .integer,.CodeRay .float{color:#099}
+.CodeRay .include{color:#555}
+.CodeRay .inline{color:#000}
+.CodeRay .inline .inline{background:#ccc}
+.CodeRay .inline .inline .inline{background:#bbb}
+.CodeRay .inline .inline-delimiter{color:#d14}
+.CodeRay .inline-delimiter{color:#d14}
+.CodeRay .important{color:#555;font-weight:bold}
+.CodeRay .interpreted{color:#b2b}
+.CodeRay .instance-variable{color:#008080}
+.CodeRay .label{color:#970}
+.CodeRay .local-variable{color:#963}
+.CodeRay .octal{color:#40e}
+.CodeRay .predefined{color:#369}
+.CodeRay .preprocessor{color:#579}
+.CodeRay .pseudo-class{color:#555}
+.CodeRay .directive{font-weight:bold}
+.CodeRay .type{font-weight:bold}
+.CodeRay .predefined-type{color:inherit}
+.CodeRay .reserved,.CodeRay .keyword {color:#000;font-weight:bold}
+.CodeRay .key{color:#808}
+.CodeRay .key .delimiter{color:#606}
+.CodeRay .key .char{color:#80f}
+.CodeRay .value{color:#088}
+.CodeRay .regexp .delimiter{color:#808}
+.CodeRay .regexp .content{color:#808}
+.CodeRay .regexp .modifier{color:#808}
+.CodeRay .regexp .char{color:#d14}
+.CodeRay .regexp .function{color:#404;font-weight:bold}
+.CodeRay .string{color:#d20}
+.CodeRay .string .string .string{background:#ffd0d0}
+.CodeRay .string .content{color:#d14}
+.CodeRay .string .char{color:#d14}
+.CodeRay .string .delimiter{color:#d14}
+.CodeRay .shell{color:#d14}
+.CodeRay .shell .delimiter{color:#d14}
+.CodeRay .symbol{color:#990073}
+.CodeRay .symbol .content{color:#a60}
+.CodeRay .symbol .delimiter{color:#630}
+.CodeRay .tag{color:#008080}
+.CodeRay .tag-special{color:#d70}
+.CodeRay .variable{color:#036}
+.CodeRay .insert{background:#afa}
+.CodeRay .delete{background:#faa}
+.CodeRay .change{color:#aaf;background:#007}
+.CodeRay .head{color:#f8f;background:#505}
+.CodeRay .insert .insert{color:#080}
+.CodeRay .delete .delete{color:#800}
+.CodeRay .change .change{color:#66f}
+.CodeRay .head .head{color:#f4f}
+</style>
 <link rel="stylesheet" href="../katex/katex.min.css">
 <link href="chunked.css?4" rel="stylesheet">
 <script>var searchindexurl = 'search.index.js?4' + (document.title.replace(/[^0-9.]/g, ''));</script>
@@ -753,12 +844,12 @@ a code { color: inherit; }
 </script></head>
 <body class="book toc2 toc-left" style="max-width: 100;">
 <div id="header">
-<h1>Vulkan<sup>®</sup> 1.1.106 - A Specification (with all published extensions)</h1>
+<h1>Vulkan<sup>®</sup> 1.1.114 - A Specification (with all published extensions)</h1>
 <div class="details">
 <span id="author" class="author">The Khronos<sup>®</sup> Vulkan Working Group</span><br>
-<span id="revnumber">version 1.1.106,</span>
-<span id="revdate">2019-04-15 21:10:00Z</span>
-<br><span id="revremark">from git branch: Git branch information not available commit: b1042a3204aba3319e2a9b42afa969789472a458</span>
+<span id="revnumber">version 1.1.114,</span>
+<span id="revdate">2019-07-26 16:21:27Z</span>
+<br><span id="revremark">from git branch: Git branch information not available commit: 7eb07044df67e19e768080c7f378fc0938ead346</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -922,7 +1013,7 @@ a code { color: inherit; }
 <li><a href="chap15.html#_conversion_formulas">15.2. Conversion Formulas</a></li>
 <li><a href="chap15.html#_texel_input_operations">15.3. Texel Input Operations</a></li>
 <li><a href="chap15.html#_texel_output_operations">15.4. Texel Output Operations</a></li>
-<li><a href="chap15.html#_derivative_operations">15.5. Derivative Operations</a></li>
+<li><a href="chap15.html#texture-derivatives">15.5. Derivative Operations</a></li>
 <li><a href="chap15.html#textures-normalized-operations">15.6. Normalized Texel Coordinate Operations</a></li>
 <li><a href="chap15.html#_unnormalized_texel_coordinate_operations">15.7. Unnormalized Texel Coordinate Operations</a></li>
 <li><a href="chap15.html#textures-integer-coordinate-operations">15.8. Integer Texel Coordinate Operations</a></li>
@@ -946,6 +1037,7 @@ a code { color: inherit; }
 <li><a href="chap17.html#queries-pipestats">17.4. Pipeline Statistics Queries</a></li>
 <li><a href="chap17.html#queries-timestamps">17.5. Timestamp Queries</a></li>
 <li><a href="chap17.html#queries-transform-feedback">17.6. Transform Feedback Queries</a></li>
+<li><a href="chap17.html#queries-performance-intel">17.7. Intel performance queries</a></li>
 </ul>
 </li>
 <li><a href="chap18.html#clears">18. Clear Commands</a>
@@ -1913,8 +2005,12 @@ created surface object is returned.</p>
 <p><code>flags</code> is reserved for future use.</p>
 </li>
 <li>
-<p><code>hinstance</code> and <code>hwnd</code> are the Win32 <code>HINSTANCE</code> and
-<code>HWND</code> for the window to associate the surface with.</p>
+<p><code>hinstance</code> is the Win32 <code>HINSTANCE</code> for the window to associate
+the surface with.</p>
+</li>
+<li>
+<p><code>hwnd</code> is the Win32 <code>HWND</code> for the window to associate the
+surface with.</p>
 </li>
 </ul>
 </div>
@@ -1984,6 +2080,19 @@ changes.</p>
 </td>
 </tr>
 </table>
+</div>
+<div class="openblock">
+<div class="content">
+<div id="VkWin32SurfaceCreateFlagsKHR" class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">typedef</span> VkFlags VkWin32SurfaceCreateFlagsKHR;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>VkWin32SurfaceCreateFlagsKHR</code> is a bitmask type for setting a mask, but
+is currently reserved for future use.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="sect3">
@@ -4717,6 +4826,19 @@ describing the display parameters associated with <code>displayMode</code>.</p>
 </div>
 <div class="openblock">
 <div class="content">
+<div id="VkDisplayModeCreateFlagsKHR" class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">typedef</span> VkFlags VkDisplayModeCreateFlagsKHR;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>VkDisplayModeCreateFlagsKHR</code> is a bitmask type for setting a mask, but
+is currently reserved for future use.</p>
+</div>
+</div>
+</div>
+<div class="openblock">
+<div class="content">
 <div class="paragraph">
 <p>To query the properties of a device’s built-in display modes, call:</p>
 </div>
@@ -5921,6 +6043,19 @@ less than the <code>maxImageDimensions2D</code> member of
 </div>
 <div class="openblock">
 <div class="content">
+<div id="VkDisplaySurfaceCreateFlagsKHR" class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">typedef</span> VkFlags VkDisplaySurfaceCreateFlagsKHR;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>VkDisplaySurfaceCreateFlagsKHR</code> is a bitmask type for setting a mask,
+but is currently reserved for future use.</p>
+</div>
+</div>
+</div>
+<div class="openblock">
+<div class="content">
 <div class="paragraph">
 <p>Possible values of <a href="#VkDisplaySurfaceCreateInfoKHR">VkDisplaySurfaceCreateInfoKHR</a>::<code>alphaMode</code>,
 specifying the type of alpha blending to use on a display, are:</p>
@@ -5978,6 +6113,181 @@ image’s other color channels.</p>
 zero or more <a href="#VkDisplayPlaneAlphaFlagBitsKHR">VkDisplayPlaneAlphaFlagBitsKHR</a>.</p>
 </div>
 </div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="headless">32.3.4. Presenting to headless surfaces</h4>
+<div class="paragraph">
+<p>Vulkan rendering can be presented to a headless surface, where the
+presentation operation is a no-op producing no externally-visible result.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="title">Note</div>
+<div class="paragraph">
+<p>Because there is no real presentation target, the headless presentation
+engine may be extended to impose an arbitrary or customisable set of
+restrictions and features.
+This makes it a useful portable test target for applications targeting a
+wide range of presentation engines where the actual target presentation
+engines might be scarce, unavailable or otherwise undesirable or
+inconvenient to use for general Vulkan application development.</p>
+</div>
+<div class="paragraph">
+<p>The usual surface query mechanisms must be used to determine the actual
+restrictions and features of the implementation.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>To create a headless <code>VkSurfaceKHR</code> object, call:</p>
+</div>
+<div id="vkCreateHeadlessSurfaceEXT" class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++">VkResult vkCreateHeadlessSurfaceEXT(
+    VkInstance                                  instance,
+    <span class="directive">const</span> VkHeadlessSurfaceCreateInfoEXT*       pCreateInfo,
+    <span class="directive">const</span> VkAllocationCallbacks*                pAllocator,
+    VkSurfaceKHR*                               pSurface);</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>instance</code> is the instance to associate the surface with.</p>
+</li>
+<li>
+<p><code>pCreateInfo</code> is a pointer to an instance of the
+<a href="#VkHeadlessSurfaceCreateInfoEXT">VkHeadlessSurfaceCreateInfoEXT</a> structure containing parameters
+affecting the creation of the surface object.</p>
+</li>
+<li>
+<p><code>pAllocator</code> is the allocator used for host memory allocated for the
+surface object when there is no more specific allocator available (see
+<a href="chap10.html#memory-allocation">Memory Allocation</a>).</p>
+</li>
+<li>
+<p><code>pSurface</code> points to a <code>VkSurfaceKHR</code> handle in which the
+created surface object is returned.</p>
+</li>
+</ul>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Valid Usage (Implicit)</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a id="VUID-vkCreateHeadlessSurfaceEXT-instance-parameter"></a> <code>instance</code> <strong class="purple">must</strong> be a valid <code>VkInstance</code> handle</p>
+</li>
+<li>
+<p><a id="VUID-vkCreateHeadlessSurfaceEXT-pCreateInfo-parameter"></a> <code>pCreateInfo</code> <strong class="purple">must</strong> be a valid pointer to a valid <code>VkHeadlessSurfaceCreateInfoEXT</code> structure</p>
+</li>
+<li>
+<p><a id="VUID-vkCreateHeadlessSurfaceEXT-pAllocator-parameter"></a> If <code>pAllocator</code> is not <code>NULL</code>, <code>pAllocator</code> <strong class="purple">must</strong> be a valid pointer to a valid <code>VkAllocationCallbacks</code> structure</p>
+</li>
+<li>
+<p><a id="VUID-vkCreateHeadlessSurfaceEXT-pSurface-parameter"></a> <code>pSurface</code> <strong class="purple">must</strong> be a valid pointer to a <code>VkSurfaceKHR</code> handle</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Return Codes</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><a href="chap2.html#fundamentals-successcodes">Success</a></dt>
+<dd>
+<div class="ulist">
+<ul>
+<li>
+<p><code>VK_SUCCESS</code></p>
+</li>
+</ul>
+</div>
+</dd>
+<dt class="hdlist1"><a href="chap2.html#fundamentals-errorcodes">Failure</a></dt>
+<dd>
+<div class="ulist">
+<ul>
+<li>
+<p><code>VK_ERROR_OUT_OF_HOST_MEMORY</code></p>
+</li>
+<li>
+<p><code>VK_ERROR_OUT_OF_DEVICE_MEMORY</code></p>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>The <code>VkHeadlessSurfaceCreateInfoEXT</code> structure is defined as:</p>
+</div>
+<div id="VkHeadlessSurfaceCreateInfoEXT" class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="c++"><span class="keyword">typedef</span> <span class="keyword">struct</span> VkHeadlessSurfaceCreateInfoEXT {
+    VkStructureType                    sType;
+    <span class="directive">const</span> <span class="directive">void</span>*                        pNext;
+    VkHeadlessSurfaceCreateFlagsEXT    flags;
+} VkHeadlessSurfaceCreateInfoEXT;</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>sType</code> is the type of this structure.</p>
+</li>
+<li>
+<p><code>pNext</code> is <code>NULL</code> or a pointer to an extension-specific structure.</p>
+</li>
+<li>
+<p><code>flags</code> is reserved for future use.</p>
+</li>
+</ul>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Valid Usage (Implicit)</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a id="VUID-VkHeadlessSurfaceCreateInfoEXT-sType-sType"></a> <code>sType</code> <strong class="purple">must</strong> be <code>VK_STRUCTURE_TYPE_HEADLESS_SURFACE_CREATE_INFO_EXT</code></p>
+</li>
+<li>
+<p><a id="VUID-VkHeadlessSurfaceCreateInfoEXT-pNext-pNext"></a> <code>pNext</code> <strong class="purple">must</strong> be <code>NULL</code></p>
+</li>
+<li>
+<p><a id="VUID-VkHeadlessSurfaceCreateInfoEXT-flags-zerobitmask"></a> <code>flags</code> <strong class="purple">must</strong> be <code>0</code></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>For headless surfaces, <code>currentExtent</code> is undefined <span class="eq">(0xFFFFFFFF,
+0xFFFFFFFF)</span>.
+Whatever the application sets a swapchain’s <code>imageExtent</code> to will be the
+size of the surface, after the first image is presented.</p>
 </div>
 </div>
 </div>
@@ -6293,7 +6603,7 @@ server.
 <p><a id="VUID-vkGetPhysicalDeviceXcbPresentationSupportKHR-physicalDevice-parameter"></a> <code>physicalDevice</code> <strong class="purple">must</strong> be a valid <code>VkPhysicalDevice</code> handle</p>
 </li>
 <li>
-<p><a id="VUID-vkGetPhysicalDeviceXcbPresentationSupportKHR-connection-parameter"></a> <code>connection</code> <strong class="purple">must</strong> be a valid pointer to a <code>xcb_connection_t</code> value</p>
+<p><a id="VUID-vkGetPhysicalDeviceXcbPresentationSupportKHR-connection-parameter"></a> <code>connection</code> <strong class="purple">must</strong> be a valid pointer to an <code>xcb_connection_t</code> value</p>
 </li>
 </ul>
 </div>
@@ -7699,7 +8009,6 @@ number of format pairs available or queried, as described below.</p>
 <p>If <code>pSurfaceFormats</code> is <code>NULL</code>, then the number of format pairs
 supported for the given <code>surface</code> is returned in
 <code>pSurfaceFormatCount</code>.
-The number of format pairs supported will be greater than or equal to 1.
 Otherwise, <code>pSurfaceFormatCount</code> <strong class="purple">must</strong> point to a variable set by the
 user to the number of elements in the <code>pSurfaceFormats</code> array, and on
 return the variable is overwritten with the number of structures actually
@@ -7710,7 +8019,23 @@ written.
 If <code>pSurfaceFormatCount</code> is smaller than the number of format pairs
 supported for the given <code>surface</code>, <code>VK_INCOMPLETE</code> will be returned
 instead of <code>VK_SUCCESS</code> to indicate that not all the available values
-were returned.</p>
+were returned.
+The number of format pairs supported <strong class="purple">must</strong> be greater than or equal to 1.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Valid Usage</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a id="VUID-vkGetPhysicalDeviceSurfaceFormatsKHR-surface-02739"></a>
+<code>surface</code> must be supported by <code>physicalDevice</code>, as reported by
+<a href="#vkGetPhysicalDeviceSurfaceSupportKHR">vkGetPhysicalDeviceSurfaceSupportKHR</a> or an equivalent
+platform-specific mechanism.</p>
+</li>
+</ul>
+</div>
+</div>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -7844,7 +8169,6 @@ number of format tuples available or queried, as described below.</p>
 <p>If <code>pSurfaceFormats</code> is <code>NULL</code>, then the number of format tuples
 supported for the given <code>surface</code> is returned in
 <code>pSurfaceFormatCount</code>.
-The number of format tuples supported will be greater than or equal to 1.
 Otherwise, <code>pSurfaceFormatCount</code> <strong class="purple">must</strong> point to a variable set by the
 user to the number of elements in the <code>pSurfaceFormats</code> array, and on
 return the variable is overwritten with the number of structures actually
@@ -7855,7 +8179,24 @@ written.
 If <code>pSurfaceFormatCount</code> is smaller than the number of format tuples
 supported for the surface parameters described in <code>pSurfaceInfo</code>,
 <code>VK_INCOMPLETE</code> will be returned instead of <code>VK_SUCCESS</code> to indicate
-that not all the available values were returned.</p>
+that not all the available values were returned.
+The number of format tuples supported <strong class="purple">must</strong> be greater than or equal to 1.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Valid Usage</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a id="VUID-vkGetPhysicalDeviceSurfaceFormats2KHR-pSurfaceInfo-02740"></a>
+<code>pSurfaceInfo</code>::<code>surface</code> must be supported by
+<code>physicalDevice</code>, as reported by
+<a href="#vkGetPhysicalDeviceSurfaceSupportKHR">vkGetPhysicalDeviceSurfaceSupportKHR</a> or an equivalent
+platform-specific mechanism.</p>
+</li>
+</ul>
+</div>
+</div>
 </div>
 <div class="sidebarblock">
 <div class="content">
@@ -7985,7 +8326,7 @@ supported color spaces of a presentation engine, are:</p>
     VK_COLOR_SPACE_SRGB_NONLINEAR_KHR = <span class="integer">0</span>,
     VK_COLOR_SPACE_DISPLAY_P3_NONLINEAR_EXT = <span class="integer">1000104001</span>,
     VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT = <span class="integer">1000104002</span>,
-    VK_COLOR_SPACE_DCI_P3_LINEAR_EXT = <span class="integer">1000104003</span>,
+    VK_COLOR_SPACE_DISPLAY_P3_LINEAR_EXT = <span class="integer">1000104003</span>,
     VK_COLOR_SPACE_DCI_P3_NONLINEAR_EXT = <span class="integer">1000104004</span>,
     VK_COLOR_SPACE_BT709_LINEAR_EXT = <span class="integer">1000104005</span>,
     VK_COLOR_SPACE_BT709_NONLINEAR_EXT = <span class="integer">1000104006</span>,
@@ -7999,6 +8340,7 @@ supported color spaces of a presentation engine, are:</p>
     VK_COLOR_SPACE_EXTENDED_SRGB_NONLINEAR_EXT = <span class="integer">1000104014</span>,
     VK_COLOR_SPACE_DISPLAY_NATIVE_AMD = <span class="integer">1000213000</span>,
     VK_COLORSPACE_SRGB_NONLINEAR_KHR = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR,
+    VK_COLOR_SPACE_DCI_P3_LINEAR_EXT = VK_COLOR_SPACE_DISPLAY_P3_LINEAR_EXT,
     VK_COLOR_SPACE_MAX_ENUM_KHR = <span class="hex">0x7FFFFFFF</span>
 } VkColorSpaceKHR;</code></pre>
 </div>
@@ -8011,58 +8353,61 @@ color space.</p>
 </li>
 <li>
 <p><code>VK_COLOR_SPACE_DISPLAY_P3_NONLINEAR_EXT</code> specifies support for the
-Display-P3 color space and applies an sRGB-like transfer function
-(defined below).</p>
+Display-P3 color space to be displayed using an sRGB-like EOTF (defined
+below).</p>
 </li>
 <li>
 <p><code>VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT</code> specifies support for the
-extended sRGB color space and applies a linear transfer function.</p>
+extended sRGB color space to be displayed using a linear EOTF.</p>
 </li>
 <li>
 <p><code>VK_COLOR_SPACE_EXTENDED_SRGB_NONLINEAR_EXT</code> specifies support for
-the extended sRGB color space and applies an sRGB transfer function.</p>
+the extended sRGB color space to be displayed using an sRGB EOTF.</p>
 </li>
 <li>
-<p><code>VK_COLOR_SPACE_DCI_P3_LINEAR_EXT</code> specifies support for the DCI-P3
-color space and applies a linear OETF.</p>
+<p><code>VK_COLOR_SPACE_DISPLAY_P3_LINEAR_EXT</code> specifies support for the
+Display-P3 color space to be displayed using a linear EOTF.</p>
 </li>
 <li>
 <p><code>VK_COLOR_SPACE_DCI_P3_NONLINEAR_EXT</code> specifies support for the
-DCI-P3 color space and applies the Gamma 2.6 OETF.</p>
+DCI-P3 color space to be displayed using the DCI-P3 EOTF.
+Note that values in such an image are interpreted as XYZ encoded color
+data by the presentation engine.</p>
 </li>
 <li>
 <p><code>VK_COLOR_SPACE_BT709_LINEAR_EXT</code> specifies support for the BT709
-color space and applies a linear OETF.</p>
+color space to be displayed using a linear EOTF.</p>
 </li>
 <li>
 <p><code>VK_COLOR_SPACE_BT709_NONLINEAR_EXT</code> specifies support for the BT709
-color space and applies the SMPTE 170M OETF.</p>
+color space to be displayed using the SMPTE 170M EOTF.</p>
 </li>
 <li>
 <p><code>VK_COLOR_SPACE_BT2020_LINEAR_EXT</code> specifies support for the BT2020
-color space and applies a linear OETF.</p>
+color space to be displayed using a linear EOTF.</p>
 </li>
 <li>
 <p><code>VK_COLOR_SPACE_HDR10_ST2084_EXT</code> specifies support for the HDR10
-(BT2020 color) space and applies the SMPTE ST2084 Perceptual Quantizer
-(PQ) OETF.</p>
+(BT2020 color) space to be displayed using the SMPTE ST2084 Perceptual
+Quantizer (PQ) EOTF.</p>
 </li>
 <li>
 <p><code>VK_COLOR_SPACE_DOLBYVISION_EXT</code> specifies support for the Dolby
-Vision (BT2020 color space), proprietary encoding, and applies the SMPTE
-ST2084 OETF.</p>
+Vision (BT2020 color space), proprietary encoding, to be displayed using
+the SMPTE ST2084 EOTF.</p>
 </li>
 <li>
 <p><code>VK_COLOR_SPACE_HDR10_HLG_EXT</code> specifies support for the HDR10
-(BT2020 color space) and applies the Hybrid Log Gamma (HLG) OETF.</p>
+(BT2020 color space) to be displayed using the Hybrid Log Gamma (HLG)
+EOTF.</p>
 </li>
 <li>
 <p><code>VK_COLOR_SPACE_ADOBERGB_LINEAR_EXT</code> specifies support for the
-AdobeRGB color space and applies a linear OETF.</p>
+AdobeRGB color space to be displayed using a linear EOTF.</p>
 </li>
 <li>
 <p><code>VK_COLOR_SPACE_ADOBERGB_NONLINEAR_EXT</code> specifies support for the
-AdobeRGB color space and applies the Gamma 2.2 OETF.</p>
+AdobeRGB color space to be displayed using the Gamma 2.2 EOTF.</p>
 </li>
 <li>
 <p><code>VK_COLOR_SPACE_PASS_THROUGH_EXT</code> specifies that color components
@@ -8078,14 +8423,34 @@ for displays supporting it.</p>
 </li>
 </ul>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="title">Note</div>
 <div class="paragraph">
-<p>The color components of Non-linear color space swap chain images have had
-the appropriate transfer function applied.
+<p>In older versions of this extension
+<code>VK_COLOR_SPACE_DISPLAY_P3_LINEAR_EXT</code> was misnamed
+<code>VK_COLOR_SPACE_DCI_P3_LINEAR_EXT</code>.
+This has been updated to indicate that it uses RGB color encoding, not XYZ.
+The old name is deprecated but is maintained for backwards compatibility.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The color components of non-linear color space swap chain images <strong class="purple">must</strong> have
+had the appropriate transfer function applied.
+The color space selected for the swap chain image will not affect the
+processing of data written into the image by the implementation.
 Vulkan requires that all implementations support the sRGB transfer function
-when using an SRGB pixel format.
-Other transfer functions, such as SMPTE 170M or SMPTE2084, <strong class="purple">must</strong> not be
-performed by the implementation, but <strong class="purple">can</strong> be performed by the application
-shader.
+by use of an SRGB pixel format.
+Other transfer functions, such as SMPTE 170M or SMPTE2084, <strong class="purple">can</strong> be performed
+by the application shader.
 This extension defines enums for <a href="#VkColorSpaceKHR">VkColorSpaceKHR</a> that correspond to
 the following color spaces:</p>
 </div>
@@ -8112,11 +8477,11 @@ the following color spaces:</p>
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">DCI-P3</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">0.680, 0.320</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">0.265, 0.690</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">0.150, 0.060</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">0.3127, 0.3290 (D65)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Gamma 2.6</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.000, 0.000</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.000, 1.000</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.000, 0.000</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.3333, 0.3333</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DCI P3</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Display-P3</p></td>
@@ -8132,7 +8497,7 @@ the following color spaces:</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">0.300, 0.600</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">0.150, 0.060</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">0.3127, 0.3290 (D65)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">SMPTE 170M</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ITU (SMPTE 170M)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">sRGB</p></td>
@@ -8156,7 +8521,7 @@ the following color spaces:</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">0.170, 0.797</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">0.131, 0.046</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">0.3127, 0.3290 (D65)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">ST2084</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ST2084 PQ</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">DOLBYVISION</p></td>
@@ -8164,7 +8529,7 @@ the following color spaces:</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">0.170, 0.797</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">0.131, 0.046</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">0.3127, 0.3290 (D65)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">ST2084</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ST2084 PQ</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">HDR10_HLG</p></td>
@@ -8185,53 +8550,13 @@ the following color spaces:</p>
 </tbody>
 </table>
 <div class="paragraph">
-<p>For Opto-Electrical Transfer Function (OETF), unless otherwise specified,
-the values of <span class="eq">L</span> and <span class="eq">E</span> are defined as:</p>
-</div>
-<div class="paragraph">
-<p><span class="eq">L</span> - linear luminance of image \(0 \leq L \leq 1\) for
-conventional colorimetry</p>
-</div>
-<div class="paragraph">
-<p><span class="eq">E</span> - corresponding electrical signal (value stored in memory)</p>
+<p>The transfer functions are described in the &quot;Transfer Functions&quot; chapter of
+the <a href="chap1.html#data-format">Khronos Data Format Specification</a>.</p>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_srgb_transfer_function">32.5.1. sRGB transfer function</h4>
-<div class="stemblock">
-<div class="content">
-\[\begin{aligned}
-E &amp; =
-  \begin{cases}
-    1.055 \times L^{1 \over 2.4} - 0.055 &amp; \text{for}\  0.0031308 \leq L \leq 1 \\
-    12.92 \times L                       &amp; \text{for}\  0 \leq L &lt; 0.0031308
-  \end{cases}
-\end{aligned}\]
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_display_p3_eotf">32.5.2. Display-P3 EOTF</h4>
-<div class="stemblock">
-<div class="content">
-\[\begin{aligned}
-E &amp; =
-  \begin{cases}
-    (a \times L + b)^{2.4} &amp; \text{for}\  0.039 \leq L \leq 1 \\
-    b \times L                    &amp; \text{for}\  0 \leq L &lt; 0.039
-  \end{cases}
-\end{aligned}\]
-</div>
-</div>
-<div class="paragraph">
-<p>\(a = 0.948\)<br>
-\(b = 0.052\)<br>
-\(c = 0.077\)<br></p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_display_p3_oetf">32.5.3. Display-P3 OETF</h4>
+<h4 id="_display_p3_oetf">32.5.1. Display-P3 OETF</h4>
 <div class="stemblock">
 <div class="content">
 \[\begin{aligned}
@@ -8242,6 +8567,10 @@ E &amp; =
   \end{cases}
 \end{aligned}\]
 </div>
+</div>
+<div class="paragraph">
+<p>where <span class="eq">L</span> is the linear value of a color channel and <span class="eq">E</span> is the
+encoded value (as stored in the image in memory).</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -8258,102 +8587,6 @@ E &amp; =
 </tr>
 </table>
 </div>
-</div>
-<div class="sect3">
-<h4 id="_extended_srgb_oetf">32.5.4. Extended sRGB OETF</h4>
-<div class="stemblock">
-<div class="content">
-\[\begin{aligned}
-E &amp; =
-  \begin{cases}
-    1.055 \times L^{1 \over 2.4} - 0.055 &amp; \text{for}\  0.0031308 \leq L \leq 7.5913 \\
-    12.92 \times L                       &amp; \text{for}\  0 \leq L &lt; 0.0031308 \\
-    -f(-L)                               &amp; \text{for}\  L &lt; 0
-  \end{cases}
-\end{aligned}\]
-</div>
-</div>
-<div class="paragraph">
-<p><span class="eq">L</span> - luminance of image is within <span class="eq">[-0.6038, 7.5913]</span>.</p>
-</div>
-<div class="paragraph">
-<p><span class="eq">E</span> can be negative and/or &gt; 1.
-That is how extended sRGB specifies colors outside the standard sRGB gamut.
-This means extended sRGB needs a floating point pixel format to cover the
-intended color range.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_smpte_170m_oetf">32.5.5. SMPTE 170M OETF</h4>
-<div class="stemblock">
-<div class="content">
-\[\begin{aligned}
-E &amp; =
-  \begin{cases}
-    \alpha \times L^{0.45} - (1 - \alpha) &amp; \text{for}\  \beta \leq L \leq 1 \\
-    4.5 \times L                            &amp; \text{for}\  0 \leq L &lt; \beta
-  \end{cases}
-\end{aligned}\]
-</div>
-</div>
-<div class="paragraph">
-<p>\(\alpha = 1.099 \text{ and } \beta = 0.018 \text{ for 10-bits and
-less per sample system (the values given in Rec.
-709)}\)<br>
-\(\alpha = 1.0993 \text{ and } \beta = 0.0181 \text{ for 12-bits
-per sample system}\)</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_smpte_st2084_oetf_inverse_eotf">32.5.6. SMPTE ST2084 OETF (Inverse-EOTF)</h4>
-<div class="stemblock">
-<div class="content">
-\[
-E = (\frac{c_1 + c_2 \times L^{m_1}}{1 + c_3 \times L^{m_1}})^{m_2}
-\]
-</div>
-</div>
-<div class="paragraph">
-<p>where:</p>
-</div>
-<div class="paragraph">
-<p>\(m_1 = 2610 / 4096 \times \frac{1}{4} = 0.1593017578125\)<br>
-\(m_2 = 2523 / 4096 \times 128 = 78.84375\)<br>
-\(c_1 = 3424 / 4096 = 0.8359375 = c3 - c2 + 1\)<br>
-\(c_2 = 2413 / 4096 \times 32 = 18.8515625\)<br>
-\(c_3 = 2392 / 4096 \times 32 = 18.6875\)<br></p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_hybrid_log_gamma_hlg">32.5.7. Hybrid Log Gamma (HLG)</h4>
-<div class="stemblock">
-<div class="content">
-\[\begin{aligned}
-E &amp; =
-  \begin{cases}
-    r \sqrt{L}                &amp; \text{for}\  0 \leq L \leq 1 \\
-    a \times \ln(L - b) + c    &amp; \text{for}\  1 &lt; L
-  \end{cases}
-\end{aligned}\]
-</div>
-</div>
-<div class="paragraph">
-<p><span class="eq"><em>L</em></span> — is the signal normalized by the reference white level<br>
-<span class="eq"><em>r</em></span> — is the reference white level and has a signal value of 0.5<br>
-<span class="eq"><em>a</em> = 0.17883277</span> and <span class="eq"><em>b</em> = 0.28466892</span> and <span class="eq"><em>c</em> = 0.55991073</span></p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_adobe_rgb_1998_oetf">32.5.8. Adobe RGB (1998) OETF</h4>
-<div class="paragraph">
-<p>\(E = L^\frac{1}{2.19921875}\)</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_gamma_2_6_oetf">32.5.9. Gamma 2.6 OETF</h4>
-<div class="paragraph">
-<p>\(E = L^\frac{1}{2.6}\)</p>
-</div>
 <div class="paragraph">
 <p>An implementation supporting this extension indicates support for these
 color spaces via <a href="#VkSurfaceFormatKHR">VkSurfaceFormatKHR</a> structures returned from
@@ -8364,38 +8597,15 @@ color spaces via <a href="#VkSurfaceFormatKHR">VkSurfaceFormatKHR</a> structures
 <a href="#vkCreateSwapchainKHR">vkCreateSwapchainKHR</a> will create a swapchain using that color space.</p>
 </div>
 <div class="paragraph">
-<p>Vulkan requires that all implementations support the sRGB Opto-Electrical
-Transfer Function (OETF) and Electro-optical transfer function (EOTF) when
-using an SRGB pixel format.
-Other transfer functions, such as SMPTE 170M, <strong class="purple">must</strong> not be performed by the
-implementation, but <strong class="purple">can</strong> be performed by the application shader.</p>
-</div>
-<div class="paragraph">
 <p>If <code>pSurfaceFormats</code> includes an entry whose value for <code>colorSpace</code>
 is <code>VK_COLOR_SPACE_SRGB_NONLINEAR_KHR</code> and whose value for <code>format</code>
 is a UNORM (or SRGB) format and the corresponding SRGB (or UNORM) format is
 a color renderable format for <code>VK_IMAGE_TILING_OPTIMAL</code>, then
 <code>pSurfaceFormats</code> <strong class="purple">must</strong> also contain an entry with the same value for
 <code>colorSpace</code> and <code>format</code> equal to the corresponding SRGB (or UNORM)
-format.</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-<div class="title">Note</div>
-<div class="paragraph">
-<p>If <code>pSurfaceFormats</code> includes just one entry, whose value for
-<code>format</code> is <code>VK_FORMAT_UNDEFINED</code>, <code>surface</code> has no preferred
 format.
-In this case, the application <strong class="purple">can</strong> use any valid <a href="chap37.html#VkFormat">VkFormat</a> value.</p>
-</div>
-</td>
-</tr>
-</table>
+<code>pSurfaceFormats</code> <strong class="purple">must</strong> not contain an entry whose value for
+<code>format</code> is <code>VK_FORMAT_UNDEFINED</code>.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -13975,99 +14185,10 @@ in nits</p>
 </div></div>
 <div id="footer">
 <div id="footer-text">
-Version 1.1.106<br>
+Version 1.1.114<br>
 Last updated 2019-04-11 14:02:22 -0600
 </div>
 </div>
-<style>
-/* Stylesheet for CodeRay to match GitHub theme | MIT License | http://foundation.zurb.com */
-pre.CodeRay{background:#f7f7f8}
-.CodeRay .line-numbers{border-right:1px solid currentColor;opacity:.35;padding:0 .5em 0 0}
-.CodeRay span.line-numbers{display:inline-block;margin-right:.75em}
-.CodeRay .line-numbers strong{color:#000}
-table.CodeRay{border-collapse:separate;border:0;margin-bottom:0;background:none}
-table.CodeRay td{vertical-align:top;line-height:inherit}
-table.CodeRay td.line-numbers{text-align:right}
-table.CodeRay td.code{padding:0 0 0 .75em}
-.CodeRay .debug{color:#fff !important;background:#000080 !important}
-.CodeRay .annotation{color:#007}
-.CodeRay .attribute-name{color:#000080}
-.CodeRay .attribute-value{color:#700}
-.CodeRay .binary{color:#509}
-.CodeRay .comment{color:#998;font-style:italic}
-.CodeRay .char{color:#04d}
-.CodeRay .char .content{color:#04d}
-.CodeRay .char .delimiter{color:#039}
-.CodeRay .class{color:#458;font-weight:bold}
-.CodeRay .complex{color:#a08}
-.CodeRay .constant,.CodeRay .predefined-constant{color:#008080}
-.CodeRay .color{color:#099}
-.CodeRay .class-variable{color:#369}
-.CodeRay .decorator{color:#b0b}
-.CodeRay .definition{color:#099}
-.CodeRay .delimiter{color:#000}
-.CodeRay .doc{color:#970}
-.CodeRay .doctype{color:#34b}
-.CodeRay .doc-string{color:#d42}
-.CodeRay .escape{color:#666}
-.CodeRay .entity{color:#800}
-.CodeRay .error{color:#808}
-.CodeRay .exception{color:inherit}
-.CodeRay .filename{color:#099}
-.CodeRay .function{color:#900;font-weight:bold}
-.CodeRay .global-variable{color:#008080}
-.CodeRay .hex{color:#058}
-.CodeRay .integer,.CodeRay .float{color:#099}
-.CodeRay .include{color:#555}
-.CodeRay .inline{color:#000}
-.CodeRay .inline .inline{background:#ccc}
-.CodeRay .inline .inline .inline{background:#bbb}
-.CodeRay .inline .inline-delimiter{color:#d14}
-.CodeRay .inline-delimiter{color:#d14}
-.CodeRay .important{color:#555;font-weight:bold}
-.CodeRay .interpreted{color:#b2b}
-.CodeRay .instance-variable{color:#008080}
-.CodeRay .label{color:#970}
-.CodeRay .local-variable{color:#963}
-.CodeRay .octal{color:#40e}
-.CodeRay .predefined{color:#369}
-.CodeRay .preprocessor{color:#579}
-.CodeRay .pseudo-class{color:#555}
-.CodeRay .directive{font-weight:bold}
-.CodeRay .type{font-weight:bold}
-.CodeRay .predefined-type{color:inherit}
-.CodeRay .reserved,.CodeRay .keyword {color:#000;font-weight:bold}
-.CodeRay .key{color:#808}
-.CodeRay .key .delimiter{color:#606}
-.CodeRay .key .char{color:#80f}
-.CodeRay .value{color:#088}
-.CodeRay .regexp .delimiter{color:#808}
-.CodeRay .regexp .content{color:#808}
-.CodeRay .regexp .modifier{color:#808}
-.CodeRay .regexp .char{color:#d14}
-.CodeRay .regexp .function{color:#404;font-weight:bold}
-.CodeRay .string{color:#d20}
-.CodeRay .string .string .string{background:#ffd0d0}
-.CodeRay .string .content{color:#d14}
-.CodeRay .string .char{color:#d14}
-.CodeRay .string .delimiter{color:#d14}
-.CodeRay .shell{color:#d14}
-.CodeRay .shell .delimiter{color:#d14}
-.CodeRay .symbol{color:#990073}
-.CodeRay .symbol .content{color:#a60}
-.CodeRay .symbol .delimiter{color:#630}
-.CodeRay .tag{color:#008080}
-.CodeRay .tag-special{color:#d70}
-.CodeRay .variable{color:#036}
-.CodeRay .insert{background:#afa}
-.CodeRay .delete{background:#faa}
-.CodeRay .change{color:#aaf;background:#007}
-.CodeRay .head{color:#f8f;background:#505}
-.CodeRay .insert .insert{color:#080}
-.CodeRay .delete .delete{color:#800}
-.CodeRay .change .change{color:#66f}
-.CodeRay .head .head{color:#f4f}
-</style>
 
 
 </body>

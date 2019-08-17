@@ -101,10 +101,15 @@ class Optimizer {
   // from time to time.
   Optimizer& RegisterSizePasses();
 
-  // Registers passes that have been prescribed for WebGPU environments.
-  // This sequence of passes is subject to constant review and will change
-  // from time to time.
-  Optimizer& RegisterWebGPUPasses();
+  // Registers passes that have been prescribed for converting from Vulkan to
+  // WebGPU. This sequence of passes is subject to constant review and will
+  // change from time to time.
+  Optimizer& RegisterVulkanToWebGPUPasses();
+
+  // Registers passes that have been prescribed for converting from WebGPU to
+  // Vulkan. This sequence of passes is subject to constant review and will
+  // change from time to time.
+  Optimizer& RegisterWebGPUToVulkanPasses();
 
   // Registers passes that attempt to legalize the generated code.
   //
@@ -487,20 +492,6 @@ Optimizer::PassToken CreateInsertExtractElimPass();
 // inserts created by that pass.
 Optimizer::PassToken CreateDeadInsertElimPass();
 
-// Creates a pass to consolidate uniform references.
-// For each entry point function in the module, first change all constant index
-// access chain loads into equivalent composite extracts. Then consolidate
-// identical uniform loads into one uniform load. Finally, consolidate
-// identical uniform extracts into one uniform extract. This may require
-// moving a load or extract to a point which dominates all uses.
-//
-// This pass requires a module to have structured control flow ie shader
-// capability. It also requires logical addressing ie Addresses capability
-// is not enabled. It also currently does not support any extensions.
-//
-// This pass currently only optimizes loads with a single index.
-Optimizer::PassToken CreateCommonUniformElimPass();
-
 // Create aggressive dead code elimination pass
 // This pass eliminates unused code from the module. In addition,
 // it detects and eliminates code which may have spurious uses but which do
@@ -733,9 +724,10 @@ Optimizer::PassToken CreateCombineAccessChainsPass();
 // |input_length_enable| controls instrumentation of runtime descriptor array
 // references, and |input_init_enable| controls instrumentation of descriptor
 // initialization checking, both of which require input buffer support.
+// |version| specifies the buffer record format.
 Optimizer::PassToken CreateInstBindlessCheckPass(
     uint32_t desc_set, uint32_t shader_id, bool input_length_enable = false,
-    bool input_init_enable = false);
+    bool input_init_enable = false, uint32_t version = 1);
 
 // Create a pass to upgrade to the VulkanKHR memory model.
 // This pass upgrades the Logical GLSL450 memory model to Logical VulkanKHR.
@@ -752,6 +744,24 @@ Optimizer::PassToken CreateCodeSinkingPass();
 // missing an initializer with a null value. In the future it may initialize
 // variables to the first value stored in them, if that is a constant.
 Optimizer::PassToken CreateGenerateWebGPUInitializersPass();
+
+// Create a pass to fix incorrect storage classes.  In order to make code
+// generation simpler, DXC may generate code where the storage classes do not
+// match up correctly.  This pass will fix the errors that it can.
+Optimizer::PassToken CreateFixStorageClassPass();
+
+// Create a pass to legalize OpVectorShuffle operands going into WebGPU. WebGPU
+// forbids using 0xFFFFFFFF, which indicates an undefined result, so this pass
+// converts those literals to 0.
+Optimizer::PassToken CreateLegalizeVectorShufflePass();
+
+// Create a pass to decompose initialized variables into a seperate variable
+// declaration and an initial store.
+Optimizer::PassToken CreateDecomposeInitializedVariablesPass();
+
+// Create a pass to attempt to split up invalid unreachable merge-blocks and
+// continue-targets to legalize for WebGPU.
+Optimizer::PassToken CreateSplitInvalidUnreachablePass();
 
 }  // namespace spvtools
 

@@ -50,12 +50,12 @@ typedef unsigned long MTLLanguageVersion;
  */
 #define MVK_VERSION_MAJOR   1
 #define MVK_VERSION_MINOR   0
-#define MVK_VERSION_PATCH   34
+#define MVK_VERSION_PATCH   36
 
 #define MVK_MAKE_VERSION(major, minor, patch)    (((major) * 10000) + ((minor) * 100) + (patch))
 #define MVK_VERSION     MVK_MAKE_VERSION(MVK_VERSION_MAJOR, MVK_VERSION_MINOR, MVK_VERSION_PATCH)
 
-#define VK_MVK_MOLTENVK_SPEC_VERSION            19
+#define VK_MVK_MOLTENVK_SPEC_VERSION            21
 #define VK_MVK_MOLTENVK_EXTENSION_NAME          "VK_MVK_moltenvk"
 
 /**
@@ -102,11 +102,21 @@ typedef unsigned long MTLLanguageVersion;
  *      2: Log errors and informational messages.
  *    If neither is set, errors and informational messages are logged.
  *
- * 2. Setting the MVK_CONFIG_TRACE_VULKAN_CALLS runtime environment variable or MoltenVK compile-time
- *    build setting to 1 will cause MoltenVK to log the name of each Vulkan call made by the application.
+ * 2. Setting the MVK_CONFIG_TRACE_VULKAN_CALLS runtime environment variable or MoltenVK compile-time build
+ *    setting will cause MoltenVK to log the name of each Vulkan call made by the application. The logging
+ *    format options can be controlled by setting the value of MVK_CONFIG_TRACE_VULKAN_CALLS as follows:
+ *        0: No Vulkan call logging.
+ *        1: Log the name of each Vulkan call when the call is entered.
+ *        2: Log the name of each Vulkan call when the call is entered and exited. This effectively
+ *           brackets any other logging activity within the scope of the Vulkan call.
+ *        3: Same as option 2, plus logs the time spent inside the Vulkan function.
  *
  * 3. Setting the MVK_CONFIG_FORCE_LOW_POWER_GPU runtime environment variable or MoltenVK compile-time
  *    build setting to 1 will force MoltenVK to use a low-power GPU, if one is availble on the device.
+ *
+ * 4. Setting the MVK_ALLOW_METAL_EVENTS runtime environment variable or MoltenVK compile-time build
+ *    setting to 1 will cause MoltenVK to use Metal events, if they are available on the device, for
+ *    Vulkan sychronization components such as VkSemaphore. This is disabled by default.
  */
 typedef struct {
 
@@ -524,6 +534,12 @@ typedef struct {
 	VkBool32 arrayOfSamplers;			 	  	/**< If true, arrays of texture samplers is supported. */
 	MTLLanguageVersion mslVersionEnum;			/**< The version of the Metal Shading Language available on this device, as a Metal enumeration. */
 	VkBool32 depthSampleCompare;				/**< If true, depth texture samplers support the comparison of the pixel value against a reference value. */
+	VkBool32 events;							/**< If true, Metal synchronization events are supported. */
+	VkBool32 memoryBarriers;					/**< If true, full memory barriers within Metal render passes are supported. */
+	VkBool32 multisampleLayeredRendering;       /**< If true, layered rendering to multiple multi-sampled cube or texture array layers is supported. */
+	VkBool32 stencilFeedback;					/**< If true, fragment shaders that write to [[stencil]] outputs are supported. */
+	VkBool32 textureBuffers;					/**< If true, textures of type MTLTextureTypeBuffer are supported. */
+	VkBool32 postDepthCoverage;					/**< If true, coverage masks in fragment shaders post-depth-test are supported. */
 } MVKPhysicalDeviceMetalFeatures;
 
 /**
@@ -564,6 +580,7 @@ typedef struct {
     MVKPerformanceTracker functionRetrieval;			/** Retrieve a MTLFunction from a MTLLibrary. */
     MVKPerformanceTracker functionSpecialization;		/** Specialize a retrieved MTLFunction. */
     MVKPerformanceTracker pipelineCompile;				/** Compile MTLFunctions into a pipeline. */
+	MVKPerformanceTracker glslToSPRIV;					/** Convert GLSL to SPIR-V code. */
 } MVKShaderCompilationPerformance;
 
 
@@ -576,7 +593,8 @@ typedef struct {
 
 /** MoltenVK performance of queue activities. */
 typedef struct {
-	MVKPerformanceTracker mtlQueueAccess;          	/** Create an MTLCommmandQueue or access an existing cached instance. */
+	MVKPerformanceTracker mtlQueueAccess;               /** Create an MTLCommmandQueue or access an existing cached instance. */
+	MVKPerformanceTracker mtlCommandBufferCompletion;   /** Completion of a MTLCommandBuffer on the GPU, from commit to completion callback. */
 } MVKQueuePerformance;
 
 /**
@@ -651,6 +669,12 @@ typedef void (VKAPI_PTR *PFN_vkGetIOSurfaceMVK)(VkImage image, IOSurfaceRef* pIO
  * that MoltenVK expects the size of MVKConfiguration to be by setting the value of pConfiguration
  * to NULL. In that case, this function will set *pConfigurationSize to the size that MoltenVK
  * expects MVKConfiguration to be.
+ *
+ * This function is not supported by the Vulkan SDK Loader and Layers framework.
+ * The VkInstance object you provide here must have been retrieved directly from MoltenVK,
+ * and not through the Vulkan SDK Loader and Layers framework. Opaque Vulkan objects
+ * are often changed by layers, and passing them from one layer to another, or from
+ * a layer directly to MoltenVK, will result in undefined behaviour.
  */
 VKAPI_ATTR VkResult VKAPI_CALL vkGetMoltenVKConfigurationMVK(
 	VkInstance                                  instance,
@@ -685,6 +709,12 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetMoltenVKConfigurationMVK(
  * that MoltenVK expects the size of MVKConfiguration to be by setting the value of pConfiguration
  * to NULL. In that case, this function will set *pConfigurationSize to the size that MoltenVK
  * expects MVKConfiguration to be.
+ *
+ * This function is not supported by the Vulkan SDK Loader and Layers framework.
+ * The VkInstance object you provide here must have been retrieved directly from MoltenVK,
+ * and not through the Vulkan SDK Loader and Layers framework. Opaque Vulkan objects
+ * are often changed by layers, and passing them from one layer to another, or from
+ * a layer directly to MoltenVK, will result in undefined behaviour.
  */
 VKAPI_ATTR VkResult VKAPI_CALL vkSetMoltenVKConfigurationMVK(
 	VkInstance                                  instance,
@@ -713,6 +743,12 @@ VKAPI_ATTR VkResult VKAPI_CALL vkSetMoltenVKConfigurationMVK(
  * expects the size of MVKPhysicalDeviceMetalFeatures to be by setting the value of pMetalFeatures to NULL.
  * In that case, this function will set *pMetalFeaturesSize to the size that MoltenVK expects
  * MVKPhysicalDeviceMetalFeatures to be.
+ *
+ * This function is not supported by the Vulkan SDK Loader and Layers framework.
+ * The VkPhysicalDevice object you provide here must have been retrieved directly from
+ * MoltenVK, and not through the Vulkan SDK Loader and Layers framework. Opaque Vulkan
+ * objects are often changed by layers, and passing them from one layer to another,
+ * or from a layer directly to MoltenVK, will result in undefined behaviour.
  */
 VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceMetalFeaturesMVK(
 	VkPhysicalDevice                            physicalDevice,
@@ -740,6 +776,12 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceMetalFeaturesMVK(
  * that MoltenVK expects the size of MVKSwapchainPerformance to be by setting the value of
  * pSwapchainPerf to NULL. In that case, this function will set *pSwapchainPerfSize to the
  * size that MoltenVK expects MVKSwapchainPerformance to be.
+ *
+ * This function is not supported by the Vulkan SDK Loader and Layers framework.
+ * The VkDevice and VkSwapchainKHR objects you provide here must have been retrieved directly
+ * from MoltenVK, and not through the Vulkan SDK Loader and Layers framework. Opaque Vulkan
+ * objects are often changed by layers, and passing them from one layer to another,
+ * or from a layer directly to MoltenVK, will result in undefined behaviour.
  */
 VKAPI_ATTR VkResult VKAPI_CALL vkGetSwapchainPerformanceMVK(
 	VkDevice                                    device,
@@ -768,6 +810,12 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetSwapchainPerformanceMVK(
  * that MoltenVK expects the size of MVKPerformanceStatistics to be by setting the value of
  * pPerf to NULL. In that case, this function will set *pPerfSize to the size that MoltenVK
  * expects MVKPerformanceStatistics to be.
+ *
+ * This function is not supported by the Vulkan SDK Loader and Layers framework.
+ * The VkDevice object you provide here must have been retrieved directly from
+ * MoltenVK, and not through the Vulkan SDK Loader and Layers framework. Opaque Vulkan
+ * objects are often changed by layers, and passing them from one layer to another,
+ * or from a layer directly to MoltenVK, will result in undefined behaviour.
  */
 VKAPI_ATTR VkResult VKAPI_CALL vkGetPerformanceStatisticsMVK(
 	VkDevice                                    device,
@@ -787,10 +835,36 @@ VKAPI_ATTR void VKAPI_CALL vkGetVersionStringsMVK(
     char*                                       pVulkanVersionStringBuffer,
     uint32_t                                    vulkanVersionStringBufferLength);
 
+/**
+ * Sets the number of threads in a workgroup for a compute kernel.
+ *
+ * This needs to be called if you are creating compute shader modules from MSL
+ * source code or MSL compiled code. Workgroup size is determined automatically
+ * if you're using SPIR-V.
+ *
+ * This function is not supported by the Vulkan SDK Loader and Layers framework.
+ * The VkShaderModule object you provide here must have been retrieved directly from
+ * MoltenVK, and not through the Vulkan SDK Loader and Layers framework. Opaque Vulkan
+ * objects are often changed by layers, and passing them from one layer to another,
+ * or from a layer directly to MoltenVK, will result in undefined behaviour.
+ */
+VKAPI_ATTR void VKAPI_CALL vkSetWorkgroupSizeMVK(
+    VkShaderModule                              shaderModule,
+    uint32_t                                    x,
+    uint32_t                                    y,
+    uint32_t                                    z);
 
 #ifdef __OBJC__
 
-/** Returns, in the pMTLDevice pointer, the MTLDevice used by the VkPhysicalDevice. */
+/**
+ * Returns, in the pMTLDevice pointer, the MTLDevice used by the VkPhysicalDevice.
+ *
+ * This function is not supported by the Vulkan SDK Loader and Layers framework.
+ * The VkPhysicalDevice object you provide here must have been retrieved directly from
+ * MoltenVK, and not through the Vulkan SDK Loader and Layers framework. Opaque Vulkan
+ * objects are often changed by layers, and passing them from one layer to another,
+ * or from a layer directly to MoltenVK, will result in undefined behaviour.
+ */
 VKAPI_ATTR void VKAPI_CALL vkGetMTLDeviceMVK(
     VkPhysicalDevice                           physicalDevice,
     id<MTLDevice>*                             pMTLDevice);
@@ -804,12 +878,26 @@ VKAPI_ATTR void VKAPI_CALL vkGetMTLDeviceMVK(
  * If a MTLTexture has already been created for this image, it will be destroyed.
  *
  * Returns VK_SUCCESS.
+ *
+ * This function is not supported by the Vulkan SDK Loader and Layers framework.
+ * The VkImage object you provide here must have been retrieved directly from
+ * MoltenVK, and not through the Vulkan SDK Loader and Layers framework. Opaque Vulkan
+ * objects are often changed by layers, and passing them from one layer to another,
+ * or from a layer directly to MoltenVK, will result in undefined behaviour.
  */
 VKAPI_ATTR VkResult VKAPI_CALL vkSetMTLTextureMVK(
     VkImage                                     image,
     id<MTLTexture>                              mtlTexture);
 
-/** Returns, in the pMTLTexture pointer, the MTLTexture currently underlaying the VkImage. */
+/**
+ * Returns, in the pMTLTexture pointer, the MTLTexture currently underlaying the VkImage.
+ *
+ * This function is not supported by the Vulkan SDK Loader and Layers framework.
+ * The VkImage object you provide here must have been retrieved directly from
+ * MoltenVK, and not through the Vulkan SDK Loader and Layers framework. Opaque Vulkan
+ * objects are often changed by layers, and passing them from one layer to another,
+ * or from a layer directly to MoltenVK, will result in undefined behaviour.
+ */
 VKAPI_ATTR void VKAPI_CALL vkGetMTLTextureMVK(
     VkImage                                     image,
     id<MTLTexture>*                             pMTLTexture);
@@ -837,6 +925,12 @@ VKAPI_ATTR void VKAPI_CALL vkGetMTLTextureMVK(
  *   - VK_SUCCESS.
  *   - VK_ERROR_FEATURE_NOT_PRESENT if IOSurfaces are not supported on the platform.
  *   - VK_ERROR_INITIALIZATION_FAILED if ioSurface is specified and is not compatible with this VkImage.
+ *
+ * This function is not supported by the Vulkan SDK Loader and Layers framework.
+ * The VkImage object you provide here must have been retrieved directly from
+ * MoltenVK, and not through the Vulkan SDK Loader and Layers framework. Opaque Vulkan
+ * objects are often changed by layers, and passing them from one layer to another,
+ * or from a layer directly to MoltenVK, will result in undefined behaviour.
  */
 VKAPI_ATTR VkResult VKAPI_CALL vkUseIOSurfaceMVK(
     VkImage                                     image,
@@ -846,6 +940,12 @@ VKAPI_ATTR VkResult VKAPI_CALL vkUseIOSurfaceMVK(
  * Returns, in the pIOSurface pointer, the IOSurface currently underlaying the VkImage,
  * as set by the useIOSurfaceMVK() function, or returns null if the VkImage is not using
  * an IOSurface, or if the platform does not support IOSurfaces.
+ *
+ * This function is not supported by the Vulkan SDK Loader and Layers framework.
+ * The VkImage object you provide here must have been retrieved directly from
+ * MoltenVK, and not through the Vulkan SDK Loader and Layers framework. Opaque Vulkan
+ * objects are often changed by layers, and passing them from one layer to another,
+ * or from a layer directly to MoltenVK, will result in undefined behaviour.
  */
 VKAPI_ATTR void VKAPI_CALL vkGetIOSurfaceMVK(
     VkImage                                     image,

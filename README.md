@@ -82,16 +82,34 @@ GIT after initial pull
 git submodule init
 ?git submodule pull recursive
 
+export DYLD_LIBRARY_PATH=/usr/local/boost-1.68.0/lib:$DYLD_LIBRARY_PATH
+
+check if lib++ is installed
+printf "#include <ciso646>\nint main () {}" | clang -E -stdlib=libc++ -x c++ -dM - | grep _LIBCPP_VERSION
+
 BOOST
 ./bootstrap.sh --with-toolset=clang --prefix=../../build/bin/boost --exec-prefix=../../build/bin/boost
 ./b2 clean
 ./b2 install --build-type=complete --build-dir=../../build/bin/boost/build toolset=clang cxxflags="-DBOOST_SYSTEM_NO_DEPRECATED -stdlib=libc++ -std=c++17" linkflags="-stdlib=libc++" --layout=tagged 
 
 
-copy from /Library/Developer/CommandLineTools/usr/bin/clang
-to /usr/bin/
+
+Apple Command Line Tools
+sudo rm -R /Library/Developer/CommandLineTools
+xcode-select --install
+open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
+export CPATH=/Library/Developer/CommandLineTools/usr/include/c++/v1
+put on path if needed /Library/Developer/CommandLineTools/usr/bin/
+
+brew install llvm
+
 
 -DBOOST_SYSTEM_NO_DEPRECATED
+
+in case git files don't work
+    brew install boost
+    /usr/local/Cellar/boost/1.70.0/lib/
+    cp -R /usr/local/Cellar/boost/1.70.0/include/boost/ 
 
 
 LLVM build
@@ -105,9 +123,15 @@ brew install graphviz
 sudo pip install --upgrade pip
 sudo pip install epydoc
 
+---not yet: sudo xcode-select -s /Library/Developer/CommandLineTools/
+
 FOR APPLE
+cd ./build/bin/llvm-project/
 sudo xcode-select -r
-rm -r *
+xcode-select -p
+rm -R *
+export CPATH=/Library/Developer/CommandLineTools/usr/include/c++/v1
+export SDKROOT=`xcrun --show-sdk-path`
 cmake \
     -G Ninja \
     -DLLVM_ENABLE_PROJECTS="clang;lldb;lld;libcxx;libcxxabi" \
@@ -116,9 +140,16 @@ cmake \
     -C ../../../extern/llvm-project/clang/cmake/caches/Apple-stage1.cmake \
     -DLLVM_CREATE_XCODE_TOOLCHAIN=On \
     ../../../extern/llvm-project/llvm
+
+xcode-select -p
+sudo xcode-select --switch /Library/Developer/CommandLineTools/
+xcode-select -p
+
+
 ninja stage2-distribution
 ninja stage2-install-distribution
 ninja cxx
 ninja lld
 ninja lldb
 
+    -DLLVM_CREATE_XCODE_TOOLCHAIN=On \

@@ -1,0 +1,253 @@
+{
+  "./macOS/lib/libHLSL.a" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libMoltenVK.dylib" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libOGLCompiler.a" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libOSDependent.a" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libSPIRV-Tools-link.a" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libSPIRV-Tools-opt.a" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libSPIRV-Tools-reduce.a" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libSPIRV-Tools-shared.dylib" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libSPIRV-Tools.a" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libSPIRV.a" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libSPVRemapper.a" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libVkLayer_api_dump.dylib" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libVkLayer_core_validation.dylib" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libVkLayer_khronos_validation.dylib" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libVkLayer_object_lifetimes.dylib" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libVkLayer_stateless_validation.dylib" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libVkLayer_thread_safety.dylib" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libVkLayer_unique_objects.dylib" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libglslang.a" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libshaderc.a" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libshaderc_combined.a" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libshaderc_shared.1.dylib" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libshaderc_shared.dylib" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : "libshaderc_shared.1.dylib",
+      "Dir" : false
+    },
+  "./macOS/lib/libspirv-cross.a" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libvulkan.1.1.114.dylib" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/lib/libvulkan.1.dylib" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : "libvulkan.1.1.114.dylib",
+      "Dir" : false
+    },
+  "./macOS/lib/libvulkan.dylib" : {
+      "Dest" : "/usr/local/lib",
+      "Link" : "libvulkan.1.dylib",
+      "Dir" : false
+    },
+  "./macOS/bin/glslangValidator" : {
+      "Dest" : "/usr/local/bin",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/bin/glslc" : {
+      "Dest" : "/usr/local/bin",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/bin/spirv-as" : {
+      "Dest" : "/usr/local/bin",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/bin/spirv-cfg" : {
+      "Dest" : "/usr/local/bin",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/bin/spirv-cross" : {
+      "Dest" : "/usr/local/bin",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/bin/spirv-dis" : {
+      "Dest" : "/usr/local/bin",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/bin/spirv-lesspipe.sh" : {
+      "Dest" : "/usr/local/bin",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/bin/spirv-link" : {
+      "Dest" : "/usr/local/bin",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/bin/spirv-opt" : {
+      "Dest" : "/usr/local/bin",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/bin/spirv-reduce" : {
+      "Dest" : "/usr/local/bin",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/bin/spirv-remap" : {
+      "Dest" : "/usr/local/bin",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/bin/spirv-val" : {
+      "Dest" : "/usr/local/bin",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/bin/vulkaninfo" : {
+      "Dest" : "/usr/local/bin",
+      "Link" : null,
+      "Dir" : false
+    },
+  "./macOS/include/SPIRV" : {
+      "Dest" : "/usr/local/include",
+      "Link" : null,
+      "Dir" : true
+    },
+  "./macOS/include/glslang" : {
+      "Dest" : "/usr/local/include",
+      "Link" : null,
+      "Dir" : true
+    },
+  "./macOS/include/libshaderc" : {
+      "Dest" : "/usr/local/include",
+      "Link" : null,
+      "Dir" : true
+    },
+  "./macOS/include/spirv-tools" : {
+      "Dest" : "/usr/local/include",
+      "Link" : null,
+      "Dir" : true
+    },
+  "./macOS/include/vulkan" : {
+      "Dest" : "/usr/local/include",
+      "Link" : null,
+      "Dir" : true
+    },
+  "./macOS/etc/vulkan" : {
+      "Dest" : "/usr/local/share",
+      "Link" : null,
+      "Dir" : true
+    },
+  "./Applications/vkconfig.app" : {
+      "Dest" : "/Applications",
+      "Link" : null,
+      "Dir" : true
+    },
+  "./Applications/vkcube.app" : {
+      "Dest" : "/Applications",
+      "Link" : null,
+      "Dir" : true
+    },
+  "./Applications/vkcubepp.app" : {
+      "Dest" : "/Applications",
+      "Link" : null,
+      "Dir" : true
+    },
+  "./Applications/vulkaninfo.app" : {
+      "Dest" : "/Applications",
+      "Link" : null,
+      "Dir" : true
+    },
+    "END" : ""
+}

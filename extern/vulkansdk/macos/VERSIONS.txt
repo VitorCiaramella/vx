@@ -1,12 +1,12 @@
-Revisions used to build this SDK on Tue Apr 16 21:31:26 UTC 2019
-08cbb5458f692d4778806775f65eb3dc642ddbbf : https://github.com/KhronosGroup/Vulkan-Headers.git
-763adc5f17a3b9030c6613797d5c9b07c4c2ca61 : https://github.com/KhronosGroup/Vulkan-Loader.git
-e866aff34913e6e530c96bcb9cb23b81afc87320 : https://github.com/KhronosGroup/Vulkan-ValidationLayers.git
-2abb69904b9ad017d39d3da1e7fc3dec1a584cd8 : https://github.com/KhronosGroup/Vulkan-Tools.git
-e8fb46fd3d609b696dc9fa211cf99294fd1cc236 : https://github.com/LunarG/VulkanTools.git
-d57704b69f33f8d39b71abedc4771cd58b03ede0 : https://github.com/KhronosGroup/MoltenVK.git
-e06c7e9a515b716c731bda13f507546f107775d1 : https://github.com/KhronosGroup/Glslang.git
-26c1b8878315a7a5c188df45e0bc236bb222b698 : https://github.com/KhronosGroup/SPIRV-Tools
-2434b89345a50c018c84f42a310b0fad4f3fd94f : https://github.com/KhronosGroup/SPIRV-Headers
-ac5a9570a744eb72725c23c34f36fbc564c0bb51 : https://github.com/KhronosGroup/SPIRV-Cross.git
-07df0d34217fbcb57cc1cb9cf90b37108a6827be : https://github.com/google/shaderc.git
+Revisions used to build this SDK on Fri Jul 26 17:00:31 UTC 2019
+e3f96a9ccab9397481eb81c4d9bce4ea7590dc33 : https://github.com/KhronosGroup/Vulkan-Headers.git
+ab2bcb97c78a3a086c3d09327de4fb47060a2bbf : https://github.com/KhronosGroup/Vulkan-Loader.git
+20b52a923c80e533e8fa7ee0d0ce8dceade16fa1 : https://github.com/KhronosGroup/Vulkan-ValidationLayers.git
+462ad675c0e137641ef3adc1aefba7e0d6ac2ce0 : https://github.com/KhronosGroup/Vulkan-Tools.git
+514ed232e50abf673ce4632e3dcc1e7d07560a84 : https://github.com/LunarG/VulkanTools.git
+73cbc807169c23aef6e9b968da1fa996d3c8b133 : https://github.com/KhronosGroup/MoltenVK.git
+333d1c95792692205472c457d7bec915a94c8000 : https://github.com/KhronosGroup/Glslang.git
+aa9e8f538041db3055ea443080e0ccc315fa114f : https://github.com/KhronosGroup/SPIRV-Tools
+45c2cc37276d69e5b257507d97fd90d2a5684ccc : https://github.com/KhronosGroup/SPIRV-Headers
+98d8bcd64b58ddc754927985861ef6f53625917c : https://github.com/KhronosGroup/SPIRV-Cross.git
+b669b85fd7b4a6902869bf6747f370b6dc115cf1 : https://github.com/google/shaderc.git
