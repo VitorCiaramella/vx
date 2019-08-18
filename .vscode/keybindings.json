@@ -1,0 +1,12 @@
+/*
+To be copied to
+cd ~
+code "./Library/Application Support/Code/User/keybindings.json"
+*/
+[
+    {
+        "key": "Ctrl+Shift+B",
+        "command": "workbench.action.tasks.runTask",
+        "args": "vxBuild vxGraphics"
+    },
+]

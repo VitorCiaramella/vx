@@ -6,6 +6,7 @@
         {
             "type": "shell",
             "label": "Build vxBuild",
+            "group": "build",
             "command": "/Library/Developer/CommandLineTools/usr/bin/clang++",
             //"command": "/usr/local/Cellar/llvm/8.0.1/Toolchains/LLVM8.0.1.xctoolchain/usr/bin/clang++",
             "args": [
@@ -41,6 +42,7 @@
         },
         {
             "label": "vxBuild vxGraphics",
+            "group": "build",
             "type": "shell",
             "command": "${workspaceFolder}/build/bin/vxBuild/vxBuild",
             "args": [

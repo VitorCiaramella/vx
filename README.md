@@ -130,6 +130,14 @@ in case git files don't work
     cp -R /usr/local/Cellar/boost/1.70.0/include/boost/ 
 
 
+Terminal
+    pwd    Get current path
+    find / -name atomic.h 2>/dev/null
+    clear
+    cp -R
+    rm -R
+
+
 LLVM build
 brew update
 brew upgrade
@@ -148,8 +156,6 @@ cd ./build/bin/llvm-project/
 sudo xcode-select -r
 xcode-select -p
 rm -R *
-export CPATH=/Library/Developer/CommandLineTools/usr/include/c++/v1
-export SDKROOT=`xcrun --show-sdk-path`
 cmake \
     -G Ninja \
     -DLLVM_ENABLE_PROJECTS="clang;lldb;lld;libcxx;libcxxabi" \
@@ -158,16 +164,9 @@ cmake \
     -C ../../../extern/llvm-project/clang/cmake/caches/Apple-stage1.cmake \
     -DLLVM_CREATE_XCODE_TOOLCHAIN=On \
     ../../../extern/llvm-project/llvm
-
-xcode-select -p
-sudo xcode-select --switch /Library/Developer/CommandLineTools/
-xcode-select -p
-
-
 ninja stage2-distribution
 ninja stage2-install-distribution
 ninja cxx
 ninja lld
 ninja lldb
 
-    -DLLVM_CREATE_XCODE_TOOLCHAIN=On \
