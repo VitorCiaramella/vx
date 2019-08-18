@@ -28,3 +28,6 @@
 [submodule "extern/cpython"]
 	path = extern/cpython
 	url = https://github.com/python/cpython.git
+[submodule "extern/boost"]
+	path = extern/boost
+	url = https://github.com/boostorg/boost.git
