@@ -9,31 +9,28 @@
             "command": "/Library/Developer/CommandLineTools/usr/bin/clang++",
             //"command": "/usr/local/Cellar/llvm/8.0.1/Toolchains/LLVM8.0.1.xctoolchain/usr/bin/clang++",
             "args": [
-                //"-std=c++17",
-                //"-stdlib=libc++",
+                "-std=c++17",
+                "-stdlib=libc++",
                 
                 "-D_DEBUG",
-                "-DENABLE_PRECOMPILED_HEADERS=OFF",
 
                 "-v",//verbose
                 "-g",//debug
 
-                "-isystem",
-                "-I${workspaceFolder}/build/bin/boost/include",
                 "${workspaceFolder}/build/bin/boost/lib/libboost_filesystem-mt-d-x64.a",
                 "${workspaceFolder}/build/bin/boost/lib/libboost_chrono-mt-d-x64.a",
                 "${workspaceFolder}/build/bin/boost/lib/libboost_system-mt-d-x64.a",
                 "${workspaceFolder}/build/bin/boost/lib/libboost_thread-mt-d-x64.a",
-                //"-I/usr/local/Cellar/boost/1.70.0/include/boost/",
-                "-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/",
-                "-I/usr/include/",
 
                 "${workspaceFolder}/src/vxBuild/main.cpp",
 
-                "-I${workspaceFolder}/extern/tiny-process-library",
                 "${workspaceFolder}/extern/tiny-process-library/process.cpp",
                 //"${workspaceFolder}/extern/tiny-process-library/process_win.cpp",
                 "${workspaceFolder}/extern/tiny-process-library/process_unix.cpp",
+
+                "-I/usr/include/",
+                "-I${workspaceFolder}/build/bin/boost/include",
+                "-I${workspaceFolder}/extern/tiny-process-library",
 
                 "-o",
                 "${workspaceFolder}/build/bin/vxBuild/vxBuild",

@@ -38,6 +38,16 @@ install_name_tool -add_rpath "@loader_path" vxGraphics
 install_name_tool -change '@rpath/libvulkan.1.dylib' '@executable_path/libvulkan.1.dylib' ${workspaceFolder}/build/bin/vxGraphics/vxGraphics
 
 
+GIT Submodules
+https://git-scm.com/book/en/v2/Git-Tools-Submodules
+cd extern
+git rm boost
+rm -rf ../.git/modules/extern/boost
+git submodule add https://github.com/boostorg/boost.git
+cd boost
+git submodule init
+git submodule update
+
 Vulkan SDK
 https://vulkan.lunarg.com/sdk/home
 
@@ -88,15 +98,23 @@ check if lib++ is installed
 printf "#include <ciso646>\nint main () {}" | clang -E -stdlib=libc++ -x c++ -dM - | grep _LIBCPP_VERSION
 
 BOOST
+https://github.com/boostorg/boost
+
 ./bootstrap.sh --with-toolset=clang --prefix=../../build/bin/boost --exec-prefix=../../build/bin/boost
 ./b2 clean
 ./b2 install --build-type=complete --build-dir=../../build/bin/boost/build toolset=clang cxxflags="-DBOOST_SYSTEM_NO_DEPRECATED -stdlib=libc++ -std=c++17" linkflags="-stdlib=libc++" --layout=tagged 
 
 
+POTENTIAL INCLUDES and settings
+                //"-DENABLE_PRECOMPILED_HEADERS=OFF",
+                //"-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/",
+                //"-isystem",
+
 
 Apple Command Line Tools
 sudo rm -R /Library/Developer/CommandLineTools
 xcode-select --install
+sudo xcode-select --switch /Library/Developer/CommandLineTools/
 open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg
 export CPATH=/Library/Developer/CommandLineTools/usr/include/c++/v1
 put on path if needed /Library/Developer/CommandLineTools/usr/bin/
