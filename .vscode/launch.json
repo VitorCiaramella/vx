@@ -53,7 +53,25 @@
                 "traceResponse": true,
                 "engineLogging": true
             }
-        }
-        
+        },
+        {
+            "name": "vxApplication-macOS",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bin/vxApplication/macos/Debug/vxApplication-macOS.app/Contents/MacOS/vxApplication-macOS",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build/bin/vxApplication/macos/Debug/vxApplication-macOS.app/Contents/MacOS/",
+            "environment": [
+            ],
+            "externalConsole": true,
+            "MIMode": "lldb",
+            "preLaunchTask": "Build vxApplication-macos",
+            "logging": {
+                "trace": true,
+                "traceResponse": true,
+                "engineLogging": true
+            }
+        }       
     ]
 }

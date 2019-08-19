@@ -683,7 +683,7 @@ void createGlslCompileProcessRequest(const std::shared_ptr<ProcessManager> & pro
     createGlslCompileCommand(filesFound, processManager, glslCompileTask, absRootPath);
 }
 
-void createExeLinkerProcessRequest(const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath)
+void createLinkerProcessRequest(const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath, bool library)
 {
     auto filesFound = std::list<fs::path>();
     auto extensions = std::list<std::string>();
@@ -704,6 +704,10 @@ void createExeLinkerProcessRequest(const std::shared_ptr<ProcessManager> & proce
     }
 
     auto commonArgs = std::vector<std::string>();
+    if (library)
+    {
+        commonArgs.push_back("-dylib"); 
+    }
     commonArgs.push_back("-t"); //trace
     commonArgs.push_back("-demangle"); 
     //commonArgs.push_back("-lto_library"); 
@@ -736,8 +740,13 @@ void createExeLinkerProcessRequest(const std::shared_ptr<ProcessManager> & proce
         commonArgs.push_back(objectFile.string());
     }
 
-    auto stdOutFilePath = fs::absolute(fs::path("vxGraphics.build.log"), binOutputRootPath);
-    auto outputFilePath = fs::absolute(fs::path("vxGraphics"), binOutputRootPath);
+    std::string outputFilename = "VxGraphics";
+    if (library)
+    {
+        outputFilename = "lib" + outputFilename + ".dylib";
+    }
+    auto stdOutFilePath = fs::absolute(fs::path(outputFilename + ".build.log"), binOutputRootPath);
+    auto outputFilePath = fs::absolute(fs::path(outputFilename), binOutputRootPath);
 
     auto compilerProcess = std::make_shared<Process>();
     compilerProcess->description = "Linker";
@@ -748,6 +757,17 @@ void createExeLinkerProcessRequest(const std::shared_ptr<ProcessManager> & proce
     compilerProcess->stdOutPath = stdOutFilePath;
     processManager->processQueue.push(compilerProcess);
 }
+
+void createExeLinkerProcessRequest(const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath)
+{
+    createLinkerProcessRequest(processManager, cppCompileTask, absRootPath, false);
+}
+
+void createLibLinkerProcessRequest(const std::shared_ptr<ProcessManager> & processManager, const CppCompileTask & cppCompileTask, const fs::path & absRootPath)
+{
+    createLinkerProcessRequest(processManager, cppCompileTask, absRootPath, true);
+}
+
 
 int main()
 {
@@ -762,6 +782,7 @@ int main()
     cppCompileTask.cppCompilerPath = "clang++";
     //cppCompileTask.sourcePaths.push_back("./src/**.cpp");
     cppCompileTask.sourcePaths.push_back("./src/vxGraphics/**.cpp");
+    cppCompileTask.sourcePaths.push_back("./src/vxApplication/**.cpp");
     cppCompileTask.sourcePaths.push_back("./src/vxCommon/**.cpp");
     //cppCompileTask.inputExtensions.push_back(".cpp");
     cppCompileTask.includePaths.push_back("./include/");
@@ -845,7 +866,19 @@ int main()
         processManager->completedProcesses.clear();
     }
 
+    if (!containsFailures)
+    {
+        createLibLinkerProcessRequest(processManager, cppCompileTask, absRootPath);
+        processJobs(processManager);
+        printCompletedProcesses(processManager->completedProcesses, containsFailures);
+        processManager->completedProcesses.clear();
+    }
+
     /*
+
+    -dynamiclib
+
+
     "/Library/Developer/CommandLineTools/usr/bin/dsymutil" -o /Users/vitorciaramella/Documents/GitHub/vx/build/bin/vxBuild/vxBuild.dSYM /Users/vitorciaramella/Documents/GitHub/vx/build/bin/vxBuild/vxBuild
     
     -o /Users/vitorciaramella/Documents/GitHub/vx/build/bin/vxGraphics/vxGraphics

@@ -50,8 +50,20 @@
             "options": {
                 "cwd": "${workspaceFolder}/build/bin/vxBuild"
             },
-            //"dependsOn": ["Build vxBuild"],
-            "dependsOn": [],
+            "dependsOn": ["Build vxBuild"],
+            //"dependsOn": [],
+        },
+        {
+            "label": "Build vxApplication-macos",
+            "type": "shell",
+            "command": "sh",
+            "args": [
+                "build.sh"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/src/vxApplication/macos"
+            },
+            "group": "build",            
         },
         {
             "label": "Build",

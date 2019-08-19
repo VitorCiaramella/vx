@@ -1,4 +1,4 @@
-#import "MainViewController.h"
+#import "MainViewController.hpp"
 #import <QuartzCore/CAMetalLayer.h>
 
 #include <MoltenVK/mvk_vulkan.h>
@@ -13,7 +13,7 @@
 
 @implementation MainViewController {
 	CVDisplayLinkRef	_displayLink;
-	//struct vxApplicationInstance vxApp;
+	spt(VxApplicationInstance) spVxApplicationInstance;
 }
 
 -(void) dealloc {
@@ -29,6 +29,7 @@
 
 	//Main_main(&Main, self.view.layer, 1, &arg);
     //vxApp.init();
+    spVxApplicationInstance->test();
 
 	CVDisplayLinkCreateWithActiveCGDisplays(&_displayLink);
     CVDisplayLinkSetOutputCallback(_displayLink, &DisplayLinkCallback, NULL);
