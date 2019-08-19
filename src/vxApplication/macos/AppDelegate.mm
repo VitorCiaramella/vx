@@ -1,12 +1,4 @@
-//
-//  AppDelegate.m
-//  Test001
-//
-//  Created by Vitor Ciaramella on 8/17/19.
-//  Copyright © 2019 Vitor Ciaramella. All rights reserved.
-//
-
-#import "AppDelegate.h"
+#import "AppDelegate.hpp"
 
 @interface AppDelegate ()
 
@@ -23,5 +15,8 @@
     // Insert code here to tear down your application
 }
 
+- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender {
+    return YES;
+}
 
 @end

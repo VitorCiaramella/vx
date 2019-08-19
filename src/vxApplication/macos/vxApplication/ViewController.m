@@ -1,26 +1,22 @@
 //
 //  ViewController.m
-//  Test001
+//  vxApplication
 //
-//  Created by Vitor Ciaramella on 8/17/19.
+//  Created by Vitor Ciaramella on 8/18/19.
 //  Copyright © 2019 Vitor Ciaramella. All rights reserved.
 //
 
 #import "ViewController.h"
 
+@interface ViewController ()
+
+@end
+
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
     // Do any additional setup after loading the view.
-}
-
-
-- (void)setRepresentedObject:(id)representedObject {
-    [super setRepresentedObject:representedObject];
-
-    // Update the view, if already loaded.
 }
 
 
