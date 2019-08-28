@@ -1,6 +1,3 @@
-[submodule "extern/glfw"]
-	path = extern/glfw
-	url = https://github.com/glfw/glfw.git
 [submodule "extern/Vulkan-Loader"]
 	path = extern/Vulkan-Loader
 	url = https://github.com/KhronosGroup/Vulkan-Loader.git
