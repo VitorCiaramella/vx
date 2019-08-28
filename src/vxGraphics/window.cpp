@@ -61,13 +61,6 @@ void VxGraphicsWindow::destroy()
     AssertNotNull(this);
     spVxGraphicsSurface->destroy();
     spVxGraphicsSurface = nullptr;
-    if (rpGlfwWindow != nullptr)
-    {
-        vxLogInfo2("Destroying glfwWindow...", "Memory");
-        glfwDestroyWindow(rpGlfwWindow);
-        rpGlfwWindow  = nullptr;
-        vxLogInfo2("GlfwWindow destroyed.", "Memory");
-    }
 }
 
 VxGraphicsWindow::~VxGraphicsWindow()
@@ -122,71 +115,11 @@ VxGraphicsSwapchain::~VxGraphicsSwapchain()
     destroy();
 }
 
-void vxGlfwErrorCallback(int error, const char* description)
-{
-    vxLogError3("%i: %s", "GLFW", error, description);
-}
-
 VkResult vxCreateGraphicsWindow(spt(VxGraphicsWindowCreateInfo) spVxGraphicsWindowCreateInfo, spt(VxGraphicsWindow) & spVxGraphicsWindow)
 {
-    if (spVxGraphicsWindowCreateInfo->rpExistingWindowHandle != nullptr)
-    {
-        spVxGraphicsWindow = nsp<VxGraphicsWindow>(spVxGraphicsWindowCreateInfo->rpVxWindowLoopFunction);
-        spVxGraphicsWindow->rpWindowHandle = spVxGraphicsWindowCreateInfo->rpExistingWindowHandle;
-        return VkResult::VK_SUCCESS;
-    }
-
-    vxLogInfo2("Setting glfw error callback...", "GLFW");
-    glfwSetErrorCallback(vxGlfwErrorCallback);
-    vxLogInfo2("Glfw error callback set.", "GLFW");
-
-    vxLogInfo2("Initializing glfw...", "GLFW");
-    if (!glfwInit())
-    {
-        vxLogError2("Error initializing glfw.", "GLFW");
-        return VkResult::VK_ERROR_INITIALIZATION_FAILED;
-    }
-    vxLogInfo2("Glfw initialized.", "GLFW");
-
-    glfwWindowHint(GLFW_RESIZABLE, spVxGraphicsWindowCreateInfo->resizable);
-    glfwWindowHint(GLFW_VISIBLE, spVxGraphicsWindowCreateInfo->visible);
-    glfwWindowHint(GLFW_DECORATED, spVxGraphicsWindowCreateInfo->decorated);
-    glfwWindowHint(GLFW_FOCUSED, spVxGraphicsWindowCreateInfo->focused);
-    glfwWindowHint(GLFW_FOCUS_ON_SHOW, spVxGraphicsWindowCreateInfo->focusOnShow);
-    glfwWindowHint(GLFW_CENTER_CURSOR, spVxGraphicsWindowCreateInfo->centerCursor);
-    glfwWindowHint(GLFW_SCALE_TO_MONITOR, spVxGraphicsWindowCreateInfo->scaleToMonitor);
-    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, spVxGraphicsWindowCreateInfo->transparentFramebuffer);
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
-    auto rpGLFWmonitor = glfwGetPrimaryMonitor();
-    AssertNotNullVkResult(rpGLFWmonitor);
-
-    auto rpGLFWvidmode = glfwGetVideoMode(rpGLFWmonitor);
-    AssertNotNullVkResult(rpGLFWvidmode);
-
-    glfwWindowHint(GLFW_RED_BITS, rpGLFWvidmode->redBits);
-    glfwWindowHint(GLFW_GREEN_BITS, rpGLFWvidmode->greenBits);
-    glfwWindowHint(GLFW_BLUE_BITS, rpGLFWvidmode->blueBits);
-    glfwWindowHint(GLFW_REFRESH_RATE, rpGLFWvidmode->refreshRate);
-
-    vxLogInfo2("Creating Glfw window...", "GLFW");
-    GLFWwindow *rpGLFWwindow;
-    if (spVxGraphicsWindowCreateInfo->fullScreen)
-    {
-        rpGLFWwindow = glfwCreateWindow(rpGLFWvidmode->width, rpGLFWvidmode->height, spVxGraphicsWindowCreateInfo->title, rpGLFWmonitor, nullptr);
-    }
-    else
-    {
-        rpGLFWwindow = glfwCreateWindow(spVxGraphicsWindowCreateInfo->initialWidth, spVxGraphicsWindowCreateInfo->initialHeight, spVxGraphicsWindowCreateInfo->title, nullptr, nullptr);
-    }
-    AssertNotNullVkResult(rpGLFWwindow);
-    vxLogInfo2("Glfw window created.", "GLFW");
-
+    AssertNotNullVkResult(spVxGraphicsWindowCreateInfo->rpExistingWindowHandle);
     spVxGraphicsWindow = nsp<VxGraphicsWindow>(spVxGraphicsWindowCreateInfo->rpVxWindowLoopFunction);
-    spVxGraphicsWindow->rpGlfwWindow = rpGLFWwindow;
-
-    glfwPollEvents();
-
+    spVxGraphicsWindow->rpWindowHandle = spVxGraphicsWindowCreateInfo->rpExistingWindowHandle;
     return VkResult::VK_SUCCESS;
 }
 
@@ -207,74 +140,21 @@ VkResult vxGetSurfaceCapabilities(const spt(VxGraphicsWindow) & spVxGraphicsWind
 
 VkExtent2D vxGetWindowSize(const spt(VxGraphicsWindow) & spVxGraphicsWindow)
 {
-    VkExtent2D result;
-    if (spVxGraphicsWindow->rpWindowHandle != nullptr)
+    VkSurfaceCapabilitiesKHR vkSurfaceCapabilities;
+    if (vxGetSurfaceCapabilities(spVxGraphicsWindow, vkSurfaceCapabilities) == VkResult::VK_SUCCESS)
     {
-        VkSurfaceCapabilitiesKHR vkSurfaceCapabilities;
-        if (vxGetSurfaceCapabilities(spVxGraphicsWindow, vkSurfaceCapabilities) == VkResult::VK_SUCCESS)
-        {
-            result.width = vkSurfaceCapabilities.currentExtent.width;
-            result.height = vkSurfaceCapabilities.currentExtent.height;
-        }                    
-        else
-        {
-            result.width = 500;
-            result.height = 500;
-        }
-        return result;
-    }
+        return vkSurfaceCapabilities.currentExtent;
+    }                    
 
-    int width = 0;
-    int height = 0;
-    glfwGetFramebufferSize(spVxGraphicsWindow->rpGlfwWindow, &width, &height);
-    result.width = width;
-    result.height = height;
+    VkExtent2D result;
+    result.width = 500;
+    result.height = 500;
     return result;
 }
 
 VxWindowLoopResult windowDummyLoop(const spt(VxGraphicsWindow) & spVxGraphicsWindow)
 {
     return VxWindowLoopResult::VX_WL_CONTINUE;
-}
-
-VkResult vxAwaitWindowClose(const spt(VxGraphicsWindow) & spVxGraphicsWindow)
-{
-    if (spVxGraphicsWindow->rpWindowHandle != nullptr)
-    {
-        //TODO
-        return VkResult::VK_SUCCESS;
-    }
-
-    auto vxWindowLoopFunction = windowDummyLoop;
-    if (spVxGraphicsWindow->rpVxWindowLoopFunction != nullptr)
-    {
-        vxWindowLoopFunction = spVxGraphicsWindow->rpVxWindowLoopFunction;
-    }
-
-    while (!glfwWindowShouldClose(spVxGraphicsWindow->rpGlfwWindow))
-    {
-        glfwPollEvents();
-        if (spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice != nullptr
-            && spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->vkDevice != nullptr)
-        {
-            vkDeviceWaitIdle(spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->vkDevice);
-        }
-
-        //upGraphicsInstance->windowSize = vxGetWindowSize(upGraphicsInstance);
-        auto loopResult = vxWindowLoopFunction(spVxGraphicsWindow);        
-        if (loopResult != VxWindowLoopResult::VX_WL_CONTINUE)
-        {
-            break;
-        }
-    }
-    glfwPollEvents();
-    if (spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice != nullptr
-        && spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->vkDevice != nullptr)
-    {
-        vkDeviceWaitIdle(spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->vkDevice);
-    }
-
-    return VkResult::VK_SUCCESS;
 }
 
 VkResult vxSelectSurfacePhysicalDevice(spt(VxGraphicsSurface) spVxGraphicsSurface)

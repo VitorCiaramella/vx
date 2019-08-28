@@ -3,7 +3,6 @@
 
 #include <vxCommon/vxCommon.hpp>
 #include <vulkan/vulkan.hpp>
-#include <GLFW/glfw3.h>
 #include <string>
 
 #include "instance.hpp"
@@ -65,7 +64,6 @@ typedef enum class VxWindowLoopResult
 
 typedef struct VxGraphicsWindow
 {
-    rpt(GLFWwindow)                         rpGlfwWindow;
     void*                                   rpWindowHandle;
     PFN_vxWindowLoop                        rpVxWindowLoopFunction;
 
@@ -77,7 +75,6 @@ typedef struct VxGraphicsWindow
     void init(PFN_vxWindowLoop windowLoopFunction)
     {
         rpVxWindowLoopFunction = windowLoopFunction;
-        rpGlfwWindow = nullptr;
         rpWindowHandle = nullptr;
         createGraphicsSurfaceResult = VK_RESULT_MAX_ENUM;
         spVxGraphicsSurface = nullptr;
@@ -197,7 +194,6 @@ typedef struct VxGraphicsSwapchain
 
 VkResult vxCreateGraphicsWindow(spt(VxGraphicsWindowCreateInfo) spVxGraphicsWindowCreateInfo, spt(VxGraphicsWindow) & spVxGraphicsWindow);
 VkExtent2D vxGetWindowSize(const spt(VxGraphicsWindow) & spVxGraphicsWindow);
-VkResult vxAwaitWindowClose(const spt(VxGraphicsWindow) & spVxGraphicsWindow);
 
 VkResult vxCreateGraphicsSurface(const spt(VxGraphicsInstance) & spVxGraphicsInstance, spt(VxGraphicsSurface) & spVxGraphicsSurface);
 VkResult vxCreateSurfaceDevice(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(VxGraphicsDevice) & spVxGraphicsDevice);

@@ -379,7 +379,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../../include\"/**",
-					"\"$(SRCROOT)/../../../extern/glfw/include\"/**",
 					"\"$(SRCROOT)/../../../extern/vulkansdk/macos/MoltenVK/include\"/**",
 					"\"/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include\"",
 				);

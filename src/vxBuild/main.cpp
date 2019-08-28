@@ -808,7 +808,6 @@ int main(int argc, char *argv[])
     //cppCompileTask.inputExtensions.push_back(".cpp");
     cppCompileTask.includePaths.push_back("./include/");
     cppCompileTask.includePaths.push_back("./extern/boost/boost/");
-    cppCompileTask.includePaths.push_back("./extern/glfw/include/");
     cppCompileTask.includePaths.push_back("./extern/vulkansdk/macos/macOS/include/");
     cppCompileTask.options.push_back("-D_DEBUG");
     cppCompileTask.options.push_back("-DVK_USE_PLATFORM_MACOS_MVK");
@@ -820,9 +819,7 @@ int main(int argc, char *argv[])
     cppCompileTask.frameworks.push_back("OpenGL");
     cppCompileTask.frameworks.push_back("IOKit");
     cppCompileTask.frameworks.push_back("CoreVideo");
-    cppCompileTask.libraryPaths.push_back("./build/bin/glfw/src");
     cppCompileTask.libraryPaths.push_back("./extern/vulkansdk/macos/macOS/lib");
-    cppCompileTask.libraries.push_back("glfw3");
     cppCompileTask.libraries.push_back("vulkan");
 
     auto processManager = std::make_shared<ProcessManager>();
@@ -884,13 +881,13 @@ int main(int argc, char *argv[])
         compilerComandsJson.close();
     }
 
-    if (!containsFailures)
-    {
-        createExeLinkerProcessRequest(processManager, cppCompileTask, absRootPath);
-        processJobs(processManager);
-        printCompletedProcesses(processManager->completedProcesses, containsFailures);
-        processManager->completedProcesses.clear();
-    }
+    // if (!containsFailures)
+    // {
+    //     createExeLinkerProcessRequest(processManager, cppCompileTask, absRootPath);
+    //     processJobs(processManager);
+    //     printCompletedProcesses(processManager->completedProcesses, containsFailures);
+    //     processManager->completedProcesses.clear();
+    // }
 
     if (!containsFailures)
     {
@@ -901,8 +898,10 @@ int main(int argc, char *argv[])
     }
 
     /*
-
-    -dynamiclib
+    TODO: 
+        cp libvulkan.1.1.114.dylib libvulkan.dylib
+        cp libvulkan.1.1.114.dylib libvulkan.1.dylib
+        The link was not working for XCode Framework reference
 
 
     "/Library/Developer/CommandLineTools/usr/bin/dsymutil" -o /Users/vitorciaramella/Documents/GitHub/vx/build/bin/vxBuild/vxBuild.dSYM /Users/vitorciaramella/Documents/GitHub/vx/build/bin/vxBuild/vxBuild

@@ -5,37 +5,6 @@
     "version": "0.2.0",
     "configurations": [        
         {
-            "name": "vxGraphics",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/bin/vxGraphics/vxGraphics",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build/bin/vxGraphics",
-            "environment": [
-                {"name": "DYLD_LIBRARY_PATH", "value": "$DYLD_LIBRARY_PATH:${workspaceFolder}/extern/vulkansdk/macos/macOS/lib"},
-                {"name": "VK_LAYER_PATH", "value": "${workspaceFolder}/extern/vulkansdk/macos/macOS/etc/vulkan/explicit_layer.d"},
-                {"name": "VK_ICD_FILENAMES", "value": "${workspaceFolder}/extern/vulkansdk/macos/macOS/etc/vulkan/icd.d/MoltenVK_icd.json"},
-            ],
-            "externalConsole": true,
-            "preLaunchTask": "vxBuild vxGraphics",
-            //"postDebugTask": "postdebugKill",
-            "logging": {
-                "trace": true,
-                "traceResponse": true,
-                "engineLogging": true
-            },
-            "MIMode": "lldb",
-            /*
-            "miDebuggerPath" : "${workspaceFolder}/build/bin/llvm-project/bin/lldb",
-            "miDebuggerArgs": "--arch=x86_64 --disable-aslr",
-            "customLaunchSetupCommands": [
-                { "text": "target-run", "description": "run target", "ignoreFailures": false }
-             ],
-             "launchCompleteCommand": "exec-run",
-             */
-        },
-        {
             "name": "vxBuild",
             "type": "cppdbg",
             "request": "launch",

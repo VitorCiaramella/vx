@@ -310,31 +310,3 @@ VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo
 
     return VK_SUCCESS;
 }
-
-VkResult vxGraphicsDestroyInstance(spt(VxGraphicsInstance) & spVxGraphicsInstance)
-{
-    if (spVxGraphicsInstance != nullptr)
-    {
-        spVxGraphicsInstance->destroy();
-        spVxGraphicsInstance = nullptr;
-    }
-    return VK_SUCCESS;
-}
-
-VkResult vxGraphicsRun(const spt(VxGraphicsInstance) & spVxGraphicsInstance)
-{
-    AssertVkResult(vxAwaitWindowClose, spVxGraphicsInstance->spMainVxGraphicsWindow);
-    return VK_SUCCESS;
-}
-
-VkResult vxGraphicsTerminate(spt(VxGraphicsInstance) & spVxGraphicsInstance)
-{
-    vxGraphicsDestroyInstance(spVxGraphicsInstance);
-    glfwTerminate();    
-    return VK_SUCCESS;
-}
-
-VkResult vxGetVkSuccess()
-{
-    return VK_SUCCESS;
-}

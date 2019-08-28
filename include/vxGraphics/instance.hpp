@@ -3,7 +3,6 @@
 
 #include <vxCommon/vxCommon.hpp>
 #include <vulkan/vulkan.hpp>
-#include <GLFW/glfw3.h>
 #include <string>
 
 #include "debug.hpp"
@@ -173,10 +172,6 @@ typedef struct VxGraphicsInstance
 } VxGraphicsInstance;
 
 VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo, spt(VxGraphicsInstance) & spVxGraphicsInstance);
-VkResult vxGraphicsRun(const spt(VxGraphicsInstance) & spVxGraphicsInstance);
-VkResult vxGraphicsDestroyInstance(spt(VxGraphicsInstance) & spVxGraphicsInstance);
-VkResult vxGraphicsTerminate(spt(VxGraphicsInstance) & spVxGraphicsInstance);
-VkResult vxGetVkSuccess();
 
 #endif
 

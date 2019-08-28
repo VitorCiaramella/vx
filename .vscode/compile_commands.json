@@ -48,12 +48,6 @@
     "output":"/Users/vitorciaramella/Documents/GitHub/vx/build/temp/objs/src/vxGraphics/win32/window.cpp.o"
   },
   {
-    "command":"/usr/bin/clang++ -D_DEBUG -DVK_USE_PLATFORM_MACOS_MVK -DVK_USE_PLATFORM_METAL_EXT -v -g -I/Users/vitorciaramella/Documents/GitHub/vx/include -I/Users/vitorciaramella/Documents/GitHub/vx/extern/glfw/include -I/Users/vitorciaramella/Documents/GitHub/vx/extern/vulkansdk/macos/macOS/include /Users/vitorciaramella/Documents/GitHub/vx/src/vxGraphics/main.cpp -std=c++17 -stdlib=libc++ -x c++ -c -emit-obj -o /Users/vitorciaramella/Documents/GitHub/vx/build/temp/objs/src/vxGraphics/main.cpp.o",
-    "directory":"/Users/vitorciaramella/Documents/GitHub/vx",
-    "file":"/Users/vitorciaramella/Documents/GitHub/vx/src/vxGraphics/main.cpp",
-    "output":"/Users/vitorciaramella/Documents/GitHub/vx/build/temp/objs/src/vxGraphics/main.cpp.o"
-  },
-  {
     "command":"/usr/bin/clang++ -D_DEBUG -DVK_USE_PLATFORM_MACOS_MVK -DVK_USE_PLATFORM_METAL_EXT -v -g -I/Users/vitorciaramella/Documents/GitHub/vx/include -I/Users/vitorciaramella/Documents/GitHub/vx/extern/glfw/include -I/Users/vitorciaramella/Documents/GitHub/vx/extern/vulkansdk/macos/macOS/include /Users/vitorciaramella/Documents/GitHub/vx/src/vxApplication/instance.cpp -std=c++17 -stdlib=libc++ -x c++ -c -emit-obj -o /Users/vitorciaramella/Documents/GitHub/vx/build/temp/objs/src/vxApplication/instance.cpp.o",
     "directory":"/Users/vitorciaramella/Documents/GitHub/vx",
     "file":"/Users/vitorciaramella/Documents/GitHub/vx/src/vxApplication/instance.cpp",
