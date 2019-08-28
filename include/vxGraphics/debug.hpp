@@ -2,6 +2,7 @@
 #define VX_GRAPHICS_DEBUG_HEADER
 
 #include "instance.hpp"
+#include <string>
 
 #ifdef _DEBUG
     #define vxLogVkResult(vkResult) vxGraphicsDebugLogVkResult(vkResult, nullptr, __FUNCTION_NAME__, __FILE__, __LINE__)

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CD2EA7DB2317085B00AEC1E9 /* shaders in Resources */ = {isa = PBXBuildFile; fileRef = CD2EA7DA2317085B00AEC1E9 /* shaders */; };
 		CD76A42B2309326D00E6ACB0 /* MainViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CD76A4232309326D00E6ACB0 /* MainViewController.mm */; };
 		CD76A42C2309326D00E6ACB0 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = CD76A4252309326D00E6ACB0 /* AppDelegate.mm */; };
 		CD76A42F2309326D00E6ACB0 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = CD76A4292309326D00E6ACB0 /* main.mm */; };
@@ -52,6 +53,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CD2EA7DA2317085B00AEC1E9 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shaders; path = ../../../../build/bin/vxGraphics/shaders; sourceTree = "<group>"; };
 		CD76A4232309326D00E6ACB0 /* MainViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MainViewController.mm; sourceTree = "<group>"; };
 		CD76A4242309326D00E6ACB0 /* vxApplication.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = vxApplication.entitlements; sourceTree = "<group>"; };
 		CD76A4252309326D00E6ACB0 /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AppDelegate.mm; sourceTree = "<group>"; };
@@ -100,6 +102,7 @@
 		CDBE8A2B230A0BB0004A9DA1 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				CD2EA7DA2317085B00AEC1E9 /* shaders */,
 				CDBE8A2F230A0D8D004A9DA1 /* macos.xcassets */,
 				CDBE8A2E230A0D8D004A9DA1 /* Main.storyboard */,
 			);
@@ -237,6 +240,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CD2EA7DB2317085B00AEC1E9 /* shaders in Resources */,
 				CDBE8A30230A0D8D004A9DA1 /* Main.storyboard in Resources */,
 				CDBE8A31230A0D8D004A9DA1 /* macos.xcassets in Resources */,
 			);
@@ -375,6 +379,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../../include\"/**",
+					"\"$(SRCROOT)/../../../extern/glfw/include\"/**",
 					"\"$(SRCROOT)/../../../extern/vulkansdk/macos/MoltenVK/include\"/**",
 					"\"/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include\"",
 				);

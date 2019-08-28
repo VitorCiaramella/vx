@@ -27,14 +27,18 @@
 
 	self.view.wantsLayer = YES;// Back the view with a layer created by the makeBackingLayer method.
 
-	//Main_main(&Main, self.view.layer, 1, &arg);
-    //vxApp.init();
-    spVxApplicationInstance->test();
+	auto spCreateInfo = nsp<VxApplicationInstanceCreateInfo>();
+	spCreateInfo->rpMainWindowHandle = self.view.layer;
+	auto vxResult = vxCreateApplicationInstance(spCreateInfo, spVxApplicationInstance);
 
-	CVDisplayLinkCreateWithActiveCGDisplays(&_displayLink);
-    CVDisplayLinkSetOutputCallback(_displayLink, &DisplayLinkCallback, NULL);
-	//CVDisplayLinkSetOutputCallback(_displayLink, &DisplayLinkCallback, &vxApplicationInstance);
-	CVDisplayLinkStart(_displayLink);
+    //TODO add assert
+    if (vxResult==VxResult::VX_SUCCESS)
+    {
+        CVDisplayLinkCreateWithActiveCGDisplays(&_displayLink);
+        CVDisplayLinkSetOutputCallback(_displayLink, &DisplayLinkCallback, NULL);
+        CVDisplayLinkSetOutputCallback(_displayLink, &DisplayLinkCallback, spVxApplicationInstance.get());
+        CVDisplayLinkStart(_displayLink);
+    }
 }
 
 
@@ -46,8 +50,10 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink,
 									const CVTimeStamp* outputTime,
 									CVOptionFlags flagsIn,
 									CVOptionFlags* flagsOut,
-									void* target) {
-	//Main_draw((struct Main*)target);
+									void* target)
+{
+    auto spVxApplicationInstance = (VxApplicationInstance*)target;
+    spVxApplicationInstance->draw();
 	return kCVReturnSuccess;
 }
 

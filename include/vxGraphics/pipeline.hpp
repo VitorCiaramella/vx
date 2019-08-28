@@ -12,7 +12,7 @@ struct VxGraphicsSurface;
 
 typedef struct VxGraphicsPipelineCreateInfo
 {
-    vector(std::string)                     shadersFilePaths;
+    vectorT(std::string)                     shadersFilePaths;
 
     ~VxGraphicsPipelineCreateInfo();
     void destroy();

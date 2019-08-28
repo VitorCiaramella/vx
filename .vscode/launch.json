@@ -18,8 +18,8 @@
                 {"name": "VK_ICD_FILENAMES", "value": "${workspaceFolder}/extern/vulkansdk/macos/macOS/etc/vulkan/icd.d/MoltenVK_icd.json"},
             ],
             "externalConsole": true,
-            "preLaunchTask": "Build",
-            "postDebugTask": "postdebugKill",
+            "preLaunchTask": "vxBuild vxGraphics",
+            //"postDebugTask": "postdebugKill",
             "logging": {
                 "trace": true,
                 "traceResponse": true,
@@ -40,14 +40,14 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/bin/vxBuild/vxBuild",
-            "args": [],
+            "args": ["DEBUG"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build/bin/vxBuild",
             "environment": [
             ],
+            "preLaunchTask": "Build vxBuild",
             "externalConsole": true,
             "MIMode": "lldb",
-            "preLaunchTask": "Build",
             "logging": {
                 "trace": true,
                 "traceResponse": true,

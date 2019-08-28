@@ -89,7 +89,7 @@ VkResult vxLoadShader(VkDevice device, std::string filePath, VkShaderModule * sh
 	return vkResult;
 }
 
-VkResult vxLoadShaders(const spt(VxGraphicsDevice) & spVxGraphicsDevice,  const vector(string) & shadersFilePaths, vectorS(VxGraphicsShader) & spVxGraphicsShaders)
+VkResult vxLoadShaders(const spt(VxGraphicsDevice) & spVxGraphicsDevice,  const vectorT(string) & shadersFilePaths, vectorS(VxGraphicsShader) & spVxGraphicsShaders)
 {
     spVxGraphicsShaders.resize(shadersFilePaths.size());
     uint32_t index = 0;

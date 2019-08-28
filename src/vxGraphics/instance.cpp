@@ -55,12 +55,21 @@ void VxGraphicsInstance::destroy()
 {
     vxLogInfo2("Destroy call", "Memory");
     AssertNotNull(this);
-    spMainVxGraphicsPipeline->destroy();
-    spMainVxGraphicsPipeline = nullptr;
-    spMainVxGraphicsWindow->destroy();
-    spMainVxGraphicsWindow = nullptr;
-    spVxGraphicsDebug->destroy();
-    spVxGraphicsDebug = nullptr;
+    if (spMainVxGraphicsPipeline != nullptr)
+    {
+        spMainVxGraphicsPipeline->destroy();
+        spMainVxGraphicsPipeline = nullptr;
+    }
+    if (spMainVxGraphicsWindow != nullptr)
+    {
+        spMainVxGraphicsWindow->destroy();
+        spMainVxGraphicsWindow = nullptr;
+    }
+    if (spVxGraphicsDebug != nullptr)
+    {
+        spVxGraphicsDebug->destroy();
+        spVxGraphicsDebug = nullptr;
+    }
     spVxAvailablePhysicalDevices.clear();
     if (vkInstance != nullptr)
     {
@@ -71,8 +80,11 @@ void VxGraphicsInstance::destroy()
     }
     vkAvailableExtensions.clear();
     spVxAvailableLayers.clear();
-    spCreateInfo->destroy();
-    spCreateInfo = nullptr;
+    if (spCreateInfo != nullptr)
+    {
+        spCreateInfo->destroy();
+        spCreateInfo = nullptr;
+    }
 }
 
 VxGraphicsInstance::~VxGraphicsInstance()
@@ -95,7 +107,7 @@ VkResult vxGetAvailableExtensions(char* pLayerName, std::vector<VkExtensionPrope
     return VK_SUCCESS;
 }
 
-VkResult vxGetAvailableExtensions(vector(VkExtensionProperties) & vkAvailableExtensions)
+VkResult vxGetAvailableExtensions(vectorT(VkExtensionProperties) & vkAvailableExtensions)
 {
     return vxGetAvailableExtensions(nullptr, vkAvailableExtensions);
 }

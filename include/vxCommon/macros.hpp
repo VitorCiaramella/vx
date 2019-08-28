@@ -92,7 +92,7 @@ std::shared_ptr< objectType > nsp(Args... args)
     }
 
 //vectors
-#define vector(value_type) std::vector< value_type >
+#define vectorT(value_type) std::vector< value_type >
 #define vectorR(value_type) std::vector< rpt(value_type) >
 #define vectorW(value_type) std::vector< std::weak_ptr< value_type > >
 #define vectorS(value_type) vectorOfSharedPointers< value_type >

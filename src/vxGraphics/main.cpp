@@ -123,9 +123,9 @@ spt(VxGraphicsInstanceCreateInfo) getCreateInfo()
     spGraphicsInstanceCreateInfo->apiVersion = VK_API_VERSION_1_1;
 
     #ifdef _DEBUG
-    //spGraphicsInstanceCreateInfo->desiredLayersToEnable.push_back("VK_LAYER_KHRONOS_validation");
+    spGraphicsInstanceCreateInfo->desiredLayersToEnable.push_back("VK_LAYER_KHRONOS_validation");
     //spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-    spGraphicsInstanceCreateInfo->desiredLayersToEnable.push_back("VK_LAYER_LUNARG_standard_validation");
+    //spGraphicsInstanceCreateInfo->desiredLayersToEnable.push_back("VK_LAYER_LUNARG_standard_validation");
     spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
     #endif
 
@@ -151,12 +151,15 @@ spt(VxGraphicsInstanceCreateInfo) getCreateInfo()
 	spGraphicsInstanceCreateInfo->spVxGraphicsPipelineCreateInfo->shadersFilePaths.push_back("./shaders/triangle.frag.spv");
 
     spGraphicsInstanceCreateInfo->spMainWindowCreateInfo->rpVxWindowLoopFunction = &windowLoop;
+    //spGraphicsInstanceCreateInfo->rpMainWindowHandle = nullptr;
+    //spGraphicsInstanceCreateInfo->spMainWindowCreateInfo->rpExistingWindowHandle = nullptr;
 
     return spGraphicsInstanceCreateInfo;
 }
 
 VkResult createInstanceAndRun()
 {
+    vxInitDebugInstance("Debug.txt");
     auto spGraphicsInstanceCreateInfo = getCreateInfo();
     spt(VxGraphicsInstance) spVxGraphicsInstance;
     AssertVkResult(vxCreateGraphicsInstance, spGraphicsInstanceCreateInfo, spVxGraphicsInstance);

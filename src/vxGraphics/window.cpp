@@ -129,6 +129,13 @@ void vxGlfwErrorCallback(int error, const char* description)
 
 VkResult vxCreateGraphicsWindow(spt(VxGraphicsWindowCreateInfo) spVxGraphicsWindowCreateInfo, spt(VxGraphicsWindow) & spVxGraphicsWindow)
 {
+    if (spVxGraphicsWindowCreateInfo->rpExistingWindowHandle != nullptr)
+    {
+        spVxGraphicsWindow = nsp<VxGraphicsWindow>(spVxGraphicsWindowCreateInfo->rpVxWindowLoopFunction);
+        spVxGraphicsWindow->rpWindowHandle = spVxGraphicsWindowCreateInfo->rpExistingWindowHandle;
+        return VkResult::VK_SUCCESS;
+    }
+
     vxLogInfo2("Setting glfw error callback...", "GLFW");
     glfwSetErrorCallback(vxGlfwErrorCallback);
     vxLogInfo2("Glfw error callback set.", "GLFW");
@@ -183,9 +190,40 @@ VkResult vxCreateGraphicsWindow(spt(VxGraphicsWindowCreateInfo) spVxGraphicsWind
     return VkResult::VK_SUCCESS;
 }
 
+VkResult vxGetSurfaceCapabilities(const spt(VxGraphicsWindow) & spVxGraphicsWindow, VkSurfaceCapabilitiesKHR & vkSurfaceCapabilities)
+{
+    auto spVxGraphicsSurface = spVxGraphicsWindow->spVxGraphicsSurface;
+    AssertNotNullVkResult(spVxGraphicsSurface);
+    AssertNotNullVkResult(spVxGraphicsSurface->vkSurface);
+
+    auto spVxSurfaceDevice = spVxGraphicsSurface->spVxSurfaceDevice;
+    AssertNotNullVkResult(spVxSurfaceDevice);
+    AssertNotNullVkResult(spVxSurfaceDevice->vkDevice);
+
+    GetAndAssertSharedPointerVk(spVxSurfacePhysicalDevice, spVxGraphicsSurface->wpVxSurfacePhysicalDevice);
+    vkSurfaceCapabilities = spVxSurfacePhysicalDevice->vkSurfaceCapabilities;
+    return VkResult::VK_SUCCESS;
+}
+
 VkExtent2D vxGetWindowSize(const spt(VxGraphicsWindow) & spVxGraphicsWindow)
 {
     VkExtent2D result;
+    if (spVxGraphicsWindow->rpWindowHandle != nullptr)
+    {
+        VkSurfaceCapabilitiesKHR vkSurfaceCapabilities;
+        if (vxGetSurfaceCapabilities(spVxGraphicsWindow, vkSurfaceCapabilities) == VkResult::VK_SUCCESS)
+        {
+            result.width = vkSurfaceCapabilities.currentExtent.width;
+            result.height = vkSurfaceCapabilities.currentExtent.height;
+        }                    
+        else
+        {
+            result.width = 500;
+            result.height = 500;
+        }
+        return result;
+    }
+
     int width = 0;
     int height = 0;
     glfwGetFramebufferSize(spVxGraphicsWindow->rpGlfwWindow, &width, &height);
@@ -201,6 +239,12 @@ VxWindowLoopResult windowDummyLoop(const spt(VxGraphicsWindow) & spVxGraphicsWin
 
 VkResult vxAwaitWindowClose(const spt(VxGraphicsWindow) & spVxGraphicsWindow)
 {
+    if (spVxGraphicsWindow->rpWindowHandle != nullptr)
+    {
+        //TODO
+        return VkResult::VK_SUCCESS;
+    }
+
     auto vxWindowLoopFunction = windowDummyLoop;
     if (spVxGraphicsWindow->rpVxWindowLoopFunction != nullptr)
     {

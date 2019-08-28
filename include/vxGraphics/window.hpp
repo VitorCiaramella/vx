@@ -33,6 +33,7 @@ typedef struct VxGraphicsWindowCreateInfo
     bool                                    fullScreen;
     const char*                             title;
     PFN_vxWindowLoop                        rpVxWindowLoopFunction;
+    void*                                   rpExistingWindowHandle;
 
     ~VxGraphicsWindowCreateInfo();
     void destroy();
@@ -52,6 +53,7 @@ typedef struct VxGraphicsWindowCreateInfo
         fullScreen = false;
         title = "VxGraphicsWindow";
         rpVxWindowLoopFunction = nullptr;
+        rpExistingWindowHandle = nullptr;
     }
 } VxGraphicsWindowCreateInfo;
 
@@ -64,7 +66,7 @@ typedef enum class VxWindowLoopResult
 typedef struct VxGraphicsWindow
 {
     rpt(GLFWwindow)                         rpGlfwWindow;
-
+    void*                                   rpWindowHandle;
     PFN_vxWindowLoop                        rpVxWindowLoopFunction;
 
     VkResult                                createGraphicsSurfaceResult;
@@ -76,6 +78,7 @@ typedef struct VxGraphicsWindow
     {
         rpVxWindowLoopFunction = windowLoopFunction;
         rpGlfwWindow = nullptr;
+        rpWindowHandle = nullptr;
         createGraphicsSurfaceResult = VK_RESULT_MAX_ENUM;
         spVxGraphicsSurface = nullptr;
     }
@@ -89,13 +92,13 @@ typedef struct VxGraphicsSurfacePhysicalDevice
     vectorW(VxGraphicsQueueFamily)          wpVxSupportedQueueFamilies;
 
     VkResult                                vkGetPhysicalDeviceSurfaceFormatsKHRResult;
-    vector(VkSurfaceFormatKHR)              vkSurfaceFormats;
+    vectorT(VkSurfaceFormatKHR)              vkSurfaceFormats;
 
     VkResult                                vkGetPhysicalDeviceSurfaceCapabilitiesKHRResult;
     VkSurfaceCapabilitiesKHR                vkSurfaceCapabilities;
 
     VkResult                                vkGetPhysicalDeviceSurfacePresentModesKHRResult;
-    vector(VkPresentModeKHR)                vkPresentModes;
+    vectorT(VkPresentModeKHR)                vkPresentModes;
 
     ~VxGraphicsSurfacePhysicalDevice();
     void destroy();
@@ -155,13 +158,13 @@ typedef struct VxGraphicsSwapchain
     VkRenderPass                            vkRenderPass;
 
     VkResult                                getImagesResult;
-    vector(VkImage)                         vkImages;
+    vectorT(VkImage)                        vkImages;
 
     VkResult                                createImageViewsResult;
-    vector(VkImageView)                     vkImageViews;
+    vectorT(VkImageView)                    vkImageViews;
 
     VkResult                                createFramebuffersResult;
-    vector(VkFramebuffer)                   vkFramebuffers;
+    vectorT(VkFramebuffer)                  vkFramebuffers;
 
     VkResult                                createAcquireSemaphoreResult;
     VkSemaphore                             vkAcquireSemaphore;

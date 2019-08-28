@@ -24,10 +24,11 @@ typedef struct VxGraphicsInstanceCreateInfo
     std::string                             engineName;
     uint32_t                                engineVersion;
     uint32_t                                apiVersion;
-    vector(string)                          desiredLayersToEnable;
-    vector(string)                          desiredExtensionsToEnable;
+    vectorT(string)                          desiredLayersToEnable;
+    vectorT(string)                          desiredExtensionsToEnable;
 
     spt(VxGraphicsWindowCreateInfo)         spMainWindowCreateInfo;
+    void*                                   rpMainWindowHandle;
     spt(VxGraphicsPipelineCreateInfo)       spVxGraphicsPipelineCreateInfo;
     
     ~VxGraphicsInstanceCreateInfo();
@@ -42,6 +43,7 @@ typedef struct VxGraphicsInstanceCreateInfo
         desiredLayersToEnable.reserve(32);
         desiredExtensionsToEnable.reserve(32);
         spMainWindowCreateInfo = nsp<VxGraphicsWindowCreateInfo>();
+        rpMainWindowHandle = nullptr;
         spVxGraphicsPipelineCreateInfo = nsp<VxGraphicsPipelineCreateInfo>();
     }
 } VxGraphicsInstanceCreateInfo;
@@ -51,7 +53,7 @@ typedef struct VxGraphicsLayer
     VkLayerProperties                       vkLayer;
 
     VkResult                                getAvailableExtensionsResult;
-    vector(VkExtensionProperties)           vkAvailableExtensions;
+    vectorT(VkExtensionProperties)           vkAvailableExtensions;
 
     ~VxGraphicsLayer();
     void destroy();
@@ -92,7 +94,7 @@ typedef struct VxGraphicsPhysicalDevice
     bool                                    supportsGraphics;
 
     VkResult                                getAvailableExtensionResult;
-    vector(VkExtensionProperties)          vkAvailableExtensions;
+    vectorT(VkExtensionProperties)          vkAvailableExtensions;
 
     ~VxGraphicsPhysicalDevice();
     void destroy();
@@ -117,7 +119,7 @@ typedef struct VxGraphicsInstance
     vectorS(VxGraphicsLayer)                spVxAvailableLayers;
 
     VkResult                                getAvailableExtensionsResult;
-    vector(VkExtensionProperties)           vkAvailableExtensions;
+    vectorT(VkExtensionProperties)          vkAvailableExtensions;
 
     VkResult                                createInstanceResult;
     VkInstance                              vkInstance;

@@ -327,6 +327,7 @@ typedef struct CppCompileTask
     std::list<std::string> libraryPaths;
     std::list<std::string> libraries;
     bool forceCppRecompilation;
+    bool preCompileHeaders;
     bool forceHeaderCopy;
     bool forceHeaderRecompilation;
 } CppCompileTask;
@@ -498,6 +499,15 @@ void createClangCompileCommand(const std::list<fs::path> & filesFound,const std:
         commonArgs.push_back(option);
     }
     for (auto && includePath : cppCompileTask.preCompiledIncludePaths)
+    {
+        auto absIncludePath = fs::absolute(fs::path(includePath), absRootPath);
+        if (!getCanonicalPath(absIncludePath))
+        {
+            continue;
+        }
+        commonArgs.push_back("-I"+absIncludePath.string());
+    }
+    for (auto && includePath : cppCompileTask.includePaths)
     {
         auto absIncludePath = fs::absolute(fs::path(includePath), absRootPath);
         if (!getCanonicalPath(absIncludePath))
@@ -769,8 +779,17 @@ void createLibLinkerProcessRequest(const std::shared_ptr<ProcessManager> & proce
 }
 
 
-int main()
+int main(int argc, char *argv[])
 {
+    auto debugMode = false;
+    for (int i = 0; i < argc; i++)
+    {
+        if (strcasecmp(argv[i],"DEBUG")==0)
+        {
+            debugMode = true;
+        }
+    }
+    
     auto currentPath = fs::current_path();
 
     auto rootPath = fs::path("../../../");
@@ -779,6 +798,8 @@ int main()
     absRootPath = fs::canonical(absRootPath);
 
     CppCompileTask cppCompileTask;
+    cppCompileTask.forceCppRecompilation = true;
+    cppCompileTask.preCompileHeaders = false;
     cppCompileTask.cppCompilerPath = "clang++";
     //cppCompileTask.sourcePaths.push_back("./src/**.cpp");
     cppCompileTask.sourcePaths.push_back("./src/vxGraphics/**.cpp");
@@ -825,16 +846,18 @@ int main()
     printCompletedProcesses(processManager->completedProcesses, containsFailures);
     processManager->completedProcesses.clear();
 
-
-    auto copyHeaderLog = std::ofstream(copyHeaderLogPath.c_str());
-    if (copyHeaderLog.is_open())
+    if (cppCompileTask.preCompileHeaders)
     {
-        copyHeaderFilesForPreCompilation(processManager, cppCompileTask, absRootPath, &copyHeaderLog);
-        processJobs(processManager);
-        copyHeaderLog.close();
+        auto copyHeaderLog = std::ofstream(copyHeaderLogPath.c_str());
+        if (copyHeaderLog.is_open())
+        {
+            copyHeaderFilesForPreCompilation(processManager, cppCompileTask, absRootPath, &copyHeaderLog);
+            processJobs(processManager);
+            copyHeaderLog.close();
+        }
+        printCompletedProcesses(processManager->completedProcesses, containsFailures);
+        processManager->completedProcesses.clear();
     }
-    printCompletedProcesses(processManager->completedProcesses, containsFailures);
-    processManager->completedProcesses.clear();
 
     auto compileCommandsJsonPath = fs::absolute(".vscode/compile_commands.json", absRootPath);
     auto compilerComandsJson = std::ofstream(compileCommandsJsonPath.c_str());
@@ -842,11 +865,14 @@ int main()
     {
         compilerComandsJson << "[\n";
 
-        createHppPreCompileProcessRequest(processManager, cppCompileTask, absRootPath, compilerComandsJson);
-        processJobs(processManager);
-        printCompletedProcesses(processManager->completedProcesses, containsFailures);
-        processManager->completedProcesses.clear();
-    
+        if (cppCompileTask.preCompileHeaders)
+        {
+            createHppPreCompileProcessRequest(processManager, cppCompileTask, absRootPath, compilerComandsJson);
+            processJobs(processManager);
+            printCompletedProcesses(processManager->completedProcesses, containsFailures);
+            processManager->completedProcesses.clear();
+        }
+
         containsFailures = false;
         createCppCompileProcessRequest(processManager, cppCompileTask, absRootPath, compilerComandsJson);
         processJobs(processManager);
@@ -896,6 +922,11 @@ int main()
      /Library/Developer/CommandLineTools/usr/lib/clang/10.0.1/lib/darwin/libclang_rt.osx.a
     */
 
+    if (debugMode)
+    {
+        std::cout << "Press any key to close...";
+        std::getchar();
+    }
     return containsFailures ? 1 : 0;
 }
 

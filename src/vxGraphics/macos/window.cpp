@@ -8,13 +8,21 @@
 
 VkResult vxCreateSurface_PlatformSpecific(const spt(VxGraphicsSurface) & spVxGraphicsSurface)
 {
-    //VkMacOSSurfaceCreateInfoMVK createInfo = {};
-    //createInfo.pView = window->view;
-    //puGraphicsInstance->vkCreateSurfaceResult = vkCreateMacOSSurfaceMVK(puGraphicsInstance->vkInstance, &createInfo, NULL, &puGraphicsInstance->mainSurface.surface);
     //TODO: remove dependency from glfw
     GetAndAssertSharedPointerVk(spVxGraphicsInstance, spVxGraphicsSurface->wpVxGraphicsInstance);
     GetAndAssertSharedPointerVk(spVxGraphicsWindow, spVxGraphicsSurface->wpVxGraphicsWindow);
-    StoreAndAssertVkResultP(spVxGraphicsSurface->createSurfaceResult, glfwCreateWindowSurface, spVxGraphicsInstance->vkInstance, spVxGraphicsWindow->rpGlfwWindow, nullptr, &spVxGraphicsSurface->vkSurface);
+    if (spVxGraphicsWindow->rpGlfwWindow != nullptr)
+    {
+        StoreAndAssertVkResultP(spVxGraphicsSurface->createSurfaceResult, glfwCreateWindowSurface, spVxGraphicsInstance->vkInstance, spVxGraphicsWindow->rpGlfwWindow, nullptr, &spVxGraphicsSurface->vkSurface);
+    }
+    else if (spVxGraphicsWindow->rpWindowHandle != nullptr)
+    {
+        VkMacOSSurfaceCreateInfoMVK surfaceCreateInfo = { VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK };
+        surfaceCreateInfo.pNext = nullptr;
+        surfaceCreateInfo.flags = 0;
+        surfaceCreateInfo.pView = spVxGraphicsWindow->rpWindowHandle;
+        StoreAndAssertVkResultP(spVxGraphicsSurface->createSurfaceResult, vkCreateMacOSSurfaceMVK, spVxGraphicsInstance->vkInstance, &surfaceCreateInfo, nullptr, &spVxGraphicsSurface->vkSurface);
+    }
     return VK_SUCCESS;
 }
 
