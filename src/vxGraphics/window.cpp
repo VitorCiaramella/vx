@@ -115,10 +115,10 @@ VxGraphicsSwapchain::~VxGraphicsSwapchain()
     destroy();
 }
 
-VkResult vxCreateGraphicsWindow(spt(VxGraphicsWindowCreateInfo) spVxGraphicsWindowCreateInfo, spt(VxGraphicsWindow) & spVxGraphicsWindow)
+VkResult vxCreateGraphicsWindow(spt(VxGraphicsWindowCreateInfo) spVxGraphicsWindowCreateInfo, spt(VxGraphicsInstance) & spVxGraphicsInstance, spt(VxGraphicsWindow) & spVxGraphicsWindow)
 {
     AssertNotNullVkResult(spVxGraphicsWindowCreateInfo->rpExistingWindowHandle);
-    spVxGraphicsWindow = nsp<VxGraphicsWindow>(spVxGraphicsWindowCreateInfo->rpVxWindowLoopFunction);
+    spVxGraphicsWindow = nsp<VxGraphicsWindow>(spVxGraphicsInstance, spVxGraphicsWindowCreateInfo->rpVxWindowLoopFunction);
     spVxGraphicsWindow->rpWindowHandle = spVxGraphicsWindowCreateInfo->rpExistingWindowHandle;
     return VkResult::VK_SUCCESS;
 }

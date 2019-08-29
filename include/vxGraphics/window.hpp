@@ -66,16 +66,18 @@ typedef struct VxGraphicsWindow
 {
     void*                                   rpWindowHandle;
     PFN_vxWindowLoop                        rpVxWindowLoopFunction;
+    wpt(VxGraphicsInstance)                 wpVxGraphicsInstance;
 
     VkResult                                createGraphicsSurfaceResult;
     spt(VxGraphicsSurface)                  spVxGraphicsSurface;
 
     ~VxGraphicsWindow();
     void destroy();
-    void init(PFN_vxWindowLoop windowLoopFunction)
+    void init(spt(VxGraphicsInstance) spVxGraphicsInstance, PFN_vxWindowLoop windowLoopFunction)
     {
         rpVxWindowLoopFunction = windowLoopFunction;
         rpWindowHandle = nullptr;
+        wpVxGraphicsInstance = spVxGraphicsInstance;
         createGraphicsSurfaceResult = VK_RESULT_MAX_ENUM;
         spVxGraphicsSurface = nullptr;
     }
@@ -192,7 +194,7 @@ typedef struct VxGraphicsSwapchain
     }
 } VxGraphicsSwapchain;
 
-VkResult vxCreateGraphicsWindow(spt(VxGraphicsWindowCreateInfo) spVxGraphicsWindowCreateInfo, spt(VxGraphicsWindow) & spVxGraphicsWindow);
+VkResult vxCreateGraphicsWindow(spt(VxGraphicsWindowCreateInfo) spVxGraphicsWindowCreateInfo, spt(VxGraphicsInstance) & spVxGraphicsInstance, spt(VxGraphicsWindow) & spVxGraphicsWindow);
 VkExtent2D vxGetWindowSize(const spt(VxGraphicsWindow) & spVxGraphicsWindow);
 
 VkResult vxCreateGraphicsSurface(const spt(VxGraphicsInstance) & spVxGraphicsInstance, spt(VxGraphicsSurface) & spVxGraphicsSurface);

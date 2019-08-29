@@ -1,5 +1,7 @@
 #import "MainViewController.hpp"
 #import <QuartzCore/CAMetalLayer.h>
+#import <AppKit/AppKit.h>
+#import <Cocoa/Cocoa.h>
 
 #include <MoltenVK/mvk_vulkan.h>
 #include <vxApplication/vxApplication.hpp>
@@ -27,8 +29,15 @@
 
 	self.view.wantsLayer = YES;// Back the view with a layer created by the makeBackingLayer method.
 
-	auto spCreateInfo = nsp<VxApplicationInstanceCreateInfo>();
+    auto userHomeDirectory = NSHomeDirectory();
+    auto debugFilePath = [NSString stringWithFormat:@"%@/.vxApplication/Debug.txt", userHomeDirectory];
+    vxInitDebugInstance(std::string([debugFilePath UTF8String]));
+
+    auto mainBundle = [NSBundle mainBundle];
+
+    auto spCreateInfo = nsp<VxApplicationInstanceCreateInfo>();
 	spCreateInfo->rpMainWindowHandle = self.view.layer;
+    spCreateInfo->resourcePath = std::string([mainBundle.resourcePath UTF8String]);
 	auto vxResult = vxCreateApplicationInstance(spCreateInfo, spVxApplicationInstance);
 
     //TODO add assert
@@ -59,6 +68,26 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink,
 
 @end
 
+#pragma mark -
+#pragma mark MainWindowController
+
+@implementation MainWindowController {
+    
+}
+
+- (void)windowDidLoad
+{
+    [super windowDidLoad];
+
+    /*
+    [self.window deminiaturize:self];
+    [self.window makeMainWindow];
+    [self.window makeKeyAndOrderFront:self];
+    [self.window orderFrontRegardless];
+     */
+}
+
+@end
 
 #pragma mark -
 #pragma mark MainView

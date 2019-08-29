@@ -1,6 +1,8 @@
 #include "commonHeaders.hpp"
 
-//#include <boost/filesystem.hpp>
+#if _DEBUG
+#include <boost/filesystem.hpp>
+#endif 
 
 void VxGraphicsPipelineCreateInfo::destroy()
 {
@@ -59,9 +61,17 @@ VxGraphicsPipeline::~VxGraphicsPipeline()
 
 VkResult vxLoadShader(VkDevice device, std::string filePath, VkShaderModule * shaderModule)
 {
-	//printf(boost::filesystem::current_path().c_str());
-
 	FILE* file = fopen(filePath.c_str(), "rb");
+
+	#if _DEBUG
+	if (file == nullptr)
+	{
+		char text[4096];
+        snprintf(text, arraySize(text), "File not found: %s\n", boost::filesystem::absolute(boost::filesystem::path(filePath)).c_str());
+		vxLogError2(text,"Shader");		
+	}
+	#endif
+
 	AssertNotNullVkResult(file);
 
 	fseek(file, 0, SEEK_END);

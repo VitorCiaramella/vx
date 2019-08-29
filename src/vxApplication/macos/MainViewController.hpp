@@ -8,6 +8,12 @@
 @interface MainViewController : NSViewController
 @end
 
+#pragma mark -
+#pragma mark MainWindowController
+
+/** The main window controller for the main storyboard. */
+@interface MainWindowController : NSWindowController
+@end
 
 #pragma mark -
 #pragma mark MainView

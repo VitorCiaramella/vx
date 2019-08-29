@@ -326,6 +326,7 @@ typedef struct CppCompileTask
     std::list<std::string> frameworks;
     std::list<std::string> libraryPaths;
     std::list<std::string> libraries;
+    std::list<std::string> staticLibraries;
     bool forceCppRecompilation;
     bool preCompileHeaders;
     bool forceHeaderCopy;
@@ -726,6 +727,7 @@ void createLinkerProcessRequest(const std::shared_ptr<ProcessManager> & processM
     commonArgs.push_back("-dynamic"); 
     commonArgs.push_back("-arch"); 
     commonArgs.push_back("x86_64"); 
+    //commonArgs.push_back("i386"); 
     commonArgs.push_back("-macosx_version_min"); 
     commonArgs.push_back("10.14.0 "); 
     commonArgs.push_back("-lc++ "); 
@@ -743,6 +745,10 @@ void createLinkerProcessRequest(const std::shared_ptr<ProcessManager> & processM
     for (auto && library : cppCompileTask.libraries)
     {
         commonArgs.push_back("-l" + library);
+    }
+    for (auto && staticLibrary : cppCompileTask.staticLibraries)
+    {
+        commonArgs.push_back(fs::absolute(fs::path(staticLibrary), absRootPath).string());
     }
     for (auto && file : filesFound)
     {
@@ -807,20 +813,29 @@ int main(int argc, char *argv[])
     cppCompileTask.sourcePaths.push_back("./src/vxCommon/**.cpp");
     //cppCompileTask.inputExtensions.push_back(".cpp");
     cppCompileTask.includePaths.push_back("./include/");
-    cppCompileTask.includePaths.push_back("./extern/boost/boost/");
-    cppCompileTask.includePaths.push_back("./extern/vulkansdk/macos/macOS/include/");
+    cppCompileTask.includePaths.push_back("./build/bin/boost/include/");
+    //cppCompileTask.includePaths.push_back("./extern/vulkansdk/macos/macOS/include/");
+    cppCompileTask.includePaths.push_back("./extern/vulkansdk/macos/MoltenVK/include/");
     cppCompileTask.options.push_back("-D_DEBUG");
     cppCompileTask.options.push_back("-DVK_USE_PLATFORM_MACOS_MVK");
     cppCompileTask.options.push_back("-DVK_USE_PLATFORM_METAL_EXT");
     cppCompileTask.options.push_back("-v");
     cppCompileTask.options.push_back("-g");
     cppCompileTask.outputPath = "./build/";
+    cppCompileTask.frameworks.push_back("Foundation");
+    cppCompileTask.frameworks.push_back("QuartzCore");
+    cppCompileTask.frameworks.push_back("IOSurface");
     cppCompileTask.frameworks.push_back("Cocoa");
     cppCompileTask.frameworks.push_back("OpenGL");
-    cppCompileTask.frameworks.push_back("IOKit");
+    cppCompileTask.frameworks.push_back("IOKit");//UIKit for iOS
     cppCompileTask.frameworks.push_back("CoreVideo");
-    cppCompileTask.libraryPaths.push_back("./extern/vulkansdk/macos/macOS/lib");
-    cppCompileTask.libraries.push_back("vulkan");
+    cppCompileTask.frameworks.push_back("Metal");
+    //cppCompileTask.libraryPaths.push_back("./extern/vulkansdk/macos/macOS/lib");
+    //cppCompileTask.libraries.push_back("vulkan");
+    //cppCompileTask.libraryPaths.push_back("./extern/vulkansdk/macos/MoltenVK/macOS/dynamic/");
+    //cppCompileTask.libraries.push_back("MoltenVK");
+    cppCompileTask.staticLibraries.push_back("./extern/vulkansdk/macos/MoltenVK/macOS/static/libMoltenVK.a");
+    cppCompileTask.staticLibraries.push_back("./build/bin/boost/lib/libboost_filesystem-mt-d-x64.a");
 
     auto processManager = std::make_shared<ProcessManager>();
     processManager->maxCurrentProcesses = 8;

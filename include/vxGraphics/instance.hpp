@@ -2,6 +2,7 @@
 #define VX_GRAPHICS_INSTANCE_HEADER
 
 #include <vxCommon/vxCommon.hpp>
+#include <vxApplication/vxApplication.hpp>
 #include <vulkan/vulkan.hpp>
 #include <string>
 
@@ -15,6 +16,11 @@ struct VxGraphicsWindowCreateInfo;
 struct VxGraphicsWindow;
 struct VxGraphicsPipelineCreateInfo;
 struct VxGraphicsPipeline;
+struct VxGraphicsLayer;
+struct VxGraphicsQueueFamily;
+struct VxGraphicsPhysicalDevice;
+struct VxGraphicsInstance;
+struct VxApplicationInstance;
 
 typedef struct VxGraphicsInstanceCreateInfo
 {
@@ -113,6 +119,7 @@ typedef struct VxGraphicsPhysicalDevice
 typedef struct VxGraphicsInstance 
 {
     spt(VxGraphicsInstanceCreateInfo)       spCreateInfo;
+    wpt(VxApplicationInstance)              wpVxApplicationInstance;
 
     VkResult                                getAvailableLayersResult;
     vectorS(VxGraphicsLayer)                spVxAvailableLayers;
@@ -133,6 +140,7 @@ typedef struct VxGraphicsInstance
 
     VkResult                                createMainGraphicsPipelineResult;
     spt(VxGraphicsPipeline)                 spMainVxGraphicsPipeline;
+
     /* 
     PFN_vxWindowLoop                        vxWindowLoopFunction;
 
@@ -145,9 +153,10 @@ typedef struct VxGraphicsInstance
 
     ~VxGraphicsInstance();
     void destroy();
-    void init()
-    {
+    void init(spt(VxApplicationInstance) spVxApplicationInstance)
+    {        
         spCreateInfo = nullptr;
+        wpVxApplicationInstance = spVxApplicationInstance;
 
         getAvailableLayersResult = VK_RESULT_MAX_ENUM;
         spVxAvailableLayers.reserve(32);
@@ -171,7 +180,7 @@ typedef struct VxGraphicsInstance
     }
 } VxGraphicsInstance;
 
-VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo, spt(VxGraphicsInstance) & spVxGraphicsInstance);
+VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo, spt(VxApplicationInstance) & spVxApplicationInstance);
 
 #endif
 

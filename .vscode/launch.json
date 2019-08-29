@@ -30,7 +30,7 @@
             "program": "${workspaceFolder}/build/bin/vxApplication/macos/Debug/vxApplication-macOS.app/Contents/MacOS/vxApplication-macOS",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build/bin/vxApplication/macos/Debug/vxApplication-macOS.app/Contents/MacOS/",
+            "cwd": "${workspaceFolder}/build/bin/vxApplication/macos/Debug/",
             "environment": [
             ],
             "externalConsole": true,

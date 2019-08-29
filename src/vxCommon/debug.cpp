@@ -1,6 +1,7 @@
 #include "commonHeaders.hpp"
 #include <fstream>
 #include <iostream>
+#include <boost/filesystem.hpp>
 
 VxDebug VxDebugInstance;
 
@@ -14,10 +15,16 @@ void VxDebug::init()
 {
     if (debugFilePath.length()>0)
     {
+        auto debugFilePath1 = boost::filesystem::absolute(boost::filesystem::path(debugFilePath));
+        boost::filesystem::create_directories(debugFilePath1.parent_path());
+
         std::fstream debugFileStream;
         debugFileStream.open(debugFilePath,  std::fstream::in | std::fstream::out | std::fstream::trunc);
-        debugFileStream << "\n";
-        debugFileStream.close();
+        if(!debugFileStream.fail())
+        {
+            debugFileStream << "\n";
+            debugFileStream.close();
+        }
     }
 }
 
@@ -45,12 +52,15 @@ void VxDebug::log(const char* message, const char* category, const char* logType
     {
         std::fstream debugFileStream;
         debugFileStream.open(debugFilePath, std::fstream::in | std::fstream::out | std::fstream::app);
-        if (!debugFileStream) 
+        if(debugFileStream.fail())
         {
             debugFileStream.open(debugFilePath,  std::fstream::in | std::fstream::out | std::fstream::trunc);
-        } 
-        debugFileStream << text << "\n";
-        debugFileStream.close();
+        }
+        if(!debugFileStream.fail())
+        {
+            debugFileStream << text << "\n";
+            debugFileStream.close();
+        }
     }
 
     #ifdef WIN32

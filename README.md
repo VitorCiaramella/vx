@@ -92,6 +92,12 @@ GIT after initial pull
 git submodule init
 ?git submodule pull recursive
 
+Remove submodule
+    git submodule deinit <path_to_submodule>
+    git rm <path_to_submodule>
+    git commit-m "Removed submodule "
+    rm -rf .git/modules/<path_to_submodule>
+
 export DYLD_LIBRARY_PATH=/usr/local/boost-1.68.0/lib:$DYLD_LIBRARY_PATH
 
 check if lib++ is installed

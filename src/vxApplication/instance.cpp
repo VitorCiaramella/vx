@@ -39,7 +39,7 @@ VxResult vxCreateApplicationInstance(spt(VxApplicationInstanceCreateInfo) spCrea
     spGraphicsInstanceCreateInfo->applicationVersion = VX_MAKE_VERSION(0,1,0);
     spGraphicsInstanceCreateInfo->engineName = "vxGraphics";
     spGraphicsInstanceCreateInfo->engineVersion = VX_MAKE_VERSION(0,1,0);
-    spGraphicsInstanceCreateInfo->apiVersion = VK_API_VERSION_1_1;
+    spGraphicsInstanceCreateInfo->apiVersion = VK_API_VERSION_1_0;//VK_API_VERSION_1_1
 
     #ifdef _DEBUG
     //spGraphicsInstanceCreateInfo->desiredLayersToEnable.push_back("VK_LAYER_KHRONOS_validation");
@@ -66,13 +66,13 @@ VxResult vxCreateApplicationInstance(spt(VxApplicationInstanceCreateInfo) spCrea
     spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
     #endif
 
-	spGraphicsInstanceCreateInfo->spVxGraphicsPipelineCreateInfo->shadersFilePaths.push_back("../Resources/shaders/triangle.vert.spv");
-	spGraphicsInstanceCreateInfo->spVxGraphicsPipelineCreateInfo->shadersFilePaths.push_back("../Resources/shaders/triangle.frag.spv");
+	spGraphicsInstanceCreateInfo->spVxGraphicsPipelineCreateInfo->shadersFilePaths.push_back(spCreateInfo->resourcePath + "/shaders/triangle.vert.spv");
+	spGraphicsInstanceCreateInfo->spVxGraphicsPipelineCreateInfo->shadersFilePaths.push_back(spCreateInfo->resourcePath + "/shaders/triangle.frag.spv");
 
     //spGraphicsInstanceCreateInfo->spMainWindowCreateInfo->rpVxWindowLoopFunction = &windowLoop2;
     spGraphicsInstanceCreateInfo->rpMainWindowHandle = spCreateInfo->rpMainWindowHandle;
     spGraphicsInstanceCreateInfo->spMainWindowCreateInfo->rpExistingWindowHandle = spCreateInfo->rpMainWindowHandle;
-    AssertVkVxResult(vxCreateGraphicsInstance, spGraphicsInstanceCreateInfo, spVxApplicationInstance->spVxGraphicsInstance);
+    AssertVkVxResult(vxCreateGraphicsInstance, spGraphicsInstanceCreateInfo, spVxApplicationInstance);
     
     //To Deprecate
     //AssertVkVxResult(vxGraphicsRun, spVxGraphicsInstance);    

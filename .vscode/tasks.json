@@ -68,8 +68,8 @@
         },
         {
             "label": "Build",
-            //"dependsOn": ["vxBuild vxGraphics"],
-            "dependsOn": ["vxBuild vxGraphics", "Build vxApplication-macos"],
+            "dependsOn": ["Build vxBuild", "Build vxApplication-macos"],
+            "dependsOrder": "sequence",
             "group": {
                 "kind": "build",
                 "isDefault": true

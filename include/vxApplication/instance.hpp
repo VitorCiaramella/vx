@@ -3,16 +3,25 @@
 
 #include <vxCommon/vxCommon.hpp>
 #include <vxGraphics/vxGraphics.hpp>
+#include <string>
+
+struct VxApplicationInstanceCreateInfo;
+struct VxApplicationInstance;
+
+struct VxGraphicsInstance;
+enum class VxWindowLoopResult;
 
 typedef struct VxApplicationInstanceCreateInfo
 {    
-    void*     rpMainWindowHandle;
+    void*           rpMainWindowHandle;
+    std::string     resourcePath;
 
     ~VxApplicationInstanceCreateInfo();
     void destroy();
     void init()
     {
         rpMainWindowHandle = nullptr;
+        resourcePath = "";
     }
 } VxApplicationInstanceCreateInfo;
 

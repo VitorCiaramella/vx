@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		CD2EA7DB2317085B00AEC1E9 /* shaders in Resources */ = {isa = PBXBuildFile; fileRef = CD2EA7DA2317085B00AEC1E9 /* shaders */; };
+		CD2EA7DF231785A300AEC1E9 /* libVxGraphics.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CDBE8A6C230A5D0D004A9DA1 /* libVxGraphics.dylib */; };
+		CD2EA7E0231785B000AEC1E9 /* libVxGraphics.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = CDBE8A6C230A5D0D004A9DA1 /* libVxGraphics.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		CD76A42B2309326D00E6ACB0 /* MainViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CD76A4232309326D00E6ACB0 /* MainViewController.mm */; };
 		CD76A42C2309326D00E6ACB0 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = CD76A4252309326D00E6ACB0 /* AppDelegate.mm */; };
 		CD76A42F2309326D00E6ACB0 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = CD76A4292309326D00E6ACB0 /* main.mm */; };
@@ -16,17 +18,20 @@
 		CDBE8A65230A422A004A9DA1 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDBE8A64230A422A004A9DA1 /* QuartzCore.framework */; };
 		CDBE8A67230A4252004A9DA1 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDBE8A66230A4252004A9DA1 /* Cocoa.framework */; };
 		CDBE8A6B230A4506004A9DA1 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDBE8A6A230A4506004A9DA1 /* Metal.framework */; };
-		CDBE8A6D230A5D0D004A9DA1 /* libVxGraphics.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CDBE8A6C230A5D0D004A9DA1 /* libVxGraphics.dylib */; };
-		CDBE8A6E230A5D16004A9DA1 /* libVxGraphics.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = CDBE8A6C230A5D0D004A9DA1 /* libVxGraphics.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		CDBE8A78230A62BF004A9DA1 /* libvulkan.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CDBE8A75230A62BE004A9DA1 /* libvulkan.dylib */; };
-		CDBE8A79230A62BF004A9DA1 /* libMoltenVK.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CDBE8A76230A62BF004A9DA1 /* libMoltenVK.dylib */; };
-		CDBE8A7A230A62C4004A9DA1 /* libMoltenVK.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = CDBE8A76230A62BF004A9DA1 /* libMoltenVK.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		CDBE8A7C230A62C4004A9DA1 /* libvulkan.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = CDBE8A75230A62BE004A9DA1 /* libvulkan.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		CDBE8A7E230A6402004A9DA1 /* libvulkan.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CDBE8A7D230A6402004A9DA1 /* libvulkan.1.dylib */; };
-		CDBE8A7F230A6406004A9DA1 /* libvulkan.1.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = CDBE8A7D230A6402004A9DA1 /* libvulkan.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		CD2EA7E1231785B100AEC1E9 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				CD2EA7E0231785B000AEC1E9 /* libVxGraphics.dylib in Embed Libraries */,
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CDBE8A3B230A2567004A9DA1 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -34,20 +39,6 @@
 			dstSubfolderSpec = 6;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		CDBE8A49230A283F004A9DA1 /* Embed Libraries */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				CDBE8A7F230A6406004A9DA1 /* libvulkan.1.dylib in Embed Libraries */,
-				CDBE8A7A230A62C4004A9DA1 /* libMoltenVK.dylib in Embed Libraries */,
-				CDBE8A7C230A62C4004A9DA1 /* libvulkan.dylib in Embed Libraries */,
-				CDBE8A6E230A5D16004A9DA1 /* libVxGraphics.dylib in Embed Libraries */,
-			);
-			name = "Embed Libraries";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -68,9 +59,6 @@
 		CDBE8A66230A4252004A9DA1 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		CDBE8A6A230A4506004A9DA1 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		CDBE8A6C230A5D0D004A9DA1 /* libVxGraphics.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libVxGraphics.dylib; path = ../../../build/bin/vxGraphics/libVxGraphics.dylib; sourceTree = "<group>"; };
-		CDBE8A75230A62BE004A9DA1 /* libvulkan.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.dylib; path = ../../../extern/vulkansdk/macos/macOS/lib/libvulkan.dylib; sourceTree = "<group>"; };
-		CDBE8A76230A62BF004A9DA1 /* libMoltenVK.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libMoltenVK.dylib; path = ../../../extern/vulkansdk/macos/macOS/lib/libMoltenVK.dylib; sourceTree = "<group>"; };
-		CDBE8A7D230A6402004A9DA1 /* libvulkan.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.dylib; path = ../../../extern/vulkansdk/macos/macOS/lib/libvulkan.1.dylib; sourceTree = "<group>"; };
 		CDD012BC23092E590002BB4E /* vxApplication-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "vxApplication-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -86,10 +74,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CDBE8A7E230A6402004A9DA1 /* libvulkan.1.dylib in Frameworks */,
-				CDBE8A78230A62BF004A9DA1 /* libvulkan.dylib in Frameworks */,
-				CDBE8A79230A62BF004A9DA1 /* libMoltenVK.dylib in Frameworks */,
-				CDBE8A6D230A5D0D004A9DA1 /* libVxGraphics.dylib in Frameworks */,
+				CD2EA7DF231785A300AEC1E9 /* libVxGraphics.dylib in Frameworks */,
 				CDBE8A6B230A4506004A9DA1 /* Metal.framework in Frameworks */,
 				CDBE8A67230A4252004A9DA1 /* Cocoa.framework in Frameworks */,
 				CDBE8A65230A422A004A9DA1 /* QuartzCore.framework in Frameworks */,
@@ -112,9 +97,6 @@
 		CDBE8A39230A1019004A9DA1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				CDBE8A7D230A6402004A9DA1 /* libvulkan.1.dylib */,
-				CDBE8A76230A62BF004A9DA1 /* libMoltenVK.dylib */,
-				CDBE8A75230A62BE004A9DA1 /* libvulkan.dylib */,
 				CDBE8A6C230A5D0D004A9DA1 /* libVxGraphics.dylib */,
 				CDBE8A6A230A4506004A9DA1 /* Metal.framework */,
 				CDBE8A66230A4252004A9DA1 /* Cocoa.framework */,
@@ -176,7 +158,7 @@
 				CDD012B823092E590002BB4E /* Sources */,
 				CDD012B923092E590002BB4E /* Frameworks */,
 				CDBE8A3B230A2567004A9DA1 /* CopyFiles */,
-				CDBE8A49230A283F004A9DA1 /* Embed Libraries */,
+				CD2EA7E1231785B100AEC1E9 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -359,7 +341,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = "\"$(SRCROOT)/../../../extern/vulkansdk/macos/MoltenVK/macOS/framework/\"/**";
+				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -383,10 +365,7 @@
 					"\"/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include\"",
 				);
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/";
-				LIBRARY_SEARCH_PATHS = (
-					"\"$(SRCROOT)/../../../build/bin/vxGraphics\"/**",
-					"\"$(SRCROOT)/../../../extern/vulkansdk/macos/macOS/lib\"/**",
-				);
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../../../build/bin/vxGraphics/\"/**";
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -433,7 +412,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				FRAMEWORK_SEARCH_PATHS = "\"$(SRCROOT)/../../../extern/vulkansdk/macos/MoltenVK/macOS/framework/\"/**";
+				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -451,10 +430,7 @@
 					"\"/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include\"",
 				);
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/";
-				LIBRARY_SEARCH_PATHS = (
-					"\"$(SRCROOT)/../../../build/bin/vxGraphics\"/**",
-					"\"$(SRCROOT)/../../../extern/vulkansdk/macos/macOS/lib\"/**",
-				);
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../../../build/bin/vxGraphics/\"/**";
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;

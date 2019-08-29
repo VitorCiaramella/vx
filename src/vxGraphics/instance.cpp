@@ -273,9 +273,10 @@ VkResult vxGetAvailablePhysicalDevices(const spt(VxGraphicsInstance) & spVxGraph
     return VK_SUCCESS;
 }
 
-VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo, spt(VxGraphicsInstance) & spVxGraphicsInstance)
+VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo, spt(VxApplicationInstance) & spVxApplicationInstance)
 {
-    spVxGraphicsInstance = nsp<VxGraphicsInstance>();
+    auto spVxGraphicsInstance = nsp<VxGraphicsInstance>(spVxApplicationInstance);
+    
     spVxGraphicsInstance->spCreateInfo = spCreateInfo;
     spVxGraphicsInstance->spVxGraphicsDebug = nsp<VxGraphicsDebug>(spVxGraphicsInstance);
 
@@ -289,7 +290,7 @@ VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo
 
     if (spVxGraphicsInstance->spCreateInfo->spMainWindowCreateInfo != nullptr)
     {
-        StoreAndAssertVkResultP(spVxGraphicsInstance->createMainGraphicsWindowResult, vxCreateGraphicsWindow, spVxGraphicsInstance->spCreateInfo->spMainWindowCreateInfo, spVxGraphicsInstance->spMainVxGraphicsWindow);
+        StoreAndAssertVkResultP(spVxGraphicsInstance->createMainGraphicsWindowResult, vxCreateGraphicsWindow, spVxGraphicsInstance->spCreateInfo->spMainWindowCreateInfo, spVxGraphicsInstance, spVxGraphicsInstance->spMainVxGraphicsWindow);
 
         StoreAndAssertVkResultP(spVxGraphicsInstance->spMainVxGraphicsWindow->createGraphicsSurfaceResult, vxCreateGraphicsSurface, spVxGraphicsInstance, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface);
 
@@ -308,5 +309,6 @@ VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo
     //upGraphicsInstance->acquireSemaphore = createSemaphore(upGraphicsInstance->vxDevices[0].vkDevice);
     //upGraphicsInstance->releaseSemaphore = createSemaphore(upGraphicsInstance->vxDevices[0].vkDevice);
 
+    spVxApplicationInstance->spVxGraphicsInstance = spVxGraphicsInstance;
     return VK_SUCCESS;
 }
