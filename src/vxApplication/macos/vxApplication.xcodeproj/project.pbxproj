@@ -7,9 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CD1F8574231F4F31005839D1 /* libMoltenVK.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = CD1F856E231F4F17005839D1 /* libMoltenVK.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		CD1F8575231F4F31005839D1 /* libvulkan.1.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = CD1F856F231F4F17005839D1 /* libvulkan.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		CD1F8585231F53D7005839D1 /* libVkLayer_thread_safety.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = CD1F857E231F53D6005839D1 /* libVkLayer_thread_safety.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		CD1F8586231F53D7005839D1 /* libVkLayer_unique_objects.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = CD1F857F231F53D6005839D1 /* libVkLayer_unique_objects.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		CD1F8587231F53D7005839D1 /* libVkLayer_core_validation.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = CD1F8580231F53D6005839D1 /* libVkLayer_core_validation.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		CD1F8588231F53D7005839D1 /* libVkLayer_object_lifetimes.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = CD1F8581231F53D6005839D1 /* libVkLayer_object_lifetimes.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		CD1F8589231F53D7005839D1 /* libVkLayer_stateless_validation.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = CD1F8582231F53D7005839D1 /* libVkLayer_stateless_validation.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		CD1F858A231F53D7005839D1 /* libVkLayer_khronos_validation.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = CD1F8583231F53D7005839D1 /* libVkLayer_khronos_validation.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		CD1F858B231F53D7005839D1 /* libVkLayer_api_dump.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = CD1F8584231F53D7005839D1 /* libVkLayer_api_dump.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		CD1F858F231F5E2E005839D1 /* vulkan in Resources */ = {isa = PBXBuildFile; fileRef = CD1F858E231F5E2E005839D1 /* vulkan */; };
+		CD1F8591231F64D8005839D1 /* libvulkan.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CD1F856F231F4F17005839D1 /* libvulkan.1.dylib */; };
 		CD2EA7DB2317085B00AEC1E9 /* shaders in Resources */ = {isa = PBXBuildFile; fileRef = CD2EA7DA2317085B00AEC1E9 /* shaders */; };
 		CD2EA7DF231785A300AEC1E9 /* libVxGraphics.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CDBE8A6C230A5D0D004A9DA1 /* libVxGraphics.dylib */; };
 		CD2EA7E0231785B000AEC1E9 /* libVxGraphics.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = CDBE8A6C230A5D0D004A9DA1 /* libVxGraphics.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		CD2EA7E3231E168100AEC1E9 /* objects in Resources */ = {isa = PBXBuildFile; fileRef = CD2EA7E2231E168100AEC1E9 /* objects */; };
 		CD76A42B2309326D00E6ACB0 /* MainViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CD76A4232309326D00E6ACB0 /* MainViewController.mm */; };
 		CD76A42C2309326D00E6ACB0 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = CD76A4252309326D00E6ACB0 /* AppDelegate.mm */; };
 		CD76A42F2309326D00E6ACB0 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = CD76A4292309326D00E6ACB0 /* main.mm */; };
@@ -27,7 +39,16 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				CD1F8575231F4F31005839D1 /* libvulkan.1.dylib in Embed Libraries */,
+				CD1F8574231F4F31005839D1 /* libMoltenVK.dylib in Embed Libraries */,
+				CD1F8586231F53D7005839D1 /* libVkLayer_unique_objects.dylib in Embed Libraries */,
+				CD1F8587231F53D7005839D1 /* libVkLayer_core_validation.dylib in Embed Libraries */,
+				CD1F858A231F53D7005839D1 /* libVkLayer_khronos_validation.dylib in Embed Libraries */,
+				CD1F858B231F53D7005839D1 /* libVkLayer_api_dump.dylib in Embed Libraries */,
+				CD1F8588231F53D7005839D1 /* libVkLayer_object_lifetimes.dylib in Embed Libraries */,
 				CD2EA7E0231785B000AEC1E9 /* libVxGraphics.dylib in Embed Libraries */,
+				CD1F8585231F53D7005839D1 /* libVkLayer_thread_safety.dylib in Embed Libraries */,
+				CD1F8589231F53D7005839D1 /* libVkLayer_stateless_validation.dylib in Embed Libraries */,
 			);
 			name = "Embed Libraries";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -44,7 +65,18 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CD1F856E231F4F17005839D1 /* libMoltenVK.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libMoltenVK.dylib; path = ../../../extern/vulkansdk/macos/macOS/lib/libMoltenVK.dylib; sourceTree = "<group>"; };
+		CD1F856F231F4F17005839D1 /* libvulkan.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.dylib; path = ../../../extern/vulkansdk/macos/macOS/lib/libvulkan.1.dylib; sourceTree = "<group>"; };
+		CD1F857E231F53D6005839D1 /* libVkLayer_thread_safety.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libVkLayer_thread_safety.dylib; path = ../../../extern/vulkansdk/macos/macOS/lib/libVkLayer_thread_safety.dylib; sourceTree = "<group>"; };
+		CD1F857F231F53D6005839D1 /* libVkLayer_unique_objects.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libVkLayer_unique_objects.dylib; path = ../../../extern/vulkansdk/macos/macOS/lib/libVkLayer_unique_objects.dylib; sourceTree = "<group>"; };
+		CD1F8580231F53D6005839D1 /* libVkLayer_core_validation.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libVkLayer_core_validation.dylib; path = ../../../extern/vulkansdk/macos/macOS/lib/libVkLayer_core_validation.dylib; sourceTree = "<group>"; };
+		CD1F8581231F53D6005839D1 /* libVkLayer_object_lifetimes.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libVkLayer_object_lifetimes.dylib; path = ../../../extern/vulkansdk/macos/macOS/lib/libVkLayer_object_lifetimes.dylib; sourceTree = "<group>"; };
+		CD1F8582231F53D7005839D1 /* libVkLayer_stateless_validation.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libVkLayer_stateless_validation.dylib; path = ../../../extern/vulkansdk/macos/macOS/lib/libVkLayer_stateless_validation.dylib; sourceTree = "<group>"; };
+		CD1F8583231F53D7005839D1 /* libVkLayer_khronos_validation.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libVkLayer_khronos_validation.dylib; path = ../../../extern/vulkansdk/macos/macOS/lib/libVkLayer_khronos_validation.dylib; sourceTree = "<group>"; };
+		CD1F8584231F53D7005839D1 /* libVkLayer_api_dump.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libVkLayer_api_dump.dylib; path = ../../../extern/vulkansdk/macos/macOS/lib/libVkLayer_api_dump.dylib; sourceTree = "<group>"; };
+		CD1F858E231F5E2E005839D1 /* vulkan */ = {isa = PBXFileReference; lastKnownFileType = folder; path = vulkan; sourceTree = "<group>"; };
 		CD2EA7DA2317085B00AEC1E9 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shaders; path = ../../../../build/bin/vxGraphics/shaders; sourceTree = "<group>"; };
+		CD2EA7E2231E168100AEC1E9 /* objects */ = {isa = PBXFileReference; lastKnownFileType = folder; name = objects; path = ../../../vxDemoApplication/resources/objects; sourceTree = "<group>"; };
 		CD76A4232309326D00E6ACB0 /* MainViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MainViewController.mm; sourceTree = "<group>"; };
 		CD76A4242309326D00E6ACB0 /* vxApplication.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = vxApplication.entitlements; sourceTree = "<group>"; };
 		CD76A4252309326D00E6ACB0 /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AppDelegate.mm; sourceTree = "<group>"; };
@@ -74,6 +106,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CD1F8591231F64D8005839D1 /* libvulkan.1.dylib in Frameworks */,
 				CD2EA7DF231785A300AEC1E9 /* libVxGraphics.dylib in Frameworks */,
 				CDBE8A6B230A4506004A9DA1 /* Metal.framework in Frameworks */,
 				CDBE8A67230A4252004A9DA1 /* Cocoa.framework in Frameworks */,
@@ -87,6 +120,8 @@
 		CDBE8A2B230A0BB0004A9DA1 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				CD1F858E231F5E2E005839D1 /* vulkan */,
+				CD2EA7E2231E168100AEC1E9 /* objects */,
 				CD2EA7DA2317085B00AEC1E9 /* shaders */,
 				CDBE8A2F230A0D8D004A9DA1 /* macos.xcassets */,
 				CDBE8A2E230A0D8D004A9DA1 /* Main.storyboard */,
@@ -97,6 +132,15 @@
 		CDBE8A39230A1019004A9DA1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CD1F8584231F53D7005839D1 /* libVkLayer_api_dump.dylib */,
+				CD1F8580231F53D6005839D1 /* libVkLayer_core_validation.dylib */,
+				CD1F8583231F53D7005839D1 /* libVkLayer_khronos_validation.dylib */,
+				CD1F8581231F53D6005839D1 /* libVkLayer_object_lifetimes.dylib */,
+				CD1F8582231F53D7005839D1 /* libVkLayer_stateless_validation.dylib */,
+				CD1F857E231F53D6005839D1 /* libVkLayer_thread_safety.dylib */,
+				CD1F857F231F53D6005839D1 /* libVkLayer_unique_objects.dylib */,
+				CD1F856E231F4F17005839D1 /* libMoltenVK.dylib */,
+				CD1F856F231F4F17005839D1 /* libvulkan.1.dylib */,
 				CDBE8A6C230A5D0D004A9DA1 /* libVxGraphics.dylib */,
 				CDBE8A6A230A4506004A9DA1 /* Metal.framework */,
 				CDBE8A66230A4252004A9DA1 /* Cocoa.framework */,
@@ -222,7 +266,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CD1F858F231F5E2E005839D1 /* vulkan in Resources */,
 				CD2EA7DB2317085B00AEC1E9 /* shaders in Resources */,
+				CD2EA7E3231E168100AEC1E9 /* objects in Resources */,
 				CDBE8A30230A0D8D004A9DA1 /* Main.storyboard in Resources */,
 				CDBE8A31230A0D8D004A9DA1 /* macos.xcassets in Resources */,
 			);
@@ -341,7 +387,10 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"\"$(SRCROOT)/../../../extern/vulkansdk/macos/MoltenVK/macOS/framework/\"",
+					"\"$(SRCROOT)/../../../extern/vulkansdk/macos/macOS/Frameworks/\"",
+				);
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -351,6 +400,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
+					_DEBUG,
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
@@ -365,7 +415,10 @@
 					"\"/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include\"",
 				);
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/";
-				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../../../build/bin/vxGraphics/\"/**";
+				LIBRARY_SEARCH_PATHS = (
+					"\"$(SRCROOT)/../../../build/bin/vxGraphics/\"/**",
+					"\"$(SRCROOT)/../../../extern/vulkansdk/macos/macOS/lib/\"",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -412,7 +465,10 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"\"$(SRCROOT)/../../../extern/vulkansdk/macos/MoltenVK/macOS/framework/\"",
+					"\"$(SRCROOT)/../../../extern/vulkansdk/macos/macOS/Frameworks/\"",
+				);
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -430,7 +486,10 @@
 					"\"/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include\"",
 				);
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/";
-				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../../../build/bin/vxGraphics/\"/**";
+				LIBRARY_SEARCH_PATHS = (
+					"\"$(SRCROOT)/../../../build/bin/vxGraphics/\"/**",
+					"\"$(SRCROOT)/../../../extern/vulkansdk/macos/macOS/lib/\"",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;

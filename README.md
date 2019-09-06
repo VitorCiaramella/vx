@@ -1,5 +1,11 @@
 # vx
 
+Cpp Core Guidelines
+https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#main
+
+Best Practices Criteria for Free/Libre and Open Source Software (FLOSS)
+https://github.com/coreinfrastructure/best-practices-badge/blob/master/doc/criteria.md
+
 Build steps:
 
 PRE-REQS

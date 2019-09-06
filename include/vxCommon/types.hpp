@@ -2,6 +2,7 @@
 #define VX_COMMON_TYPES
 
 #include <vector>
+#include <string>
 
 typedef enum class VxResult 
 {

@@ -29,8 +29,8 @@ typedef struct VxGraphicsInstanceCreateInfo
     std::string                             engineName;
     uint32_t                                engineVersion;
     uint32_t                                apiVersion;
-    vectorT(string)                          desiredLayersToEnable;
-    vectorT(string)                          desiredExtensionsToEnable;
+    vectorT(string)                         desiredLayersToEnable;
+    vectorT(string)                         desiredExtensionsToEnable;
 
     spt(VxGraphicsWindowCreateInfo)         spMainWindowCreateInfo;
     void*                                   rpMainWindowHandle;
@@ -58,7 +58,7 @@ typedef struct VxGraphicsLayer
     VkLayerProperties                       vkLayer;
 
     VkResult                                getAvailableExtensionsResult;
-    vectorT(VkExtensionProperties)           vkAvailableExtensions;
+    vectorT(VkExtensionProperties)          vkAvailableExtensions;
 
     ~VxGraphicsLayer();
     void destroy();

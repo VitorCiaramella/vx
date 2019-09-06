@@ -140,6 +140,20 @@ VkResult vxGetSurfaceCapabilities(const spt(VxGraphicsWindow) & spVxGraphicsWind
 
 VkExtent2D vxGetWindowSize(const spt(VxGraphicsWindow) & spVxGraphicsWindow)
 {
+    if (spVxGraphicsWindow->rpVxGetWindowSize != nullptr
+        && spVxGraphicsWindow->rpWindowHandle != nullptr)
+    {
+        uint32_t width = 0;
+        uint32_t height = 0;
+        if (spVxGraphicsWindow->rpVxGetWindowSize(spVxGraphicsWindow->rpWindowHandle, width, height))
+        {
+            VkExtent2D result;
+            result.width = width;
+            result.height = height;
+            return result;
+        }
+    }
+
     VkSurfaceCapabilitiesKHR vkSurfaceCapabilities;
     if (vxGetSurfaceCapabilities(spVxGraphicsWindow, vkSurfaceCapabilities) == VkResult::VK_SUCCESS)
     {
@@ -406,13 +420,14 @@ VkResult vxCreateSwapchain(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(VxGra
     auto windowSize = vxGetWindowSize(spVxGraphicsWindow);
     if (vkSurfaceCapabilities.currentExtent.width == 0xFFFFFFFF)
     {
-        createInfo.imageExtent.width = std::clamp(windowSize.width, vkSurfaceCapabilities.minImageExtent.width, vkSurfaceCapabilities.maxImageExtent.width);
-        createInfo.imageExtent.height = std::clamp(windowSize.height, vkSurfaceCapabilities.minImageExtent.height, vkSurfaceCapabilities.maxImageExtent.height);
+        spVxGraphicsSwapchain->swapchainSize.width = std::clamp(windowSize.width, vkSurfaceCapabilities.minImageExtent.width, vkSurfaceCapabilities.maxImageExtent.width);
+        spVxGraphicsSwapchain->swapchainSize.height = std::clamp(windowSize.height, vkSurfaceCapabilities.minImageExtent.height, vkSurfaceCapabilities.maxImageExtent.height);
     }
     else
     {
-        createInfo.imageExtent = vkSurfaceCapabilities.currentExtent;
+        spVxGraphicsSwapchain->swapchainSize = vkSurfaceCapabilities.currentExtent;
     }
+    createInfo.imageExtent = spVxGraphicsSwapchain->swapchainSize;
 
 	createInfo.imageArrayLayers = 1;
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;

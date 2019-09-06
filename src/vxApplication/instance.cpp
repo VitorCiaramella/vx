@@ -1,14 +1,21 @@
 #include <vxApplication/vxApplication.hpp>
 #include <vxGraphics/vxGraphics.hpp>
-
-//To be removed
-#include "../vxGraphics/macros.hpp"
+#include <vxGraphics/macros.hpp>
 
 #include <iostream>
 #include <vector>
 #include <string>
 
+#ifdef VK_USE_PLATFORM_MACOS_MVK
+#include <MoltenVK/vk_mvk_moltenvk.h>
+#endif
+
 using namespace std;
+
+spt(VxMemoryAllocator) spVxMemoryAllocator1;
+spt(VxMemoryBuffer) spVertexBuffer1;
+spt(VxMemoryBuffer) spIndexBuffer1;
+VxMesh mesh1;
 
 VkImageMemoryBarrier imageBarrier2(VkImage image, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
@@ -42,9 +49,9 @@ VxResult vxCreateApplicationInstance(spt(VxApplicationInstanceCreateInfo) spCrea
     spGraphicsInstanceCreateInfo->apiVersion = VK_API_VERSION_1_0;//VK_API_VERSION_1_1
 
     #ifdef _DEBUG
-    //spGraphicsInstanceCreateInfo->desiredLayersToEnable.push_back("VK_LAYER_KHRONOS_validation");
-    //spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    spGraphicsInstanceCreateInfo->desiredLayersToEnable.push_back("VK_LAYER_KHRONOS_validation");
     //spGraphicsInstanceCreateInfo->desiredLayersToEnable.push_back("VK_LAYER_LUNARG_standard_validation");
+    spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
     #endif
 
@@ -60,7 +67,8 @@ VxResult vxCreateApplicationInstance(spt(VxApplicationInstanceCreateInfo) spCrea
 
     spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
     #ifdef VK_USE_PLATFORM_MACOS_MVK
-    spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_MVK_MACOS_SURFACE_EXTENSION_NAME);  
+    spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_MVK_MOLTENVK_EXTENSION_NAME);
+    spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_EXT_METAL_SURFACE_EXTENSION_NAME);  
     #endif
     #ifdef VK_USE_PLATFORM_WIN32_KHR
     spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
@@ -76,6 +84,23 @@ VxResult vxCreateApplicationInstance(spt(VxApplicationInstanceCreateInfo) spCrea
     
     //To Deprecate
     //AssertVkVxResult(vxGraphicsRun, spVxGraphicsInstance);    
+
+    auto mesh = vxLoadMesh(spCreateInfo->resourcePath + "/objects/pirate.obj");
+
+    spt(VxMemoryAllocator) spVxMemoryAllocator;
+    AssertVkVxResult(vxCreateMemoryAllocator, spVxApplicationInstance->spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice, spVxMemoryAllocator);
+    spt(VxMemoryBuffer) spVertexBuffer;
+    AssertVkVxResult(vxCreateVertexBuffer, spVxMemoryAllocator, 128 * 1024 * 1024, spVertexBuffer);
+    spt(VxMemoryBuffer) spIndexBuffer;
+    AssertVkVxResult(vxCreateIndexBuffer, spVxMemoryAllocator, 128 * 1024 * 1024, spIndexBuffer);
+
+	memcpy(spVertexBuffer->data, mesh.vertices.data(), mesh.vertices.size() * sizeof(VxVertex));
+	memcpy(spIndexBuffer->data, mesh.indices.data(), mesh.indices.size() * sizeof(uint32_t));
+
+    spVertexBuffer1 = spVertexBuffer;
+    spIndexBuffer1 = spIndexBuffer;
+    mesh1 = mesh;
+    spVxMemoryAllocator1 = spVxMemoryAllocator;
 
     return VxResult::VX_SUCCESS;
 }
@@ -110,15 +135,26 @@ VxWindowLoopResult VxApplicationInstance::draw()
         return VxWindowLoopResult::VX_WL_STOP;
     }
     GetAndAssertSharedPointer2(spVxGraphicsInstance, spVxGraphicsWindow->spVxGraphicsSurface->wpVxGraphicsInstance, VxWindowLoopResult::VX_WL_STOP);
+
+    auto windowSize = vxGetWindowSize(spVxGraphicsWindow);
+    //recreate the swapchain if needed
+    // if (windowSize.width != spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->swapchainSize.width
+    //     || windowSize.height != spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->swapchainSize.height)
+    // {
+    //     spVxGraphicsInstance->spMainVxGraphicsPipeline = nullptr;
+    //     spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain = nullptr;
+    //     spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->createSwapchainResult = vxCreateSwapchain(spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain);
+    //     spVxGraphicsInstance->createMainGraphicsPipelineResult = vxCreatePipeline(spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface, spVxGraphicsInstance->spCreateInfo->spVxGraphicsPipelineCreateInfo, spVxGraphicsInstance->spMainVxGraphicsPipeline);
+    // }
+
+    auto swapchain = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkSwapchain;
     auto commandBuffer = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->spVxQueueFamilies[0]->vkCommandBuffer;
     auto device = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->vkDevice;
-    auto swapchain = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkSwapchain;
     auto swapchainFramebuffers = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkFramebuffers;
     auto swapchainImages = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkImages;    
     auto commandPool = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->spVxQueueFamilies[0]->vkCommandPool; 
     auto queue = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->spVxQueues[0]->vkQueue;
     auto renderPass = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkRenderPass;
-    auto windowSize = vxGetWindowSize(spVxGraphicsWindow);
     auto acquireSemaphore = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkAcquireSemaphore;
     auto releaseSemaphore = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkReleaseSemaphore;
     auto trianglePipeline = spVxGraphicsInstance->spMainVxGraphicsPipeline->vkPipeline;
@@ -159,8 +195,20 @@ VxWindowLoopResult VxApplicationInstance::draw()
     range.levelCount = 1;
     range.layerCount = 1;
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, trianglePipeline);
-    vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+    //vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spVxGraphicsInstance->spMainVxGraphicsPipeline->vkPipelineLayout, 0, 1,
+    //                    &demo->swapchain_image_resources[demo->current_buffer].descriptor_set, 0, NULL);
 
+    //vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+    /*
+    Start
+    */
+    VkDeviceSize dummyOffset = 0;
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, &spVertexBuffer1->vkBuffer, &dummyOffset);
+    vkCmdBindIndexBuffer(commandBuffer, spIndexBuffer1->vkBuffer, 0, VK_INDEX_TYPE_UINT32);
+    vkCmdDrawIndexed(commandBuffer, mesh1.indices.size(), 1, 0, 0, 0);
+    /*
+    End
+    */
     vkCmdEndRenderPass(commandBuffer);
 
     VkImageMemoryBarrier renderEndBarrier = imageBarrier2(swapchainImages[imageIndex], VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);

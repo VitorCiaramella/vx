@@ -24,11 +24,23 @@
 	[super dealloc];
 }
 
+bool vxGetWindowSize(void* rpWindowHandle, uint32_t & width, uint32_t & height)
+{
+    if (rpWindowHandle==nullptr) return false;
+    
+    auto layer = (CALayer*)(rpWindowHandle);    
+    width = layer.frame.size.width * layer.contentsScale;
+    height = layer.frame.size.height * layer.contentsScale;
+    return true;
+}
+
 -(void) viewDidLoad {
 	[super viewDidLoad];
 
 	self.view.wantsLayer = YES;// Back the view with a layer created by the makeBackingLayer method.
 
+    
+    
     auto userHomeDirectory = NSHomeDirectory();
     auto debugFilePath = [NSString stringWithFormat:@"%@/.vxApplication/Debug.txt", userHomeDirectory];
     vxInitDebugInstance(std::string([debugFilePath UTF8String]));
@@ -43,6 +55,8 @@
     //TODO add assert
     if (vxResult==VxResult::VX_SUCCESS)
     {
+        spVxApplicationInstance->spVxGraphicsInstance->spMainVxGraphicsWindow->rpVxGetWindowSize = vxGetWindowSize;
+        
         CVDisplayLinkCreateWithActiveCGDisplays(&_displayLink);
         CVDisplayLinkSetOutputCallback(_displayLink, &DisplayLinkCallback, NULL);
         CVDisplayLinkSetOutputCallback(_displayLink, &DisplayLinkCallback, spVxApplicationInstance.get());

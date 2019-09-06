@@ -760,6 +760,7 @@ void createLinkerProcessRequest(const std::shared_ptr<ProcessManager> & processM
     if (library)
     {
         outputFilename = "lib" + outputFilename + ".dylib";
+        commonArgs.push_back("-install_name @rpath/"+outputFilename); 
     }
     auto stdOutFilePath = fs::absolute(fs::path(outputFilename + ".build.log"), binOutputRootPath);
     auto outputFilePath = fs::absolute(fs::path(outputFilename), binOutputRootPath);
@@ -811,11 +812,13 @@ int main(int argc, char *argv[])
     cppCompileTask.sourcePaths.push_back("./src/vxGraphics/**.cpp");
     cppCompileTask.sourcePaths.push_back("./src/vxApplication/**.cpp");
     cppCompileTask.sourcePaths.push_back("./src/vxCommon/**.cpp");
+    cppCompileTask.sourcePaths.push_back("./extern/meshoptimizer/src/**.cpp");
     //cppCompileTask.inputExtensions.push_back(".cpp");
     cppCompileTask.includePaths.push_back("./include/");
     cppCompileTask.includePaths.push_back("./build/bin/boost/include/");
     //cppCompileTask.includePaths.push_back("./extern/vulkansdk/macos/macOS/include/");
     cppCompileTask.includePaths.push_back("./extern/vulkansdk/macos/MoltenVK/include/");
+    cppCompileTask.options.push_back("-DDEBUG=1");
     cppCompileTask.options.push_back("-D_DEBUG");
     cppCompileTask.options.push_back("-DVK_USE_PLATFORM_MACOS_MVK");
     cppCompileTask.options.push_back("-DVK_USE_PLATFORM_METAL_EXT");
@@ -830,11 +833,11 @@ int main(int argc, char *argv[])
     cppCompileTask.frameworks.push_back("IOKit");//UIKit for iOS
     cppCompileTask.frameworks.push_back("CoreVideo");
     cppCompileTask.frameworks.push_back("Metal");
-    //cppCompileTask.libraryPaths.push_back("./extern/vulkansdk/macos/macOS/lib");
+    cppCompileTask.libraryPaths.push_back("./extern/vulkansdk/macos/macOS/lib");
     //cppCompileTask.libraries.push_back("vulkan");
+    cppCompileTask.libraries.push_back("MoltenVK");
     //cppCompileTask.libraryPaths.push_back("./extern/vulkansdk/macos/MoltenVK/macOS/dynamic/");
-    //cppCompileTask.libraries.push_back("MoltenVK");
-    cppCompileTask.staticLibraries.push_back("./extern/vulkansdk/macos/MoltenVK/macOS/static/libMoltenVK.a");
+    //cppCompileTask.staticLibraries.push_back("./extern/vulkansdk/macos/MoltenVK/macOS/static/libMoltenVK.a");
     cppCompileTask.staticLibraries.push_back("./build/bin/boost/lib/libboost_filesystem-mt-d-x64.a");
 
     auto processManager = std::make_shared<ProcessManager>();

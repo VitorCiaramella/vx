@@ -10,5 +10,7 @@
 #include "synchronization.hpp"
 #include "device.hpp"
 #include "pipeline.hpp"
+#include "mesh.hpp"
+#include "memory.hpp"
 
 #endif

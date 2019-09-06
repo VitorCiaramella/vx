@@ -8,11 +8,14 @@ VkResult vxCreateSurface_PlatformSpecific(const spt(VxGraphicsSurface) & spVxGra
     GetAndAssertSharedPointerVk(spVxGraphicsWindow, spVxGraphicsSurface->wpVxGraphicsWindow);
     AssertNotNullVkResult(spVxGraphicsWindow->rpWindowHandle);
 
-    VkMacOSSurfaceCreateInfoMVK surfaceCreateInfo = { VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK };
+    VkMetalSurfaceCreateInfoEXT surfaceCreateInfo = { VK_STRUCTURE_TYPE_METAL_SURFACE_CREATE_INFO_EXT };
     surfaceCreateInfo.pNext = nullptr;
     surfaceCreateInfo.flags = 0;
-    surfaceCreateInfo.pView = spVxGraphicsWindow->rpWindowHandle;
-    StoreAndAssertVkResultP(spVxGraphicsSurface->createSurfaceResult, vkCreateMacOSSurfaceMVK, spVxGraphicsInstance->vkInstance, &surfaceCreateInfo, nullptr, &spVxGraphicsSurface->vkSurface);
+    surfaceCreateInfo.pLayer = spVxGraphicsWindow->rpWindowHandle;
+
+    PFN_vkCreateMetalSurfaceEXT vkCreateMetalSurfaceEXT = (PFN_vkCreateMetalSurfaceEXT)vkGetInstanceProcAddr(spVxGraphicsInstance->vkInstance, "vkCreateMetalSurfaceEXT");
+    AssertNotNullVkResult(vkCreateMetalSurfaceEXT);
+    StoreAndAssertVkResultP(spVxGraphicsSurface->createSurfaceResult, vkCreateMetalSurfaceEXT, spVxGraphicsInstance->vkInstance, &surfaceCreateInfo, nullptr, &spVxGraphicsSurface->vkSurface);
 
     return VK_SUCCESS;
 }

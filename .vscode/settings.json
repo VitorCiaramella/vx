@@ -102,7 +102,8 @@
         "span": "cpp",
         "bit": "cpp",
         "*.inc": "cpp",
-        "*.ii": "cpp"
+        "*.ii": "cpp",
+        "simd": "cpp"
     },
     "C_Cpp.configurationWarnings": "Disabled",
     "C_Cpp.workspaceParsingPriority": "low",

@@ -125,6 +125,7 @@ VkResult vxGetAvailableLayers(vectorS(VxGraphicsLayer) & spVxAvailableLayers)
 
         for (auto && vxLayer : spVxAvailableLayers) 
         {
+            printf("%s\n",vxLayer->vkLayer.layerName);
             StoreAndAssertVkResultP(vxLayer->getAvailableExtensionsResult, vxGetAvailableExtensions, vxLayer->vkLayer.layerName, vxLayer->vkAvailableExtensions);
         }
     }
@@ -275,6 +276,8 @@ VkResult vxGetAvailablePhysicalDevices(const spt(VxGraphicsInstance) & spVxGraph
 
 VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo, spt(VxApplicationInstance) & spVxApplicationInstance)
 {
+    AssertNotNullVkResult(spCreateInfo);
+
     auto spVxGraphicsInstance = nsp<VxGraphicsInstance>(spVxApplicationInstance);
     
     spVxGraphicsInstance->spCreateInfo = spCreateInfo;
@@ -298,10 +301,7 @@ VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo
 
         StoreAndAssertVkResultP(spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->createSwapchainResult, vxCreateSwapchain, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain);
 
-        if (spVxGraphicsInstance->spCreateInfo != nullptr)
-        {
-            StoreAndAssertVkResultP(spVxGraphicsInstance->createMainGraphicsPipelineResult, vxCreatePipeline, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface, spVxGraphicsInstance->spCreateInfo->spVxGraphicsPipelineCreateInfo, spVxGraphicsInstance->spMainVxGraphicsPipeline);
-        }
+        StoreAndAssertVkResultP(spVxGraphicsInstance->createMainGraphicsPipelineResult, vxCreatePipeline, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface, spVxGraphicsInstance->spCreateInfo->spVxGraphicsPipelineCreateInfo, spVxGraphicsInstance->spMainVxGraphicsPipeline);
     }
     
     //TODO: parametrize
@@ -310,5 +310,6 @@ VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo
     //upGraphicsInstance->releaseSemaphore = createSemaphore(upGraphicsInstance->vxDevices[0].vkDevice);
 
     spVxApplicationInstance->spVxGraphicsInstance = spVxGraphicsInstance;
+
     return VK_SUCCESS;
 }

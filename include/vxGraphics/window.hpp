@@ -13,8 +13,11 @@ struct VxGraphicsWindow;
 struct VxGraphicsSurfacePhysicalDevice;
 struct VxGraphicsSurface;
 struct VxGraphicsSwapchain;
+struct VxGraphicsInstance;
+struct VxGraphicsQueueFamily;
 
 typedef VxWindowLoopResult (*PFN_vxWindowLoop)(const spt(VxGraphicsWindow) & spVxGraphicsWindow);
+typedef bool (*PFN_vxGetWindowSize)(void* rpWindowHandle, uint32_t & width, uint32_t & height);
 
 typedef struct VxGraphicsWindowCreateInfo
 {
@@ -66,6 +69,7 @@ typedef struct VxGraphicsWindow
 {
     void*                                   rpWindowHandle;
     PFN_vxWindowLoop                        rpVxWindowLoopFunction;
+    PFN_vxGetWindowSize                     rpVxGetWindowSize;
     wpt(VxGraphicsInstance)                 wpVxGraphicsInstance;
 
     VkResult                                createGraphicsSurfaceResult;
@@ -77,6 +81,7 @@ typedef struct VxGraphicsWindow
     {
         rpVxWindowLoopFunction = windowLoopFunction;
         rpWindowHandle = nullptr;
+        rpVxGetWindowSize = nullptr;
         wpVxGraphicsInstance = spVxGraphicsInstance;
         createGraphicsSurfaceResult = VK_RESULT_MAX_ENUM;
         spVxGraphicsSurface = nullptr;
@@ -149,6 +154,8 @@ typedef struct VxGraphicsSwapchain
     wpt(VxGraphicsSurface)                  wpVxSurface;
     wpt(VxGraphicsDevice)                   wpVxDevice;
     VkSurfaceFormatKHR                      vkFormat;
+
+    VkExtent2D                              swapchainSize;
 
     VkResult                                createSwapchainResult;
     VkSwapchainKHR                          vkSwapchain;
