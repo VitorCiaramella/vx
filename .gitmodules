@@ -28,3 +28,9 @@
 [submodule "extern/boost"]
 	path = extern/boost
 	url = https://github.com/boostorg/boost.git
+[submodule "extern/awesome-vulkan"]
+	path = extern/awesome-vulkan
+	url = https://github.com/vinjn/awesome-vulkan
+[submodule "extern/VulkanMemoryAllocator"]
+	path = extern/VulkanMemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
