@@ -96,13 +96,12 @@ typedef struct VxGraphicsSurfacePhysicalDevice
     vectorW(VxGraphicsQueueFamily)          wpVxSupportedQueueFamilies;
 
     VkResult                                vkGetPhysicalDeviceSurfaceFormatsKHRResult;
-    vectorT(VkSurfaceFormatKHR)              vkSurfaceFormats;
-
-    VkResult                                vkGetPhysicalDeviceSurfaceCapabilitiesKHRResult;
-    VkSurfaceCapabilitiesKHR                vkSurfaceCapabilities;
+    vectorT(VkSurfaceFormatKHR)             vkSurfaceFormats;
 
     VkResult                                vkGetPhysicalDeviceSurfacePresentModesKHRResult;
-    vectorT(VkPresentModeKHR)                vkPresentModes;
+    vectorT(VkPresentModeKHR)               vkPresentModes;
+
+    VkResult getSurfaceCapabilities(VkSurfaceCapabilitiesKHR * rpVkSurfaceCapabilities);
 
     ~VxGraphicsSurfacePhysicalDevice();
     void destroy();
@@ -111,7 +110,6 @@ typedef struct VxGraphicsSurfacePhysicalDevice
         wpVxSupportedQueueFamilies.reserve(32);
         vkGetPhysicalDeviceSurfaceFormatsKHRResult = VK_RESULT_MAX_ENUM;
         vkSurfaceFormats.reserve(32);
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHRResult = VK_RESULT_MAX_ENUM;
         vkGetPhysicalDeviceSurfacePresentModesKHRResult = VK_RESULT_MAX_ENUM;
         vkPresentModes.reserve(32);
     }

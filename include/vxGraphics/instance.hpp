@@ -34,6 +34,8 @@ typedef struct VxGraphicsInstanceCreateInfo
 
     spt(VxGraphicsWindowCreateInfo)         spMainWindowCreateInfo;
     void*                                   rpMainWindowHandle;
+    vectorT(std::string)                    shadersFilePaths;
+
     spt(VxGraphicsPipelineCreateInfo)       spVxGraphicsPipelineCreateInfo;
     
     ~VxGraphicsInstanceCreateInfo();
@@ -49,6 +51,7 @@ typedef struct VxGraphicsInstanceCreateInfo
         desiredExtensionsToEnable.reserve(32);
         spMainWindowCreateInfo = nsp<VxGraphicsWindowCreateInfo>();
         rpMainWindowHandle = nullptr;
+        shadersFilePaths.reserve(32);
         spVxGraphicsPipelineCreateInfo = nsp<VxGraphicsPipelineCreateInfo>();
     }
 } VxGraphicsInstanceCreateInfo;
@@ -138,6 +141,9 @@ typedef struct VxGraphicsInstance
     VkResult                                createMainGraphicsWindowResult;
     spt(VxGraphicsWindow)                   spMainVxGraphicsWindow;
 
+    VkResult                                loadShaderdResult;
+    vectorS(VxGraphicsShader)               spVxGraphicsShaders;
+
     VkResult                                createMainGraphicsPipelineResult;
     spt(VxGraphicsPipeline)                 spMainVxGraphicsPipeline;
 
@@ -174,6 +180,9 @@ typedef struct VxGraphicsInstance
 
         createMainGraphicsWindowResult = VK_RESULT_MAX_ENUM;
         spMainVxGraphicsWindow = nullptr;
+
+        loadShaderdResult = VK_RESULT_MAX_ENUM;
+        spVxGraphicsShaders.reserve(32);
 
         createMainGraphicsPipelineResult = VK_RESULT_MAX_ENUM;
         spMainVxGraphicsPipeline = nullptr;

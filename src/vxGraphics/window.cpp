@@ -17,6 +17,13 @@ VxGraphicsSurfacePhysicalDevice::~VxGraphicsSurfacePhysicalDevice()
     destroy();
 }
 
+VkResult VxGraphicsSurfacePhysicalDevice::getSurfaceCapabilities(VkSurfaceCapabilitiesKHR * rpVkSurfaceCapabilities)
+{
+    GetAndAssertSharedPointerVk(spVxGraphicsSurface, wpVxSurface);
+    GetAndAssertSharedPointerVk(spVxPhysicalDevice, wpVxPhysicalDevice);
+    return vkGetPhysicalDeviceSurfaceCapabilitiesKHR(spVxPhysicalDevice->vkPhysicalDevice, spVxGraphicsSurface->vkSurface, rpVkSurfaceCapabilities);
+}
+
 void VxGraphicsSurface::destroy()
 {
     vxLogInfo2("Destroy call", "Memory");
@@ -123,7 +130,7 @@ VkResult vxCreateGraphicsWindow(spt(VxGraphicsWindowCreateInfo) spVxGraphicsWind
     return VkResult::VK_SUCCESS;
 }
 
-VkResult vxGetSurfaceCapabilities(const spt(VxGraphicsWindow) & spVxGraphicsWindow, VkSurfaceCapabilitiesKHR & vkSurfaceCapabilities)
+VkResult vxGetSurfaceCapabilities(const spt(VxGraphicsWindow) & spVxGraphicsWindow, VkSurfaceCapabilitiesKHR * rpVkSurfaceCapabilities)
 {
     auto spVxGraphicsSurface = spVxGraphicsWindow->spVxGraphicsSurface;
     AssertNotNullVkResult(spVxGraphicsSurface);
@@ -134,7 +141,7 @@ VkResult vxGetSurfaceCapabilities(const spt(VxGraphicsWindow) & spVxGraphicsWind
     AssertNotNullVkResult(spVxSurfaceDevice->vkDevice);
 
     GetAndAssertSharedPointerVk(spVxSurfacePhysicalDevice, spVxGraphicsSurface->wpVxSurfacePhysicalDevice);
-    vkSurfaceCapabilities = spVxSurfacePhysicalDevice->vkSurfaceCapabilities;
+    AssertVkResult(spVxSurfacePhysicalDevice->getSurfaceCapabilities, rpVkSurfaceCapabilities);
     return VkResult::VK_SUCCESS;
 }
 
@@ -155,7 +162,7 @@ VkExtent2D vxGetWindowSize(const spt(VxGraphicsWindow) & spVxGraphicsWindow)
     }
 
     VkSurfaceCapabilitiesKHR vkSurfaceCapabilities;
-    if (vxGetSurfaceCapabilities(spVxGraphicsWindow, vkSurfaceCapabilities) == VkResult::VK_SUCCESS)
+    if (vxGetSurfaceCapabilities(spVxGraphicsWindow, &vkSurfaceCapabilities) == VkResult::VK_SUCCESS)
     {
         return vkSurfaceCapabilities.currentExtent;
     }                    
@@ -270,8 +277,6 @@ VkResult vxCreateGraphicsSurface(const spt(VxGraphicsInstance) & spVxGraphicsIns
                 spVxSupportedPhysicalDevice->vkSurfaceFormats = std::vector<VkSurfaceFormatKHR>(formatCount);
                 StoreAndAssertVkResultP(spVxSupportedPhysicalDevice->vkGetPhysicalDeviceSurfaceFormatsKHRResult, vkGetPhysicalDeviceSurfaceFormatsKHR, vxPhysicalDevice->vkPhysicalDevice, spVxGraphicsSurface->vkSurface, &formatCount, spVxSupportedPhysicalDevice->vkSurfaceFormats.data());
             }
-
-            StoreAndAssertVkResultP(spVxSupportedPhysicalDevice->vkGetPhysicalDeviceSurfaceCapabilitiesKHRResult, vkGetPhysicalDeviceSurfaceCapabilitiesKHR, vxPhysicalDevice->vkPhysicalDevice, spVxGraphicsSurface->vkSurface, &spVxSupportedPhysicalDevice->vkSurfaceCapabilities);
 
             uint32_t presentModeCount;
             StoreAndAssertVkResultP(spVxSupportedPhysicalDevice->vkGetPhysicalDeviceSurfacePresentModesKHRResult, vkGetPhysicalDeviceSurfacePresentModesKHR, vxPhysicalDevice->vkPhysicalDevice, spVxGraphicsSurface->vkSurface, &presentModeCount, nullptr);
@@ -391,7 +396,9 @@ VkResult vxCreateSurfaceDevice(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(V
 }
 
 VkResult vxCreateSwapchain(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(VxGraphicsSwapchain) & spVxGraphicsSwapchain)
-{    
+{   
+    auto oldSwapchain = spVxGraphicsSwapchain;
+
     AssertNotNullVkResult(spVxGraphicsSurface);
     AssertNotNullVkResult(spVxGraphicsSurface->vkSurface);
 
@@ -400,7 +407,9 @@ VkResult vxCreateSwapchain(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(VxGra
     AssertNotNullVkResult(spVxSurfaceDevice->vkDevice);
 
     GetAndAssertSharedPointerVk(spVxSurfacePhysicalDevice, spVxGraphicsSurface->wpVxSurfacePhysicalDevice);
-    auto vkSurfaceCapabilities = spVxSurfacePhysicalDevice->vkSurfaceCapabilities;
+    VkSurfaceCapabilitiesKHR vkSurfaceCapabilities;
+    AssertVkResult(spVxSurfacePhysicalDevice->getSurfaceCapabilities, &vkSurfaceCapabilities);
+    
     GetAndAssertSharedPointerVk(spVxGraphicsWindow, spVxGraphicsSurface->wpVxGraphicsWindow);
 
     spVxGraphicsSwapchain = nsp<VxGraphicsSwapchain>(spVxGraphicsSurface, spVxSurfaceDevice);
@@ -438,8 +447,10 @@ VkResult vxCreateSwapchain(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(VxGra
 
 	createInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
 
-    auto oldSwapchain = spVxGraphicsSwapchain->vkSwapchain;
-    createInfo.oldSwapchain = oldSwapchain;
+    if (oldSwapchain != nullptr)
+    {
+        createInfo.oldSwapchain = oldSwapchain->vkSwapchain;
+    }
 
 	createInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
     //if not supported, use current transformation
@@ -466,10 +477,10 @@ VkResult vxCreateSwapchain(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(VxGra
     //TODO: parametrize the device
     StoreAndAssertVkResultP(spVxGraphicsSwapchain->createSwapchainResult, vkCreateSwapchainKHR, spVxSurfaceDevice->vkDevice, &createInfo, nullptr, &spVxGraphicsSwapchain->vkSwapchain);
 
-    if (oldSwapchain != VK_NULL_HANDLE)
+    if (oldSwapchain != nullptr)
     {
-        //TODO: parametrize the device
-        vkDestroySwapchainKHR(spVxSurfaceDevice->vkDevice, oldSwapchain, nullptr);
+        oldSwapchain->destroy();
+        oldSwapchain = nullptr;
     }
 
 	VkAttachmentDescription attachments[1] = {};

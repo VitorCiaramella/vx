@@ -1,5 +1,10 @@
 #include "commonHeaders.hpp"
 
+#if _DEBUG
+#include <boost/filesystem.hpp>
+#endif 
+
+
 void VxGraphicsInstanceCreateInfo::destroy()
 {    
     vxLogInfo2("Destroy call", "Memory");
@@ -60,6 +65,7 @@ void VxGraphicsInstance::destroy()
         spMainVxGraphicsPipeline->destroy();
         spMainVxGraphicsPipeline = nullptr;
     }
+    spVxGraphicsShaders.clear();
     if (spMainVxGraphicsWindow != nullptr)
     {
         spMainVxGraphicsWindow->destroy();
@@ -274,6 +280,60 @@ VkResult vxGetAvailablePhysicalDevices(const spt(VxGraphicsInstance) & spVxGraph
     return VK_SUCCESS;
 }
 
+VkResult vxLoadShader(VkDevice device, std::string filePath, VkShaderModule * shaderModule)
+{
+	FILE* file = fopen(filePath.c_str(), "rb");
+
+	#if _DEBUG
+	if (file == nullptr)
+	{
+		char text[4096];
+        snprintf(text, arraySize(text), "File not found: %s\n", boost::filesystem::absolute(boost::filesystem::path(filePath)).c_str());
+		vxLogError2(text,"Shader");		
+	}
+	#endif
+
+	AssertNotNullVkResult(file);
+
+	fseek(file, 0, SEEK_END);
+	long length = ftell(file);
+	AssertTrueVkResult(length >= 0);
+	fseek(file, 0, SEEK_SET);
+
+	char* buffer = new char[length];
+	AssertNotNullVkResult(buffer);
+
+	size_t rc = fread(buffer, 1, length, file);
+	AssertTrueVkResult(rc == size_t(length));
+	fclose(file);
+
+	VkShaderModuleCreateInfo createInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
+	createInfo.codeSize = length;
+	createInfo.pCode = reinterpret_cast<const uint32_t*>(buffer);
+	
+	auto vkResult = vkCreateShaderModule(device, &createInfo, 0, shaderModule);
+
+	delete[] buffer;
+
+	AssertTrueVkResult(vkResult == VK_SUCCESS);
+
+	return vkResult;
+}
+
+VkResult vxLoadShaders(const spt(VxGraphicsDevice) & spVxGraphicsDevice,  const vectorT(string) & shadersFilePaths, vectorS(VxGraphicsShader) & spVxGraphicsShaders)
+{
+    spVxGraphicsShaders.resize(shadersFilePaths.size());
+    uint32_t index = 0;
+    for (auto && shadersFilePath : shadersFilePaths) 
+    {        
+        auto spVxGraphicsShader = nsp<VxGraphicsShader>(spVxGraphicsDevice);
+        spVxGraphicsShaders[index++] = spVxGraphicsShader;
+        spVxGraphicsShader->filePath = shadersFilePath;
+        StoreAndAssertVkResultP(spVxGraphicsShader->vxLoadShaderResult, vxLoadShader, spVxGraphicsDevice->vkDevice, shadersFilePath, &spVxGraphicsShader->vkShaderModule);
+    }
+    return VK_SUCCESS;
+}
+
 VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo, spt(VxApplicationInstance) & spVxApplicationInstance)
 {
     AssertNotNullVkResult(spCreateInfo);
@@ -300,6 +360,8 @@ VkResult vxCreateGraphicsInstance(spt(VxGraphicsInstanceCreateInfo) spCreateInfo
         StoreAndAssertVkResultP(spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->createSurfaceResult, vxCreateSurfaceDevice, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice);
 
         StoreAndAssertVkResultP(spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->createSwapchainResult, vxCreateSwapchain, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain);
+
+        StoreAndAssertVkResultP(spVxGraphicsInstance->loadShaderdResult, vxLoadShaders, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice, spCreateInfo->shadersFilePaths, spVxGraphicsInstance->spVxGraphicsShaders);
 
         StoreAndAssertVkResultP(spVxGraphicsInstance->createMainGraphicsPipelineResult, vxCreatePipeline, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface, spVxGraphicsInstance->spCreateInfo->spVxGraphicsPipelineCreateInfo, spVxGraphicsInstance->spMainVxGraphicsPipeline);
     }

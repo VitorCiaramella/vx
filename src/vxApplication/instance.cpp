@@ -74,6 +74,9 @@ VxResult vxCreateApplicationInstance(spt(VxApplicationInstanceCreateInfo) spCrea
     spGraphicsInstanceCreateInfo->desiredExtensionsToEnable.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
     #endif
 
+	spGraphicsInstanceCreateInfo->shadersFilePaths.push_back(spCreateInfo->resourcePath + "/shaders/triangle.vert.spv");
+	spGraphicsInstanceCreateInfo->shadersFilePaths.push_back(spCreateInfo->resourcePath + "/shaders/triangle.frag.spv");
+
 	spGraphicsInstanceCreateInfo->spVxGraphicsPipelineCreateInfo->shadersFilePaths.push_back(spCreateInfo->resourcePath + "/shaders/triangle.vert.spv");
 	spGraphicsInstanceCreateInfo->spVxGraphicsPipelineCreateInfo->shadersFilePaths.push_back(spCreateInfo->resourcePath + "/shaders/triangle.frag.spv");
 
@@ -126,6 +129,48 @@ void VxApplicationInstance::destroy()
     }
 }
 
+VkResult vxAcquireNextImageKHR(spt(VxGraphicsWindow) spVxGraphicsWindow, uint32_t *rpImageIndex)
+{
+    GetAndAssertSharedPointerVk(spVxGraphicsInstance, spVxGraphicsWindow->spVxGraphicsSurface->wpVxGraphicsInstance);
+    auto device = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->vkDevice;
+
+    VkResult vkResult;
+    while(true) 
+    {
+        auto swapchain = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkSwapchain;
+        auto acquireSemaphore = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkAcquireSemaphore;
+        // Get the index of the next available swapchain image:
+        vkResult = vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, acquireSemaphore, VK_NULL_HANDLE, rpImageIndex);
+
+        if (vkResult == VK_SUCCESS) 
+        {
+            return VK_SUCCESS;
+        } 
+        else if (vkResult == VK_ERROR_OUT_OF_DATE_KHR) 
+        {
+            // demo->swapchain is out of date (e.g. the window was resized) and
+            // must be recreated:
+            spVxGraphicsInstance->spMainVxGraphicsPipeline->destroy();
+            spVxGraphicsInstance->spMainVxGraphicsPipeline = nullptr;
+            spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->createSwapchainResult = vxCreateSwapchain(spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain);
+            spVxGraphicsInstance->createMainGraphicsPipelineResult = vxCreatePipeline(spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface, spVxGraphicsInstance->spCreateInfo->spVxGraphicsPipelineCreateInfo, spVxGraphicsInstance->spMainVxGraphicsPipeline);
+            //demo_resize(demo);
+            continue;
+        } 
+        else if (vkResult == VK_SUBOPTIMAL_KHR) 
+        {
+            // demo->swapchain is not as optimal as it could be, but the platform's
+            // presentation engine will still present the image correctly.
+            return VK_SUCCESS;
+        } 
+        else 
+        {
+            return vkResult;
+        }
+    } 
+    return VK_SUCCESS;
+}
+
 VxWindowLoopResult VxApplicationInstance::draw()
 {
     auto spVxGraphicsWindow = this->spVxGraphicsInstance->spMainVxGraphicsWindow;
@@ -136,31 +181,23 @@ VxWindowLoopResult VxApplicationInstance::draw()
     }
     GetAndAssertSharedPointer2(spVxGraphicsInstance, spVxGraphicsWindow->spVxGraphicsSurface->wpVxGraphicsInstance, VxWindowLoopResult::VX_WL_STOP);
 
-    auto windowSize = vxGetWindowSize(spVxGraphicsWindow);
-    //recreate the swapchain if needed
-    // if (windowSize.width != spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->swapchainSize.width
-    //     || windowSize.height != spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->swapchainSize.height)
-    // {
-    //     spVxGraphicsInstance->spMainVxGraphicsPipeline = nullptr;
-    //     spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain = nullptr;
-    //     spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->createSwapchainResult = vxCreateSwapchain(spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface, spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain);
-    //     spVxGraphicsInstance->createMainGraphicsPipelineResult = vxCreatePipeline(spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface, spVxGraphicsInstance->spCreateInfo->spVxGraphicsPipelineCreateInfo, spVxGraphicsInstance->spMainVxGraphicsPipeline);
-    // }
-
-    auto swapchain = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkSwapchain;
-    auto commandBuffer = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->spVxQueueFamilies[0]->vkCommandBuffer;
+    uint32_t imageIndex = 0;
+    AssertVkResultVxWindowLoop(vxAcquireNextImageKHR, spVxGraphicsWindow, &imageIndex);
+    
     auto device = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->vkDevice;
+    auto swapchain = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkSwapchain;
+    auto acquireSemaphore = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkAcquireSemaphore;    
+    auto commandBuffer = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->spVxQueueFamilies[0]->vkCommandBuffer;
     auto swapchainFramebuffers = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkFramebuffers;
     auto swapchainImages = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkImages;    
     auto commandPool = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->spVxQueueFamilies[0]->vkCommandPool; 
     auto queue = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->spVxQueues[0]->vkQueue;
     auto renderPass = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkRenderPass;
-    auto acquireSemaphore = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkAcquireSemaphore;
     auto releaseSemaphore = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkReleaseSemaphore;
     auto trianglePipeline = spVxGraphicsInstance->spMainVxGraphicsPipeline->vkPipeline;
+    //auto windowSize = vxGetWindowSize(spVxGraphicsWindow);
+    auto windowSize = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->swapchainSize;
 
-    uint32_t imageIndex = 0;
-    AssertVkResultVxWindowLoop(vkAcquireNextImageKHR, device, swapchain, ~0ull, acquireSemaphore, VK_NULL_HANDLE, &imageIndex);
 
     AssertVkResultVxWindowLoop(vkResetCommandPool, device, commandPool, 0);
 

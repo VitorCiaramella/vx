@@ -53,9 +53,6 @@ typedef struct VxGraphicsPipeline
     VkResult                                createPipelineResult;
     VkPipeline                              vkPipeline;
 
-    VkResult                                loadShaderdResult;
-    vectorS(VxGraphicsShader)               spVxGraphicsShaders;
-
     ~VxGraphicsPipeline();
     void destroy();
     void init(spt(VxGraphicsDevice) spVxGraphicsDevice, VkRenderPass renderPass)
@@ -67,8 +64,6 @@ typedef struct VxGraphicsPipeline
         vkPipelineLayout = nullptr;
         createPipelineResult = VK_RESULT_MAX_ENUM;
         vkPipeline = nullptr;
-        loadShaderdResult = VK_RESULT_MAX_ENUM;
-        spVxGraphicsShaders.reserve(32);
     }
 } VxGraphicsPipeline;
 

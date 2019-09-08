@@ -1,9 +1,5 @@
 #include "commonHeaders.hpp"
 
-#if _DEBUG
-#include <boost/filesystem.hpp>
-#endif 
-
 void VxGraphicsPipelineCreateInfo::destroy()
 {
     vxLogInfo2("Destroy call", "Memory");
@@ -49,68 +45,12 @@ void VxGraphicsPipeline::destroy()
         vkDestroyPipelineLayout(spVxDevice->vkDevice, vkPipelineLayout, nullptr);
         vkPipelineLayout = nullptr;
     }
-    spVxGraphicsShaders.clear();
 }
 
 VxGraphicsPipeline::~VxGraphicsPipeline()
 {
     vxLogInfo2("Destructor call", "Memory");
     destroy();
-}
-
-
-VkResult vxLoadShader(VkDevice device, std::string filePath, VkShaderModule * shaderModule)
-{
-	FILE* file = fopen(filePath.c_str(), "rb");
-
-	#if _DEBUG
-	if (file == nullptr)
-	{
-		char text[4096];
-        snprintf(text, arraySize(text), "File not found: %s\n", boost::filesystem::absolute(boost::filesystem::path(filePath)).c_str());
-		vxLogError2(text,"Shader");		
-	}
-	#endif
-
-	AssertNotNullVkResult(file);
-
-	fseek(file, 0, SEEK_END);
-	long length = ftell(file);
-	AssertTrueVkResult(length >= 0);
-	fseek(file, 0, SEEK_SET);
-
-	char* buffer = new char[length];
-	AssertNotNullVkResult(buffer);
-
-	size_t rc = fread(buffer, 1, length, file);
-	AssertTrueVkResult(rc == size_t(length));
-	fclose(file);
-
-	VkShaderModuleCreateInfo createInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
-	createInfo.codeSize = length;
-	createInfo.pCode = reinterpret_cast<const uint32_t*>(buffer);
-	
-	auto vkResult = vkCreateShaderModule(device, &createInfo, 0, shaderModule);
-
-	delete[] buffer;
-
-	AssertTrueVkResult(vkResult == VK_SUCCESS);
-
-	return vkResult;
-}
-
-VkResult vxLoadShaders(const spt(VxGraphicsDevice) & spVxGraphicsDevice,  const vectorT(string) & shadersFilePaths, vectorS(VxGraphicsShader) & spVxGraphicsShaders)
-{
-    spVxGraphicsShaders.resize(shadersFilePaths.size());
-    uint32_t index = 0;
-    for (auto && shadersFilePath : shadersFilePaths) 
-    {        
-        auto spVxGraphicsShader = nsp<VxGraphicsShader>(spVxGraphicsDevice);
-        spVxGraphicsShaders[index++] = spVxGraphicsShader;
-        spVxGraphicsShader->filePath = shadersFilePath;
-        StoreAndAssertVkResultP(spVxGraphicsShader->vxLoadShaderResult, vxLoadShader, spVxGraphicsDevice->vkDevice, shadersFilePath, &spVxGraphicsShader->vkShaderModule);
-    }
-    return VK_SUCCESS;
 }
 
 VkResult vxCreatePipelineLayout(const spt(VxGraphicsDevice) & spVxGraphicsDevice, VkPipelineLayout * vkPipelineLayout)
@@ -124,25 +64,37 @@ VkResult vxCreatePipelineLayout(const spt(VxGraphicsDevice) & spVxGraphicsDevice
     return VK_SUCCESS;
 }
 
+VkResult vxGetShaderModule(spt(VxGraphicsInstance) spVxGraphicsInstance, std::string shadersFilePath, VkShaderModule * rpVkShaderModule)
+{
+	for(auto & spVxGraphicsShader : spVxGraphicsInstance->spVxGraphicsShaders)
+	{
+		if (strcmp(shadersFilePath.c_str(), spVxGraphicsShader->filePath.c_str()) == 0) 
+		{
+			(*rpVkShaderModule) = spVxGraphicsShader->vkShaderModule;
+			return VK_SUCCESS;
+		}           
+	}
+	return VK_ERROR_INVALID_SHADER_NV;
+}
+
 VkResult vxCreatePipeline(const spt(VxGraphicsSurface) & spVxGraphicsSurface, const spt(VxGraphicsPipelineCreateInfo) & spCreateInfo, spt(VxGraphicsPipeline) & spVxGraphicsPipeline)
 {
+	GetAndAssertSharedPointerVk(spVxGraphicsInstance, spVxGraphicsSurface->wpVxGraphicsInstance);
     auto spVxGraphicsDevice = spVxGraphicsSurface->spVxSurfaceDevice;
     spVxGraphicsPipeline = nsp<VxGraphicsPipeline>(spVxGraphicsDevice, spVxGraphicsSurface->spVxGraphicsSwapchain->vkRenderPass);
 
     StoreAndAssertVkResultP(spVxGraphicsPipeline->createPipelineLayoutResult, vxCreatePipelineLayout, spVxGraphicsDevice, &spVxGraphicsPipeline->vkPipelineLayout);
-
-    StoreAndAssertVkResultP(spVxGraphicsPipeline->loadShaderdResult, vxLoadShaders, spVxGraphicsDevice, spCreateInfo->shadersFilePaths, spVxGraphicsPipeline->spVxGraphicsShaders);
 
 	VkGraphicsPipelineCreateInfo createInfo = { VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO };
 
 	auto stages = std::vector<VkPipelineShaderStageCreateInfo>(2);
 	stages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	stages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-	stages[0].module = spVxGraphicsPipeline->spVxGraphicsShaders[0]->vkShaderModule;
+	AssertVkResult(vxGetShaderModule, spVxGraphicsInstance, spCreateInfo->shadersFilePaths[0], &stages[0].module);
 	stages[0].pName = "main";
 	stages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	stages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-	stages[1].module = spVxGraphicsPipeline->spVxGraphicsShaders[1]->vkShaderModule;
+	AssertVkResult(vxGetShaderModule, spVxGraphicsInstance, spCreateInfo->shadersFilePaths[1], &stages[1].module);
 	stages[1].pName = "main";
 
 	createInfo.stageCount = stages.size();
