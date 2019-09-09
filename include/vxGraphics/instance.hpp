@@ -6,6 +6,7 @@
 #include <vulkan/vulkan.hpp>
 #include <string>
 
+#include "memory.hpp"
 #include "debug.hpp"
 #include "window.hpp"
 #include "pipeline.hpp"

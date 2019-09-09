@@ -593,7 +593,7 @@ void createClangCompileCommand(const std::list<fs::path> & filesFound,const std:
 void createGlslCompileCommand(const std::list<fs::path> & filesFound,const std::shared_ptr<ProcessManager> & processManager, const GlslCompileTask & glslCompileTask, const fs::path & absRootPath)
 {
     auto outputRootPath = absolutePath(glslCompileTask.outputPath, absRootPath);
-    auto spvOutputRootPath = createSubDirectory(outputRootPath, "/temp/spvs/");
+    auto spvOutputRootPath = createSubDirectory(outputRootPath, "/bin/");//createSubDirectory(outputRootPath, "/temp/spvs/");
 
     auto compilerPath = absolutePath(glslCompileTask.glslCompilerPath, absRootPath);
     if (!fs::exists(compilerPath) || !fs::is_regular_file(compilerPath))
@@ -621,7 +621,7 @@ void createGlslCompileCommand(const std::list<fs::path> & filesFound,const std::
         if (boost::iequals(fileExtension, ".glsl"))
         {
             outputExtension = ".spv";
-            outputFilePath = createCorrespondingPath(outputFilePath, absRootPath, spvOutputRootPath);
+            outputFilePath = createCorrespondingPath(outputFilePath, absolutePath("./src/",absRootPath), spvOutputRootPath);
             compilerProcess->description = "Shader compile " + file.filename().string();
             if (fileSubExtension.size() > 1)
             {
@@ -636,7 +636,7 @@ void createGlslCompileCommand(const std::list<fs::path> & filesFound,const std::
         }
         
         auto stdOutFilePath = fs::change_extension(outputFilePath, fileExtension + ".build.log");
-        outputFilePath = fs::change_extension(outputFilePath, fileExtension + outputExtension);
+        outputFilePath = fs::change_extension(outputFilePath, outputExtension);
 
         compilerProcess->args.push_back(file.string());
         compilerProcess->args.push_back("-o");

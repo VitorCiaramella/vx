@@ -55,6 +55,22 @@ typedef struct VxGraphicsQueue
     }
 } VxGraphicsQueue;
 
+typedef struct VxSemaphore
+{
+    wpt(VxGraphicsDevice)                   wpVxDevice;
+    VkResult                                createSemaphoreResult;
+    VkSemaphore                             vkSemaphore;
+
+    ~VxSemaphore();
+    void destroy();
+    void init(spt(VxGraphicsDevice) spVxSurfaceDevice)
+    {
+        wpVxDevice = spVxSurfaceDevice;
+        createSemaphoreResult = VK_RESULT_MAX_ENUM;
+        vkSemaphore = nullptr;
+    }
+} VxSemaphore;
+
 typedef struct VxGraphicsDevice
 {
     wpt(VxGraphicsPhysicalDevice)           wpVxPhysicalDevice;
@@ -62,7 +78,14 @@ typedef struct VxGraphicsDevice
     VkDevice                                vkDevice;
     vectorS(VxGraphicsQueue)                spVxQueues;
     vectorS(VxGraphicsDeviceQueueFamily)    spVxQueueFamilies;
+    setS(VxSemaphore)                       spVxSemaphores;
 
+    VkResult                                createMemoryAllocatorResult;
+    spt(VxMemoryAllocator)                  spVxMemoryAllocator;
+
+    VkResult createVxSemaphore(spt(VxGraphicsDevice) spVxGraphicsDevice, spt(VxSemaphore) & spVxSemaphore);
+    void destroyVxSemaphore(spt(VxSemaphore) spVxSemaphore);
+    
     ~VxGraphicsDevice();
     void destroy();
     void init()
@@ -70,6 +93,9 @@ typedef struct VxGraphicsDevice
         vkDevice = nullptr;
         spVxQueues.reserve(32);
         spVxQueueFamilies.reserve(32);
+
+        createMemoryAllocatorResult = VK_RESULT_MAX_ENUM;
+        spVxMemoryAllocator = nullptr;
     }
 } VxGraphicsDevice;
 

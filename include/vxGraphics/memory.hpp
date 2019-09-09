@@ -7,6 +7,7 @@
 #include "../../extern/VulkanMemoryAllocator/src/vk_mem_alloc.h"
 
 struct VxMemoryAllocator;
+struct VxGraphicsDevice;
 
 typedef struct VxMemoryBuffer
 {

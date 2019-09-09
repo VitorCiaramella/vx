@@ -28,6 +28,14 @@ void VxGraphicsSurface::destroy()
 {
     vxLogInfo2("Destroy call", "Memory");
     AssertNotNull(this);
+    if (this->spVxSurfaceDevice != nullptr
+        && this->spVxSurfaceDevice->spVxQueues.size() > 0
+        && this->spVxSurfaceDevice->spVxQueues[0]->vkQueue != nullptr)
+    {
+        auto queue = this->spVxSurfaceDevice->spVxQueues[0]->vkQueue;
+        vkQueueWaitIdle(queue);
+    }
+
     spVxGraphicsSwapchain->destroy();
     spVxGraphicsSwapchain = nullptr;
     spVxSurfaceDevice->destroy();
@@ -66,8 +74,12 @@ void VxGraphicsWindow::destroy()
 {
     vxLogInfo2("Destroy call", "Memory");
     AssertNotNull(this);
-    spVxGraphicsSurface->destroy();
-    spVxGraphicsSurface = nullptr;
+
+    if (spVxGraphicsSurface != nullptr)
+    {
+        spVxGraphicsSurface->destroy();
+        spVxGraphicsSurface = nullptr;
+    }
 }
 
 VxGraphicsWindow::~VxGraphicsWindow()
@@ -83,15 +95,14 @@ void VxGraphicsSwapchain::destroy()
 
     GetAndAssertSharedPointer(spVxDevice, wpVxDevice);
     AssertNotNull(spVxDevice->vkDevice);
-    if (vkReleaseSemaphore != nullptr)
+
+    for(auto & spVxSemaphore : imageAvailableSemaphores)
     {
-        vkDestroySemaphore(spVxDevice->vkDevice, vkReleaseSemaphore, nullptr);
-        vkReleaseSemaphore = nullptr;
+        spVxDevice->destroyVxSemaphore(spVxSemaphore);
     }
-    if (vkAcquireSemaphore != nullptr)
+    for(auto & spVxSemaphore : renderFinishedSemaphores)
     {
-        vkDestroySemaphore(spVxDevice->vkDevice, vkAcquireSemaphore, nullptr);
-        vkAcquireSemaphore = nullptr;
+        spVxDevice->destroyVxSemaphore(spVxSemaphore);
     }
 	for (auto && vkFramebuffer : vkFramebuffers)
     {
@@ -383,6 +394,7 @@ VkResult vxCreateSurfaceDevice(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(V
         commandPoolCreateInfo.queueFamilyIndex = vxQueueFamily->queueFamilyIndex;                    
         StoreAndAssertVkResultP(vxQueueFamily->vkCreateCommandPoolResult, vkCreateCommandPool, spVxGraphicsDevice->vkDevice, &commandPoolCreateInfo, nullptr, &vxQueueFamily->vkCommandPool);
 
+        //Command buffer should be created one for each swapchain image
         VkCommandBufferAllocateInfo allocateInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
         allocateInfo.commandPool = spVxGraphicsDevice->spVxQueueFamilies[0]->vkCommandPool;
         allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -392,7 +404,20 @@ VkResult vxCreateSurfaceDevice(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(V
         vxQueueFamily->vkCommandBuffer = commandBuffers[0];
     }
 
+    StoreAndAssertVkResultP(spVxGraphicsDevice->createMemoryAllocatorResult, vxCreateMemoryAllocator, spVxGraphicsDevice, spVxGraphicsDevice->spVxMemoryAllocator);
+
     return VK_SUCCESS;
+}
+
+VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) 
+{
+    for (const auto& availableFormat : availableFormats) 
+    {
+        if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+            return availableFormat;
+        }
+    }
+    return availableFormats[0];
 }
 
 VkResult vxCreateSwapchain(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(VxGraphicsSwapchain) & spVxGraphicsSwapchain)
@@ -414,8 +439,7 @@ VkResult vxCreateSwapchain(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(VxGra
 
     spVxGraphicsSwapchain = nsp<VxGraphicsSwapchain>(spVxGraphicsSurface, spVxSurfaceDevice);
 
-    //TODO: how to choose best format?
-    spVxGraphicsSwapchain->vkFormat = spVxSurfacePhysicalDevice->vkSurfaceFormats[0];
+    spVxGraphicsSwapchain->vkFormat = chooseSwapSurfaceFormat(spVxSurfacePhysicalDevice->vkSurfaceFormats);
 
 	VkSwapchainCreateInfoKHR createInfo = { VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR };
 	createInfo.surface = spVxGraphicsSurface->vkSurface;
@@ -438,13 +462,31 @@ VkResult vxCreateSwapchain(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(VxGra
     }
     createInfo.imageExtent = spVxGraphicsSwapchain->swapchainSize;
 
-	createInfo.imageArrayLayers = 1;
+	createInfo.imageArrayLayers = 1;//2 for stereoscopic 3D
 	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+    /*
+    in case there is not a single queuefamily that can do render and presentation together we will need to queuefamilies
+    if (indices.graphicsFamily != indices.presentFamily) 
+    {
+        createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+        createInfo.queueFamilyIndexCount = 2;
+        createInfo.pQueueFamilyIndices = queueFamilyIndices;
+    } 
+    else 
+    {
+        createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        createInfo.queueFamilyIndexCount = 0; // Optional
+        createInfo.pQueueFamilyIndices = nullptr; // Optional
+    }
+    */
 
     createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	createInfo.queueFamilyIndexCount = 0; //is the number of queue families having access to the image(s) of the swapchain when imageSharingMode is VK_SHARING_MODE_CONCURRENT.
 	createInfo.pQueueFamilyIndices = nullptr; //s an array of queue family indices having access to the images(s) of the swapchain when imageSharingMode is VK_SHARING_MODE_CONCURRENT
 
+    //TODO try mailbox and tripple buffer
+    //https://vulkan-tutorial.com/en/Drawing_a_triangle/Presentation/Swap_chain
 	createInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
 
     if (oldSwapchain != nullptr)
@@ -452,6 +494,7 @@ VkResult vxCreateSwapchain(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(VxGra
         createInfo.oldSwapchain = oldSwapchain->vkSwapchain;
     }
 
+    //can use this to flip/rotate the image
 	createInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
     //if not supported, use current transformation
     if (!(vkSurfaceCapabilities.supportedTransforms & createInfo.preTransform))
@@ -490,9 +533,11 @@ VkResult vxCreateSwapchain(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(VxGra
 	attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 	attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	attachments[0].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	attachments[0].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-	VkAttachmentReference colorAttachments = { 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
+	attachments[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	attachments[0].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	VkAttachmentReference colorAttachments = {};
+    colorAttachments.attachment = 0;
+    colorAttachments.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	VkSubpassDescription subpass = {};
 	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	subpass.colorAttachmentCount = 1;
@@ -518,7 +563,13 @@ VkResult vxCreateSwapchain(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(VxGra
             createInfo.image = spVxGraphicsSwapchain->vkImages[i];
             createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
             createInfo.format = spVxGraphicsSwapchain->vkFormat.format;
+            createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+            createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+            createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+            createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
             createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            createInfo.subresourceRange.baseMipLevel = 0;
+            createInfo.subresourceRange.baseArrayLayer = 0;
             createInfo.subresourceRange.levelCount = 1;
             createInfo.subresourceRange.layerCount = 1;
             StoreAndAssertVkResultP(spVxGraphicsSwapchain->createImageViewsResult, vkCreateImageView, spVxSurfaceDevice->vkDevice, &createInfo, nullptr, &spVxGraphicsSwapchain->vkImageViews[i]);
@@ -531,15 +582,37 @@ VkResult vxCreateSwapchain(spt(VxGraphicsSurface) spVxGraphicsSurface, spt(VxGra
             createInfo.renderPass = spVxGraphicsSwapchain->vkRenderPass;
             createInfo.attachmentCount = 1;
             createInfo.pAttachments = &spVxGraphicsSwapchain->vkImageViews[i];
-            createInfo.width = windowSize.width;
-            createInfo.height = windowSize.height;
+            createInfo.width = spVxGraphicsSwapchain->swapchainSize.width;
+            createInfo.height = spVxGraphicsSwapchain->swapchainSize.height;
             createInfo.layers = 1;
             StoreAndAssertVkResultP(spVxGraphicsSwapchain->createFramebuffersResult, vkCreateFramebuffer, spVxSurfaceDevice->vkDevice, &createInfo, nullptr, &spVxGraphicsSwapchain->vkFramebuffers[i]);
         }
     }
 
-    StoreAndAssertVkResultP(spVxGraphicsSwapchain->createAcquireSemaphoreResult, vxCreateSemaphore, spVxSurfaceDevice->vkDevice, &spVxGraphicsSwapchain->vkAcquireSemaphore);
-    StoreAndAssertVkResultP(spVxGraphicsSwapchain->createReleaseSemaphoreResult, vxCreateSemaphore, spVxSurfaceDevice->vkDevice, &spVxGraphicsSwapchain->vkReleaseSemaphore);
-    
+    for (size_t i = 0; i < spVxGraphicsSwapchain->MAX_FRAMES_IN_FLIGHT; i++) 
+    {
+        spt(VxSemaphore) spVxSemaphore;
+        AssertVkResult(spVxSurfaceDevice->createVxSemaphore, spVxSurfaceDevice, spVxSemaphore);
+        spVxGraphicsSwapchain->imageAvailableSemaphores.push_back(spVxSemaphore);
+
+        AssertVkResult(spVxSurfaceDevice->createVxSemaphore, spVxSurfaceDevice, spVxSemaphore);
+        spVxGraphicsSwapchain->renderFinishedSemaphores.push_back(spVxSemaphore);
+    }
+        
     return VK_SUCCESS;
+}
+
+VkSemaphore VxGraphicsSwapchain::getImageAvailableSemaphore()
+{
+    return this->imageAvailableSemaphores[this->currentFrame]->vkSemaphore;
+}
+
+VkSemaphore VxGraphicsSwapchain::getRenderFinishedSemaphore()
+{
+    return this->renderFinishedSemaphores[this->currentFrame]->vkSemaphore;
+}
+
+void VxGraphicsSwapchain::advanceFrame()
+{
+    this->currentFrame = (this->currentFrame + 1) % this->MAX_FRAMES_IN_FLIGHT;    
 }

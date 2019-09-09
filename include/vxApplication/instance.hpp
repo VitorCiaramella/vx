@@ -27,6 +27,7 @@ typedef struct VxApplicationInstanceCreateInfo
 
 typedef struct VxApplicationInstance
 {    
+
     spt(VxApplicationInstanceCreateInfo) spCreateInfo;
     spt(VxGraphicsInstance) spVxGraphicsInstance;
     
@@ -37,6 +38,9 @@ typedef struct VxApplicationInstance
     void init()
     {
     }
+
+    private:
+    bool mustTerminate = false;
 } VxApplicationInstance;
 
 VxResult vxCreateApplicationInstance(spt(VxApplicationInstanceCreateInfo) spCreateInfo, spt(VxApplicationInstance) & spVxApplicationInstance);

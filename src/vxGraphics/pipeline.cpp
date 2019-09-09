@@ -35,6 +35,11 @@ void VxGraphicsPipeline::destroy()
     vxLogInfo2("Destroy call", "Memory");
     AssertNotNull(this);
     GetAndAssertSharedPointer(spVxDevice, wpVxDevice);
+
+	if (spVxDevice->vkDevice != nullptr)
+	{
+		vkDeviceWaitIdle(spVxDevice->vkDevice);
+	}
     if (vkPipeline != nullptr)
     {
         vkDestroyPipeline(spVxDevice->vkDevice, vkPipeline, nullptr);
@@ -92,6 +97,8 @@ VkResult vxCreatePipeline(const spt(VxGraphicsSurface) & spVxGraphicsSurface, co
 	stages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
 	AssertVkResult(vxGetShaderModule, spVxGraphicsInstance, spCreateInfo->shadersFilePaths[0], &stages[0].module);
 	stages[0].pName = "main";
+	//stages[0].pSpecializationInfo //to pass constant parameters to the shader for its compilation
+
 	stages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	stages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 	AssertVkResult(vxGetShaderModule, spVxGraphicsInstance, spCreateInfo->shadersFilePaths[1], &stages[1].module);
@@ -122,20 +129,49 @@ VkResult vxCreatePipeline(const spt(VxGraphicsSurface) & spVxGraphicsSurface, co
 	vertexInput.pVertexAttributeDescriptions = attrs;
 
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly = { VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO };
-	inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST; //can also be points or lines
 	createInfo.pInputAssemblyState = &inputAssembly;
 
+	VkViewport viewport = {};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = (float)spVxGraphicsSurface->spVxGraphicsSwapchain->swapchainSize.width;
+	viewport.height = (float)spVxGraphicsSurface->spVxGraphicsSwapchain->swapchainSize.height;
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+	VkRect2D scissor = {};
+	scissor.offset = {0, 0};
+	scissor.extent = spVxGraphicsSurface->spVxGraphicsSwapchain->swapchainSize;
 	VkPipelineViewportStateCreateInfo viewportState = { VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO };
 	viewportState.viewportCount = 1;
+	viewportState.pViewports = &viewport;
 	viewportState.scissorCount = 1;
+	viewportState.pScissors = &scissor;
 	createInfo.pViewportState = &viewportState;
 
 	VkPipelineRasterizationStateCreateInfo rasterizationState = { VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO };
 	rasterizationState.lineWidth = 1.f;
+	rasterizationState.depthClampEnable = VK_FALSE;
+	rasterizationState.rasterizerDiscardEnable = VK_FALSE;
+	rasterizationState.polygonMode = VK_POLYGON_MODE_FILL;
+	//rasterizationState.polygonMode = VK_POLYGON_MODE_LINE; //only render the lines
+	//rasterizationState.polygonMode = VK_POLYGON_MODE_POINT; //only render the points/vertices
+	//TODO enable culling
+	//rasterizationState.cullMode = VK_CULL_MODE_BACK_BIT;
+	//rasterizationState.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterizationState.depthBiasEnable = VK_FALSE;
+	rasterizationState.depthBiasConstantFactor = 0.0f; // Optional
+	rasterizationState.depthBiasClamp = 0.0f; // Optional
+	rasterizationState.depthBiasSlopeFactor = 0.0f; // Optional
 	createInfo.pRasterizationState = &rasterizationState;
 
 	VkPipelineMultisampleStateCreateInfo multisampleState = { VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO };
 	multisampleState.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+	multisampleState.sampleShadingEnable = VK_FALSE;
+	multisampleState.minSampleShading = 1.0f; // Optional
+	multisampleState.pSampleMask = nullptr; // Optional
+	multisampleState.alphaToCoverageEnable = VK_FALSE; // Optional
+	multisampleState.alphaToOneEnable = VK_FALSE; // Optional
 	createInfo.pMultisampleState = &multisampleState;
 
 	VkPipelineDepthStencilStateCreateInfo depthStencilState = { VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO };
@@ -143,14 +179,24 @@ VkResult vxCreatePipeline(const spt(VxGraphicsSurface) & spVxGraphicsSurface, co
 
 	VkPipelineColorBlendAttachmentState colorAttachmentState = {};
 	colorAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+	/* Alpha blending
+	colorAttachmentState.blendEnable = VK_TRUE;
+	colorAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+	colorAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+	colorAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
+	colorAttachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+	colorAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+	colorAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
+	*/
+	colorAttachmentState.blendEnable = VK_FALSE;
 
 	VkPipelineColorBlendStateCreateInfo colorBlendState = { VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO };
 	colorBlendState.attachmentCount = 1;
 	colorBlendState.pAttachments = &colorAttachmentState;
+	colorBlendState.logicOpEnable = VK_FALSE;
 	createInfo.pColorBlendState = &colorBlendState;
 
 	VkDynamicState dynamicStates[] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
-
 	VkPipelineDynamicStateCreateInfo dynamicState = { VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO };
 	dynamicState.dynamicStateCount = sizeof(dynamicStates) / sizeof(dynamicStates[0]);
 	dynamicState.pDynamicStates = dynamicStates;

@@ -1,4 +1,6 @@
 #include <memory>
+#include <vector>
+#include <set>
 
 #ifndef VX_COMMON_MACROS
 #define VX_COMMON_MACROS
@@ -96,6 +98,7 @@ std::shared_ptr< objectType > nsp(Args... args)
 #define vectorR(value_type) std::vector< rpt(value_type) >
 #define vectorW(value_type) std::vector< std::weak_ptr< value_type > >
 #define vectorS(value_type) vectorOfSharedPointers< value_type >
+#define setS(value_type) setOfSharedPointers< value_type >
 
 template < typename value_type >
 struct vectorOfSharedPointers
@@ -155,6 +158,64 @@ struct vectorOfSharedPointers
         const_iterator cend() const noexcept
         {
             return storage.cend();
+        }
+        size_t size()
+        {            
+            return storage.size();
+        }
+
+};
+
+template < typename value_type >
+struct setOfSharedPointers
+{
+    private:
+        std::set< std::shared_ptr< value_type > > storage;
+    public:
+        typedef typename std::set< std::shared_ptr< value_type > >::iterator              iterator;
+        typedef typename std::set< const std::shared_ptr< value_type > >::iterator        const_iterator;
+        typedef typename std::shared_ptr< value_type >                                    &reference;
+        typedef typename std::shared_ptr< value_type >                              const  &const_reference;
+
+        void insert(const std::shared_ptr< value_type >& val)
+        {
+            storage.insert(val);
+        }
+        void insert(std::shared_ptr< value_type >&& val)
+        {
+            storage.insert(val);
+        }
+        void erase(const std::shared_ptr< value_type >& val)
+        {
+            storage.erase(val);
+        }
+        void clear() noexcept
+        {
+            for (auto && item : storage)
+            {
+                item->destroy();
+            }
+            storage.clear();
+        }
+        iterator begin() noexcept
+        {            
+            return storage.begin();
+        }
+        const_iterator cbegin() const noexcept
+        {
+            return storage.cbegin();
+        }
+        iterator end() noexcept
+        {
+            return storage.end();
+        }
+        const_iterator cend() const noexcept
+        {
+            return storage.cend();
+        }
+        size_t size()
+        {            
+            return storage.size();
         }
 
 };

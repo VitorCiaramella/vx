@@ -13,13 +13,15 @@
 #pragma mark -
 #pragma mark MainViewController
 
-@implementation MainViewController {
+@implementation MainViewController
+{
 	CVDisplayLinkRef	_displayLink;
-	spt(VxApplicationInstance) spVxApplicationInstance;
 }
 
--(void) dealloc {
-    //vxApp.destroy();
+@synthesize spVxApplicationInstance;
+
+-(void) dealloc
+{
 	CVDisplayLinkRelease(_displayLink);
 	[super dealloc];
 }
@@ -87,6 +89,18 @@ static CVReturn DisplayLinkCallback(CVDisplayLinkRef displayLink,
 
 @implementation MainWindowController {
     
+}
+
+
+- (bool)windowShouldClose:(NSWindow *)sender
+{
+    auto controller = (MainViewController*)(sender.contentViewController);
+    controller.spVxApplicationInstance->destroy();
+    return true;
+}
+
+- (void)windowWillClose:(NSNotification *)notification
+{
 }
 
 - (void)windowDidLoad

@@ -149,6 +149,9 @@ typedef struct VxGraphicsSurface
 
 typedef struct VxGraphicsSwapchain
 {
+    const int MAX_FRAMES_IN_FLIGHT = 2;
+    size_t currentFrame = 0;
+
     wpt(VxGraphicsSurface)                  wpVxSurface;
     wpt(VxGraphicsDevice)                   wpVxDevice;
     VkSurfaceFormatKHR                      vkFormat;
@@ -170,11 +173,13 @@ typedef struct VxGraphicsSwapchain
     VkResult                                createFramebuffersResult;
     vectorT(VkFramebuffer)                  vkFramebuffers;
 
-    VkResult                                createAcquireSemaphoreResult;
-    VkSemaphore                             vkAcquireSemaphore;
-    VkResult                                createReleaseSemaphoreResult;
-    VkSemaphore                             vkReleaseSemaphore;
+    vectorS(VxSemaphore)                    imageAvailableSemaphores;
+    vectorS(VxSemaphore)                    renderFinishedSemaphores;
 
+    VkSemaphore getImageAvailableSemaphore();
+    VkSemaphore getRenderFinishedSemaphore();
+    void advanceFrame();
+    
     ~VxGraphicsSwapchain();
     void destroy();
     void init(spt(VxGraphicsSurface) spVxSurface, spt(VxGraphicsDevice) spVxDevice)
@@ -192,10 +197,8 @@ typedef struct VxGraphicsSwapchain
         vkImageViews.reserve(32);
         createFramebuffersResult = VK_RESULT_MAX_ENUM;
         vkFramebuffers.reserve(32);
-        createAcquireSemaphoreResult = VK_RESULT_MAX_ENUM;
-        createReleaseSemaphoreResult = VK_RESULT_MAX_ENUM;
-        vkAcquireSemaphore = nullptr;
-        vkReleaseSemaphore = nullptr;
+        imageAvailableSemaphores.reserve(MAX_FRAMES_IN_FLIGHT);
+        renderFinishedSemaphores.reserve(MAX_FRAMES_IN_FLIGHT);
     }
 } VxGraphicsSwapchain;
 

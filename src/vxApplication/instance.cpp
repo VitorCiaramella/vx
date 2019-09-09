@@ -12,7 +12,6 @@
 
 using namespace std;
 
-spt(VxMemoryAllocator) spVxMemoryAllocator1;
 spt(VxMemoryBuffer) spVertexBuffer1;
 spt(VxMemoryBuffer) spIndexBuffer1;
 VxMesh mesh1;
@@ -90,8 +89,7 @@ VxResult vxCreateApplicationInstance(spt(VxApplicationInstanceCreateInfo) spCrea
 
     auto mesh = vxLoadMesh(spCreateInfo->resourcePath + "/objects/pirate.obj");
 
-    spt(VxMemoryAllocator) spVxMemoryAllocator;
-    AssertVkVxResult(vxCreateMemoryAllocator, spVxApplicationInstance->spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice, spVxMemoryAllocator);
+    spt(VxMemoryAllocator) spVxMemoryAllocator = spVxApplicationInstance->spVxGraphicsInstance->spMainVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->spVxMemoryAllocator;
     spt(VxMemoryBuffer) spVertexBuffer;
     AssertVkVxResult(vxCreateVertexBuffer, spVxMemoryAllocator, 128 * 1024 * 1024, spVertexBuffer);
     spt(VxMemoryBuffer) spIndexBuffer;
@@ -103,7 +101,6 @@ VxResult vxCreateApplicationInstance(spt(VxApplicationInstanceCreateInfo) spCrea
     spVertexBuffer1 = spVertexBuffer;
     spIndexBuffer1 = spIndexBuffer;
     mesh1 = mesh;
-    spVxMemoryAllocator1 = spVxMemoryAllocator;
 
     return VxResult::VX_SUCCESS;
 }
@@ -117,6 +114,7 @@ void VxApplicationInstance::destroy()
 {
     vxLogInfo2("Destroy call", "Memory");
     AssertNotNull(this);
+    this->mustTerminate = true;
     if (spVxGraphicsInstance != nullptr)
     {
         spVxGraphicsInstance->destroy();
@@ -138,7 +136,8 @@ VkResult vxAcquireNextImageKHR(spt(VxGraphicsWindow) spVxGraphicsWindow, uint32_
     while(true) 
     {
         auto swapchain = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkSwapchain;
-        auto acquireSemaphore = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkAcquireSemaphore;
+        auto spVxSemaphore = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->imageAvailableSemaphores[spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->currentFrame];
+        auto acquireSemaphore = spVxSemaphore->vkSemaphore;
         // Get the index of the next available swapchain image:
         vkResult = vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, acquireSemaphore, VK_NULL_HANDLE, rpImageIndex);
 
@@ -173,12 +172,10 @@ VkResult vxAcquireNextImageKHR(spt(VxGraphicsWindow) spVxGraphicsWindow, uint32_
 
 VxWindowLoopResult VxApplicationInstance::draw()
 {
+    if (this->mustTerminate) return VxWindowLoopResult::VX_WL_STOP;
+
     auto spVxGraphicsWindow = this->spVxGraphicsInstance->spMainVxGraphicsWindow;
 
-    if (spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkAcquireSemaphore == nullptr)
-    {
-        return VxWindowLoopResult::VX_WL_STOP;
-    }
     GetAndAssertSharedPointer2(spVxGraphicsInstance, spVxGraphicsWindow->spVxGraphicsSurface->wpVxGraphicsInstance, VxWindowLoopResult::VX_WL_STOP);
 
     uint32_t imageIndex = 0;
@@ -186,17 +183,15 @@ VxWindowLoopResult VxApplicationInstance::draw()
     
     auto device = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->vkDevice;
     auto swapchain = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkSwapchain;
-    auto acquireSemaphore = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkAcquireSemaphore;    
+    //TODO create one command buffer for each swapchain image, the record the command buffer only once
     auto commandBuffer = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->spVxQueueFamilies[0]->vkCommandBuffer;
     auto swapchainFramebuffers = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkFramebuffers;
     auto swapchainImages = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkImages;    
     auto commandPool = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->spVxQueueFamilies[0]->vkCommandPool; 
     auto queue = spVxGraphicsWindow->spVxGraphicsSurface->spVxSurfaceDevice->spVxQueues[0]->vkQueue;
     auto renderPass = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkRenderPass;
-    auto releaseSemaphore = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->vkReleaseSemaphore;
     auto trianglePipeline = spVxGraphicsInstance->spMainVxGraphicsPipeline->vkPipeline;
-    //auto windowSize = vxGetWindowSize(spVxGraphicsWindow);
-    auto windowSize = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->swapchainSize;
+    auto swapchainSize = spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->swapchainSize;
 
 
     AssertVkResultVxWindowLoop(vkResetCommandPool, device, commandPool, 0);
@@ -209,20 +204,20 @@ VxWindowLoopResult VxApplicationInstance::draw()
     VkImageMemoryBarrier renderBeginBarrier = imageBarrier2(swapchainImages[imageIndex], 0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
     vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_DEPENDENCY_BY_REGION_BIT, 0, 0, 0, 0, 1, &renderBeginBarrier);
 
-    VkClearColorValue color = { 90.f / 255.f, 10.f / 255.f, 36.f / 255.f, 1 };
-    VkClearValue clearColor = { color };
+    VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
 
     VkRenderPassBeginInfo passBeginInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO };
     passBeginInfo.renderPass = renderPass;
     passBeginInfo.framebuffer = swapchainFramebuffers[imageIndex];
-    passBeginInfo.renderArea.extent = windowSize;
+    passBeginInfo.renderArea.offset = {0, 0};
+    passBeginInfo.renderArea.extent = swapchainSize;
     passBeginInfo.clearValueCount = 1;
     passBeginInfo.pClearValues = &clearColor;
 
     vkCmdBeginRenderPass(commandBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    VkViewport viewport = { 0, 0, float(windowSize.width), float(windowSize.height), 0, 1 };
-    VkRect2D scissor = { {0, 0}, {windowSize.width, windowSize.height} };
+    VkViewport viewport = { 0, 0, float(swapchainSize.width), float(swapchainSize.height), 0, 1 };
+    VkRect2D scissor = { {0, 0}, {swapchainSize.width, swapchainSize.height} };
 
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
@@ -235,7 +230,6 @@ VxWindowLoopResult VxApplicationInstance::draw()
     //vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spVxGraphicsInstance->spMainVxGraphicsPipeline->vkPipelineLayout, 0, 1,
     //                    &demo->swapchain_image_resources[demo->current_buffer].descriptor_set, 0, NULL);
 
-    //vkCmdDraw(commandBuffer, 3, 1, 0, 0);
     /*
     Start
     */
@@ -253,27 +247,30 @@ VxWindowLoopResult VxApplicationInstance::draw()
 
     AssertVkResultVxWindowLoop(vkEndCommandBuffer, commandBuffer);
 
+    VkSemaphore waitSemaphores[] = {spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->getImageAvailableSemaphore()};    
+    VkSemaphore releaseSemaphores[] = {spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->getRenderFinishedSemaphore()};    
+
     VkPipelineStageFlags submitStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = &acquireSemaphore;
+    submitInfo.waitSemaphoreCount = arraySize(waitSemaphores);
+    submitInfo.pWaitSemaphores = waitSemaphores;
     submitInfo.pWaitDstStageMask = &submitStageMask;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &releaseSemaphore;
+    submitInfo.signalSemaphoreCount = arraySize(releaseSemaphores);
+    submitInfo.pSignalSemaphores = releaseSemaphores;
     AssertVkResultVxWindowLoop(vkQueueSubmit, queue, 1, &submitInfo, VK_NULL_HANDLE);
 
     VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
-    presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &releaseSemaphore;
+    presentInfo.waitSemaphoreCount = arraySize(releaseSemaphores);
+    presentInfo.pWaitSemaphores = releaseSemaphores;
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = &swapchain;
     presentInfo.pImageIndices = &imageIndex;
     AssertVkResultVxWindowLoop(vkQueuePresentKHR, queue, &presentInfo);
 
-    AssertVkResultVxWindowLoop(vkDeviceWaitIdle, device);
-
+    spVxGraphicsWindow->spVxGraphicsSurface->spVxGraphicsSwapchain->advanceFrame();
+    
     return VxWindowLoopResult::VX_WL_CONTINUE;
 }
 
